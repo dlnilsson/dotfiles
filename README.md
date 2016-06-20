@@ -1,3 +1,8 @@
-<h1>.dotfiles for crunchbang </h1>
-<p>
-</p>
+# ~/.dotfiles
+
+
+### TODO
+
+- symlink configs
+- npm packages
+- zsh config/theme

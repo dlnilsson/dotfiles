@@ -1,0 +1,124 @@
+{
+	"Seti_no_bar_undertabs": true,
+	"Seti_tabs_small": false,
+	"additional_path_items":
+	[
+		"/Users/dln/.composer/vendor/bin"
+	],
+	"always_show_minimap_viewport": false,
+	"backup_daniel_color_scheme": "Packages/Theme - Afterglow/Afterglow.tmTheme",
+	"backup_daniel_font_face": "Source Code Pro",
+	"backup_daniel_theme": "Afterglow-orange.sublime-theme",
+	"binary_file_patterns":
+	[
+		"*.dds",
+		"*.eot",
+		"*.gif",
+		"*.ico",
+		"*.jar",
+		"*.jpeg",
+		"*.jpg",
+		"*.pdf",
+		"*.png",
+		"*.swf",
+		"*.tga",
+		"*.ttf",
+		"*.zip",
+		".sass-cache/**",
+		"/Users/dln/devbox/www/permit/.sass-cache/**",
+		"node_modules/**"
+	],
+	"bold_folder_labels": true,
+	"caret_extra_bottom": 0,
+	"caret_extra_top": 0,
+	"caret_extra_width": 0,
+	"caret_style": "false",
+	"color_scheme": "Packages/Colorsublime - Themes/Facebook.tmTheme",
+	"default_line_ending": "unix",
+	"detect_indentation": true,
+	"draw_minimap_border": false,
+	"draw_white_space": "selection",
+	"ensure_newline_at_eof_on_save": true,
+	"fade_fold_buttons": false,
+	"flatland_sidebar_tree_large": true,
+	"flatland_sidebar_tree_medium": false,
+	"flatland_sidebar_tree_small": false,
+	"flatland_sidebar_tree_xlarge": false,
+	"flatland_sidebar_tree_xsmall": false,
+	"flatland_square_tabs": true,
+	"font_face": "Fira Code",
+	"font_options":
+	[
+		"subpixel_antialias",
+		"no_round"
+	],
+	"font_size": 15,
+	"gutter": true,
+	"highlight_line": true,
+	"highlight_modified_tabs": true,
+	"ignored_packages":
+	[
+		"SublimeLinter",
+		"Vintage"
+	],
+	"indent_guide_options":
+	[
+		"draw_normal",
+		"draw_active"
+	],
+	"index_exclude_patterns":
+	[
+		"/Users/dln/devbox/www/permit/node_modules*",
+		"node_modules*",
+		"resources/assets/bower*",
+		"bower_components*",
+		"variables.css.map",
+		"/Users/dln/box/development/www/parkera.se/node_modules*",
+		"bower/*",
+		"/Users/dln/devbox/www/permit/resources/assets/bower*",
+		"*.css.map",
+		"/Users/dln/devbox/www/permit/.sass-cache*",
+		"/Users/dln/devbox/www/permit/docs*",
+		"*.min.css",
+		"*.log",
+		"/Users/dln/box/development/www/parkera.se/public/css/dev/sass/variables.css",
+		".sass-cache*",
+		"node_modules/*",
+		"/Users/dln/box/development/www/parkera.se/public/css/dev/sass/variables.css.map",
+		".sass-cache/*",
+		"/Users/dln/devbox/www/kundportal/node_modules*",
+		"/Users/dln/box/development/www/permit/.sass-cache*",
+		"/Users/dln/devbox/www/kundportal/.sass-cache*"
+	],
+	"line_numbers": true,
+	"line_padding_bottom": 4,
+	"line_padding_top": 4,
+	"material_theme_bold_tab": true,
+	"material_theme_compact_sidebar": false,
+	"material_theme_contrast_mode": false,
+	"material_theme_small_statusbar": true,
+	"material_theme_small_tab": true,
+	"material_theme_tabs_separator": false,
+	"overlay_scroll_bars": "enabled",
+	"remember_open_files": true,
+	"rulers":
+	[
+		80,
+		120
+	],
+	"scroll_past_end": false,
+	"show_encoding": true,
+	"show_full_path": true,
+	"sidebar_medium": false,
+	"sidebar_row_padding_medium": true,
+	"sidebar_size_12": true,
+	"spacegray_tabs_auto_width": true,
+	"status_bar_brighter": true,
+	"tab_completion": true,
+	"tab_size": 4,
+	"tabs_small": true,
+	"theme": "Material-Theme.sublime-theme",
+	"translate_tabs_to_spaces": true,
+	"trim_trailing_white_space_on_save": false,
+	"use_simple_full_screen": true
+}

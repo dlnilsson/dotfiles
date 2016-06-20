@@ -1,0 +1,41 @@
+{
+	"bootstrapped": true,
+	"in_process_packages":
+	[
+	],
+	"installed_packages":
+	[
+		"Alignment",
+		"BracketHighlighter",
+		"Case Conversion",
+		"Colorsublime",
+		"DocBlockr",
+		"DotENV",
+		"Dracula Color Scheme",
+		"Emmet",
+		"FixMacPath",
+		"Git",
+		"GitGutter",
+		"Laravel Blade Highlighter",
+		"LESS",
+		"Material Theme",
+		"Package Control",
+		"PackageResourceViewer",
+		"PHP Companion",
+		"Phpcs",
+		"Pretty JSON",
+		"Puppet",
+		"ReactJS",
+		"SCSS",
+		"SFTP",
+		"SideBarEnhancements",
+		"SortBy",
+		"SublimeLinter",
+		"Theme - Afterglow",
+		"Theme - Cobalt2",
+		"Theme - Flatland",
+		"Theme - itg.flat",
+		"Theme - Spacegray",
+		"Vuejs Complete Package"
+	]
+}

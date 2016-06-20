@@ -1,0 +1,14 @@
+<snippet>
+    <content><![CDATA[
+/**
+ * ${1:this}
+ *
+ * @author Daniel Nilsson <daniel@smspark.se>
+ */
+]]></content>
+    <!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+    <tabTrigger>author</tabTrigger>
+    <description>Author docblock</description>
+    <!-- Optional: Set a scope to limit where the snippet will trigger -->
+    <!-- <scope>source.python</scope> -->
+</snippet>
