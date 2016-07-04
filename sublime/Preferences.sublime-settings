@@ -33,7 +33,7 @@
 	"caret_extra_top": 0,
 	"caret_extra_width": 0,
 	"caret_style": "false",
-	"color_scheme": "Packages/Colorsublime - Themes/Facebook.tmTheme",
+	"color_scheme": "Packages/User/SublimeLinter/Facebook (SL).tmTheme",
 	"default_line_ending": "unix",
 	"detect_indentation": true,
 	"draw_minimap_border": false,

@@ -1,0 +1,24 @@
+{
+    "symlinks": [
+        {
+            "from": "sublime",
+            "to": "Library/Application Support/Sublime Text 3/Packages/User/"
+        },
+        {
+            "from": "fish",
+            "to": ".config/fish/"
+        },
+        {
+            "from": "composer",
+            "to": ".composer/"
+        },
+        {
+            "from": "git",
+            "to": "/"
+        },
+        {
+            "from": "atom",
+            "to": ".atom/"
+        }
+    ]
+}

@@ -2,6 +2,7 @@
 # Fork of https://github.com/paulirish/dotfiles/blob/master/brew.sh
 #
 # Install command-line tools using Homebrew
+#
 
 # Make sure we’re using the latest Homebrew
 brew update
@@ -59,6 +60,7 @@ brew install mtr
 # Install other useful binaries
 brew install the_silver_searcher
 brew install fzf
+brew install fish
 
 brew install git
 brew tap git-duet/tap
@@ -87,8 +89,6 @@ brew install composer
 # install the python package provided with homebrew
 brew install python
 
-# install HTTPie with the pip utility
-pip install httpie
 
 ## Amazon cli
 brew install awscli
