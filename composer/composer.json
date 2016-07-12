@@ -1,16 +1,16 @@
 {
     "require": {
         "laravel/installer": "~1.1",
-        "fabpot/php-cs-fixer": "~1.4",
         "phpunit/phpunit": "4.3.*",
         "laravel/homestead": "~2.0",
         "squizlabs/php_codesniffer": "*",
-        "phpmd/phpmd": "~2.1",
         "laravel/envoy": "~1.0",
         "sami/sami": "~3.0",
-        "laravel/valet": "^1.1"
+        "laravel/valet": "^1.1",
+        "friendsofphp/php-cs-fixer": "^1.11"
     },
     "require-dev": {
-        "apigen/apigen": "^4.1"
+        "apigen/apigen": "^4.1",
+        "phpmd/phpmd": "^2.4"
     }
 }
