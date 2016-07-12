@@ -2,6 +2,7 @@ set -g -x PATH /usr/local/bin $PATH
 set -g -x PATH /Users/dln/.composer/vendor/bin $PATH
 set -g -x PATH /Users/dln/.node/bin $PATH
 set -g -x PATH /Users/dln/.nvm $PATH
+set -g -x PATH /usr/local/Cellar/bison/3.0.4/bin $PATH
 set -x NVM_DIR /Users/dln/.nvm
 
 # Path to Oh My Fish install.
