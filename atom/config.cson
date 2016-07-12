@@ -21,6 +21,11 @@
     countDisplayPosition: "Right"
   welcome:
     showOnStartup: false
+".blade.html.php.text":
+  editor:
+    commentEnd: " --}}"
+    commentStart: "{{-- "
+    tabLength: 4
 ".feature.source":
   editor:
     tabLength: 4
