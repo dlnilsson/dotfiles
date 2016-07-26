@@ -40,3 +40,6 @@
   'test function':
     'prefix': 'testf'
     'body': '/**\n * @test\n */\npublic function $1()\n{\n\t$2\n}\n'
+  'dump this function':
+    'prefix': 'df'
+    'body': 'dd(__METHOD__, func_get_args());'
