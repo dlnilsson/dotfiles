@@ -5,6 +5,9 @@
     ]
     excludeVcsIgnoredPaths: false
     fileEncoding: "iso88591"
+    packagesWithKeymapsDisabled: [
+      "emmet"
+    ]
   docblockr:
     short_primitives: true
     spacer_between_sections: true
