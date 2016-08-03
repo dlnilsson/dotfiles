@@ -1,8 +1,6 @@
 "*":
   core:
-    disabledPackages: [
-      "docblockr"
-    ]
+    disabledPackages: []
     excludeVcsIgnoredPaths: false
     fileEncoding: "iso88591"
     packagesWithKeymapsDisabled: [
@@ -15,6 +13,7 @@
     fontFamily: "Fira Code"
     fontSize: 15
     invisibles: {}
+    scrollPastEnd: false
     showIndentGuide: true
     showInvisibles: true
     tabLength: 4
@@ -30,5 +29,8 @@
     commentStart: "{{-- "
     tabLength: 4
 ".feature.source":
+  editor:
+    tabLength: 4
+".ini.source":
   editor:
     tabLength: 4
