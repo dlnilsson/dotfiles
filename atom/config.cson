@@ -6,12 +6,16 @@
     packagesWithKeymapsDisabled: [
       "emmet"
     ]
+    themes: [
+      "one-dark-ui"
+      "base16-ocean-dark-spacegray"
+    ]
   docblockr:
     short_primitives: true
     spacer_between_sections: true
   editor:
     fontFamily: "Fira Code"
-    fontSize: 15
+    fontSize: 16
     invisibles: {}
     scrollPastEnd: false
     showIndentGuide: true
