@@ -7,7 +7,8 @@
         "laravel/envoy": "~1.0",
         "sami/sami": "~3.0",
         "laravel/valet": "^1.1",
-        "friendsofphp/php-cs-fixer": "^1.11"
+        "friendsofphp/php-cs-fixer": "^1.11",
+        "laravel/lumen-installer": "^1.0"
     },
     "require-dev": {
         "apigen/apigen": "^4.1",
