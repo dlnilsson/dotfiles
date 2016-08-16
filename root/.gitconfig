@@ -1,6 +1,7 @@
 [user]
 	name = Daniel Nilsson
-	email = daniel@smspark.se
+	email = daniel.nilsson1989@gmail.com
+	signingkey = 2F0D0C55
 [color]
     ui = auto
 [color "branch"]
@@ -69,3 +70,5 @@
 	clean = git lfs clean %f
 	smudge = git lfs smudge %f
 	required = true
+[commit]
+	gpgsign = true
