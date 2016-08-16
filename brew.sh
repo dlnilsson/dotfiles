@@ -93,5 +93,9 @@ brew install python
 ## Amazon cli
 brew install awscli
 
+## GPG
+brew install gpg keybase
+brew install gpg-agent pinentry-mac
+
 # Remove outdated versions from the cellar
 brew cleanup
