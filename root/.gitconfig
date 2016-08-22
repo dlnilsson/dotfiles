@@ -1,7 +1,7 @@
 [user]
 	name = Daniel Nilsson
 	email = daniel.nilsson1989@gmail.com
-	signingkey = 2F0D0C55
+	signingkey = F23E000A2F0D0C55
 [color]
     ui = auto
 [color "branch"]
@@ -23,6 +23,11 @@
 [color "sh"]
     branch = yellow
 [alias]
+    # https://gist.github.com/nh2/66e1cd83a86da7fe43b1
+    signoff-rebase = "!EDITOR='sed -i -re s/^pick/e/' sh -c 'git rebase -i $1 && while test -f .git/rebase-merge/interactive; do git commit --amend --signoff --no-edit && git rebase --continue; done' -"
+    amend = commit -S --amend
+    cm = commit -S -m
+    commit = commit -S
     s = status
     st = status
     ci = commit
@@ -71,4 +76,4 @@
 	smudge = git lfs smudge %f
 	required = true
 [commit]
-	gpgsign = true
+  gpgsign = true
