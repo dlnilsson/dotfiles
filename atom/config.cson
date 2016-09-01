@@ -5,6 +5,7 @@
     fileEncoding: "iso88591"
     packagesWithKeymapsDisabled: [
       "emmet"
+      "toggle-quotes"
     ]
     themes: [
       "one-dark-ui"
@@ -16,15 +17,22 @@
   editor:
     fontFamily: "Fira Code"
     fontSize: 16
-    invisibles: {}
+    invisibles:
+      cr: " "
+      eol: " "
+      tab: " "
     scrollPastEnd: false
     showIndentGuide: true
     showInvisibles: true
     tabLength: 4
   "exception-reporting":
     userId: "609849ec-65fb-8830-c0ae-843b285ca3e9"
+  "git-diff": {}
+  linter:
+    errorPanelHeight: 145
   "quick-highlight":
     countDisplayPosition: "Right"
+  "toggle-quotes": {}
   welcome:
     showOnStartup: false
 ".blade.html.php.text":

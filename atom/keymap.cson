@@ -93,3 +93,7 @@
 
 '.platform-darwin atom-pane atom-text-editor:not([mini])':
   'cmd-/': 'emmet:toggle-comment'
+
+
+'.platform-darwin atom-workspace':
+  'cmd-shift-end': 'toggle-quotes:toggle'
