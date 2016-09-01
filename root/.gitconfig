@@ -27,10 +27,10 @@
     signoff-rebase = "!EDITOR='sed -i -re s/^pick/e/' sh -c 'git rebase -i $1 && while test -f .git/rebase-merge/interactive; do git commit --amend --signoff --no-edit && git rebase --continue; done' -"
     amend = commit -S --amend
     cm = commit -S -m
-    commit = commit -S
+    commit = commit -s
     s = status
     st = status
-    ci = commit
+    ci = commit -s
     br = branch
     co = checkout
     df = diff
