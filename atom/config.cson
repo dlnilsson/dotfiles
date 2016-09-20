@@ -6,6 +6,7 @@
     packagesWithKeymapsDisabled: [
       "emmet"
       "toggle-quotes"
+      "sort-lines"
     ]
     themes: [
       "one-dark-ui"

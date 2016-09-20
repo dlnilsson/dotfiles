@@ -43,3 +43,6 @@
   'dump this function':
     'prefix': 'df'
     'body': 'dd(__METHOD__, func_get_args());'
+  'sys db log':
+    'prefix': 'sysdblog'
+    'body': "app('db.eloquent')->connection()->enableQueryLog();\n\t$1\ndd($result, app('db.eloquent')->connection()->getQueryLog());"
