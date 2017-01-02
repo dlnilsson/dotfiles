@@ -3,7 +3,18 @@ set -g -x PATH /Users/dln/.composer/vendor/bin $PATH
 set -g -x PATH /Users/dln/.node/bin $PATH
 set -g -x PATH /Users/dln/.nvm $PATH
 set -g -x PATH /usr/local/Cellar/bison/3.0.4/bin $PATH
+set -g -x PATH /usr/local/opt/go/libexec/bin $PATH
 set -x NVM_DIR /Users/dln/.nvm
+
+# go path
+set -x GOPATH $HOME/go
+set -g -x PATH $GOPATH/bin $PATH
+
+##  dotfiles
+set -gx PATH "$HOME/.dotfiles/bin" $PATH
+
+
+
 
 # Path to Oh My Fish install.
 set -q XDG_DATA_HOME
