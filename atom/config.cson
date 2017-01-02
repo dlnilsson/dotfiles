@@ -2,16 +2,23 @@
   core:
     disabledPackages: []
     excludeVcsIgnoredPaths: false
-    fileEncoding: "iso88591"
+    fileEncoding: "windows1252"
+    ignoredNames: [
+      ".git"
+      ".hg"
+      ".svn"
+      ".DS_Store"
+      "._*"
+      "Thumbs.db"
+      "ci/build/*"
+    ]
     packagesWithKeymapsDisabled: [
       "emmet"
       "toggle-quotes"
       "sort-lines"
     ]
-    themes: [
-      "one-dark-ui"
-      "base16-ocean-dark-spacegray"
-    ]
+    telemetryConsent: "limited"
+    useCustomTitleBar: true
   docblockr:
     short_primitives: true
     spacer_between_sections: true
@@ -31,6 +38,8 @@
   "git-diff": {}
   linter:
     errorPanelHeight: 145
+  "markdown-preview":
+    useGitHubStyle: true
   "quick-highlight":
     countDisplayPosition: "Right"
   "toggle-quotes": {}
@@ -40,6 +49,9 @@
   editor:
     commentEnd: " --}}"
     commentStart: "{{-- "
+    tabLength: 4
+".editorconfig.source":
+  editor:
     tabLength: 4
 ".feature.source":
   editor:

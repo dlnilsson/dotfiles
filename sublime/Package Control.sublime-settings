@@ -10,6 +10,7 @@
 		"Case Conversion",
 		"Colorsublime",
 		"DocBlockr",
+		"Dockerfile Syntax Highlighting",
 		"DotENV",
 		"Dracula Color Scheme",
 		"EditorConfig",
@@ -39,6 +40,7 @@
 		"Theme - Flatland",
 		"Theme - itg.flat",
 		"Theme - Spacegray",
+		"Twig",
 		"Vuejs Complete Package"
 	]
 }
