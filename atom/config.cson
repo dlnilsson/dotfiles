@@ -1,6 +1,5 @@
 "*":
   core:
-    disabledPackages: []
     excludeVcsIgnoredPaths: false
     fileEncoding: "windows1252"
     ignoredNames: [
@@ -35,6 +34,10 @@
     tabLength: 4
   "exception-reporting":
     userId: "609849ec-65fb-8830-c0ae-843b285ca3e9"
+  gist: {}
+  "gist-it":
+    newGistsDefaultToPrivate: true
+    openAfterCreate: true
   "git-diff": {}
   linter:
     errorPanelHeight: 145
