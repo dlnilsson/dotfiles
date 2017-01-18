@@ -34,6 +34,7 @@ alias pa "php artisan"
 alias devup "cd ~/box/development; vagrant up"
 alias puf "phpunit --verbose --debug --filter="
 alias g "git"
+alias nah="git reset --hard; git clean -df"
 
 test -e {$HOME}/.iterm2_shell_integration.fish ; and source {$HOME}/.iterm2_shell_integration.fish
 
