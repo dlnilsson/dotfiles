@@ -6,6 +6,7 @@
 	"installed_packages":
 	[
 		"Alignment",
+		"Behat",
 		"BracketHighlighter",
 		"Case Conversion",
 		"Colorsublime",
