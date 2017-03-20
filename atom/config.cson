@@ -41,6 +41,9 @@
   "git-diff": {}
   linter:
     errorPanelHeight: 145
+  "linter-php": {}
+  "linter-ui-default":
+    showPanel: true
   "markdown-preview":
     useGitHubStyle: true
   "quick-highlight":

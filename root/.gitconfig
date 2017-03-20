@@ -22,6 +22,8 @@
     untracked = red
 [color "sh"]
     branch = yellow
+[url "git@github.com:"]
+    insteadOf = https://github.com/
 [alias]
     # https://gist.github.com/nh2/66e1cd83a86da7fe43b1
     signoff-rebase = "!EDITOR='sed -i -re s/^pick/e/' sh -c 'git rebase -i $1 && while test -f .git/rebase-merge/interactive; do git commit --amend --signoff --no-edit && git rebase --continue; done' -"

@@ -1,5 +1,6 @@
 {
     "require": {
+        "symfony/console": "^3.0",
         "laravel/installer": "~1.1",
         "laravel/homestead": "~2.0",
         "squizlabs/php_codesniffer": "*",
@@ -8,10 +9,10 @@
         "laravel/lumen-installer": "^1.0",
         "phpstan/phpstan": "^0.4.0",
         "laravel/valet": "^2.0",
-        "phpunit/phpunit": "^6.0"
+        "phpunit/phpunit": "^6.0",
+        "sebastian/phpcpd": "^3.0"
     },
     "require-dev": {
-        "apigen/apigen": "^4.1",
         "phpmd/phpmd": "^2.4"
     }
 }
