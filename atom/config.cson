@@ -23,7 +23,7 @@
     spacer_between_sections: true
   editor:
     fontFamily: "Fira Code"
-    fontSize: 16
+    fontSize: 15
     invisibles:
       cr: " "
       eol: " "
@@ -39,8 +39,7 @@
     newGistsDefaultToPrivate: true
     openAfterCreate: true
   "git-diff": {}
-  linter:
-    errorPanelHeight: 145
+  linter: {}
   "linter-php": {}
   "linter-ui-default":
     showPanel: true

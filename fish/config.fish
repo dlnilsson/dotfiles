@@ -9,6 +9,7 @@ set -x NVM_DIR /Users/dln/.nvm
 # go path
 set -x GOPATH $HOME/go
 set -g -x PATH $GOPATH/bin $PATH
+set -g -x GOROOT /usr/local/Cellar/go/1.8/libexec/bin
 
 ##  dotfiles
 set -gx PATH "$HOME/.dotfiles/bin" $PATH
