@@ -17,7 +17,7 @@
       "sort-lines"
     ]
     telemetryConsent: "limited"
-    useCustomTitleBar: true
+    titleBar: "custom"
   docblockr:
     short_primitives: true
     spacer_between_sections: true
