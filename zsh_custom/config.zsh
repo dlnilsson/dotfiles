@@ -15,3 +15,6 @@ alias puf="phpunit --verbose --debug --filter="
 alias g="git"
 alias nah="git reset --hard; git clean -df"
 
+
+#plugins=(git z zsh-autosuggestions)
+
