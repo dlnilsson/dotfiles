@@ -89,9 +89,12 @@ brew install composer
 # install the python package provided with homebrew
 brew install python
 
+brew install git-lfs
 
 ## Amazon cli
 brew install awscli
+# Terraform
+brew install terraform
 
 ## GPG
 brew install gpg keybase
