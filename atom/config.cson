@@ -20,10 +20,9 @@
     titleBar: "custom"
   docblockr:
     short_primitives: true
-    spacer_between_sections: true
   editor:
     fontFamily: "Fira Code"
-    fontSize: 15
+    fontSize: 13
     invisibles:
       cr: " "
       eol: " "
@@ -42,6 +41,7 @@
   linter: {}
   "linter-php": {}
   "linter-ui-default":
+    panelHeight: 69
     showPanel: true
   "markdown-preview":
     useGitHubStyle: true
