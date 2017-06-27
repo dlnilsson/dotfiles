@@ -17,7 +17,7 @@ local _current_dir="%{$green%}%0~%{$reset_color%} "
 local _return_status="%{$red%}%(?..×)%{$reset_color%}"
 
 function _user_host() {
-  echo "%{$red%}%n%{$reset_color%}%{$white%} at %{$yellow%}%m%{$reset_color%} %{$white%}in "
+  echo "%{$red%}%n%{$reset_color%} %{$white%}in "
 }
 
 function _vi_status() {
