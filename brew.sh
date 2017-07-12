@@ -100,5 +100,8 @@ brew install terraform
 brew install gpg keybase
 brew install gpg-agent pinentry-mac
 
+# 
+brew install graphviz
+
 # Remove outdated versions from the cellar
 brew cleanup
