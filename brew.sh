@@ -60,7 +60,6 @@ brew install mtr
 # Install other useful binaries
 brew install the_silver_searcher
 brew install fzf
-brew install fish
 
 brew install git
 brew tap git-duet/tap
