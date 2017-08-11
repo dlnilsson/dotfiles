@@ -5,7 +5,10 @@ export PATH=$GOPATH/bin:$PATH
 export PATH=$HOME/.dotfiles/bin:$PATH
 export PATH=/usr/local/Cellar/bison/3.0.4/bin:$PATH
 export PATH=/Users/dln/.node/bin:$PATH
+export PATH=/usr/local/sbin:$PATH
 
+
+export EDITOR=nano
 
 alias cgs="clear; git status"
 alias lla="ls -la"
@@ -24,3 +27,4 @@ dri() { echo "\nRemoving docker images\n"; for i in $(docker images -q); do dock
 
 
 aws_login() { exec $(aws ecr get-login --no-include-email) }
+
