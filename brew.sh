@@ -19,6 +19,8 @@ brew install findutils
 # GNU `sed`, overwriting the built-in `sed`
 brew install gnu-sed --default-names
 
+brew cask install jumpcut
+
 
 # Bash 4
 # Note: don’t forget to add `/usr/local/bin/bash` to `/etc/shells` before running `chsh`.
@@ -85,19 +87,31 @@ brew tap homebrew/php
 brew install homebrew/php/php70
 brew install composer
 
+# go
+brew install go --cross-compile-common
+
+
+brew install cmake
+
 # install the python package provided with homebrew
 brew install python
+brew install pip
 
 brew install git-lfs
 
 ## Amazon cli
 brew install awscli
+
+brew tap wallix/awless; brew install awless
+
 # Terraform
 brew install terraform
 
 ## GPG
-brew install gpg keybase
-brew install gpg-agent pinentry-mac
+brew install gpg
+brew install keybase
+brew install gpg-agent
+brew install pinentry-mac
 
 # 
 brew install graphviz
