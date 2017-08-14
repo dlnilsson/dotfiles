@@ -2,7 +2,7 @@
 export GOPATH=$HOME/go
 export PATH=/Users/dln/.composer/vendor/bin:$PATH
 export PATH=$GOPATH/bin:$PATH
-export PATH=$HOME/.dotfiles/bin:$PATH
+export PATH=$HOME/dotfiles/bin:$PATH
 export PATH=/usr/local/Cellar/bison/3.0.4/bin:$PATH
 export PATH=/Users/dln/.node/bin:$PATH
 export PATH=/usr/local/sbin:$PATH
