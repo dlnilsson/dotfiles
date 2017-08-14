@@ -1,7 +1,7 @@
 [user]
 	name = Daniel Nilsson
 	email = daniel.nilsson1989@gmail.com
-	signingkey = 322E6E1D511E93E15DD9831ED5E5496671F2C701
+	signingkey = F9282329DBF9544827B99D6FF23E000A2F0D0C55
 [color]
     ui = auto
 [color "branch"]
