@@ -102,7 +102,9 @@ brew install git-lfs
 ## Amazon cli
 brew install awscli
 
-brew tap wallix/awless; brew install awless
+brew tap wallix/awless
+brew install awless
+brew install vault
 
 # Terraform
 brew install terraform
