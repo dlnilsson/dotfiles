@@ -27,5 +27,5 @@ dri() { echo "\nRemoving docker images\n"; for i in $(docker images -q); do dock
 
 inteleon() { ssh -i ~/.ssh/amazon.pem ubuntu@$* }
 
-aws_login() { exec $(aws ecr get-login --no-include-email) }
+aws_login() { eval ${$(aws ecr get-login --no-include-email)} }
 
