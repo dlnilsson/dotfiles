@@ -89,7 +89,7 @@ brew install composer
 
 # go
 brew install go --cross-compile-common
-
+brew install glide
 
 brew install cmake
 
