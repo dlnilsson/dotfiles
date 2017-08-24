@@ -53,10 +53,10 @@ brew install gh
 # mtr - ping & traceroute. best.
 brew install mtr
 
-    # allow mtr to run without sudo
-    mtrlocation=$(brew info mtr | grep Cellar | sed -e 's/ (.*//') #  e.g. `/Users/paulirish/.homebrew/Cellar/mtr/0.86`
-    sudo chmod 4755 $mtrlocation/sbin/mtr
-    sudo chown root $mtrlocation/sbin/mtr
+	# allow mtr to run without sudo
+	mtrlocation=$(brew info mtr | grep Cellar | sed -e 's/ (.*//') #  e.g. `/Users/paulirish/.homebrew/Cellar/mtr/0.86`
+	sudo chmod 4755 $mtrlocation/sbin/mtr
+	sudo chown root $mtrlocation/sbin/mtr
 
 
 # Install other useful binaries
@@ -115,7 +115,7 @@ brew install keybase
 brew install gpg-agent
 brew install pinentry-mac
 
-# 
+#
 brew install graphviz
 
 # Remove outdated versions from the cellar

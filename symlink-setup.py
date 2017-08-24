@@ -1,5 +1,5 @@
 #!/usr/bin/python
-    
+
 import shutil
 import errno
 import ntpath
@@ -13,7 +13,7 @@ import pprint
 home =  os.environ['HOME'] + '/'
 current = os.getcwd() + '/'
 
-with open('links.json') as data_file:    
+with open('links.json') as data_file:
     jsonObject = json.load(data_file)
 
 
@@ -30,7 +30,7 @@ def select_files(root, files):
     selected_files = []
 
     for file in files:
-        #do concatenation here to get full path 
+        #do concatenation here to get full path
         full_path = os.path.join(root, file)
         ext = os.path.splitext(file)[1]
         selected_files.append(full_path)

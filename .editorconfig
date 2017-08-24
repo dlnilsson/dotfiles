@@ -3,14 +3,22 @@ root = true
 
 # Unix-style newlines with a newline ending every file
 [*]
+charset = utf-8
 end_of_line = lf
 insert_final_newline = true
 max_line_length = 80
 trim_trailing_whitespace = true
 
 [*.sh]
-charset = utf-8
 indent_style = tab
+
+[*.zsh]
+indent_style = tab
+
+[*.{py,rst,txt}]
+indent_style = space
+trim_trailing_whitespace = true
+indent_size = 4
 
 # Tab indentation (no size specified)
 [Makefile]

@@ -52,7 +52,7 @@
 
     # If you've eg. moved around a bunch of lines in data files, and want a diff of what _else_ happened
     sortdiff = !sh -c 'git diff "$@" | grep "^[+-]" | sort --key=1.2 | uniq -u -s1'
-    
+
     # You get a lot of merge conflicts and want to quickly solve them using an editor and then add the conflicted files.
     edit-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; nano `f`"
     add-unmerged = "!f() { git diff --name-status --diff-filter=U | cut -f2 ; }; git add `f`"
@@ -69,7 +69,7 @@
     default = simple
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
+	path =
 [mergetool "sourcetree"]
 	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true

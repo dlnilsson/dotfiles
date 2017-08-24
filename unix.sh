@@ -6,56 +6,56 @@
 #
 
 cmn_init() {
-    # Will exit script if we would use an uninitialised variable:
-    set -o nounset
-    # Will exit script when a simple command (not a control structure) fails:
-    set -o errexit
+	# Will exit script if we would use an uninitialised variable:
+	set -o nounset
+	# Will exit script when a simple command (not a control structure) fails:
+	set -o errexit
 
-    set -e
+	set -e
 }
 
 cmn_assert_running_as_root() {
-    if [[ ${EUID} -ne 0 ]]; then
-        cmn_die "This script must be run as root!"
-    fi
+	if [[ ${EUID} -ne 0 ]]; then
+		cmn_die "This script must be run as root!"
+	fi
 }
 
 info() {
-    local green=$(tput setaf 2)
-    local reset=$(tput sgr0)
-    echo -e "${green}$@${reset}"
+	local green=$(tput setaf 2)
+	local reset=$(tput sgr0)
+	echo -e "${green}$@${reset}"
 }
 
 notice() {
-    local blue=$(tput setaf 4)
-    local reset=$(tput sgr0)
-    echo -e "${blue}$@${reset}"
+	local blue=$(tput setaf 4)
+	local reset=$(tput sgr0)
+	echo -e "${blue}$@${reset}"
 }
 
 important() {
-    local yellow=$(tput setaf 3)
-    local reset=$(tput sgr0)
-    echo -e "${yellow}$@${reset}"
+	local yellow=$(tput setaf 3)
+	local reset=$(tput sgr0)
+	echo -e "${yellow}$@${reset}"
 }
 
 cmn_die() {
-    local red=$(tput setaf 1)
-    local reset=$(tput sgr0)
-    echo >&2 -e "${red}$@${reset}"
-    exit 1
+	local red=$(tput setaf 1)
+	local reset=$(tput sgr0)
+	echo >&2 -e "${red}$@${reset}"
+	exit 1
 }
 
 confirm() {
-    # call with a prompt string or use a default
-    read -r -p "${1:-Are you sure? [y/N]} " response
-    case "$response" in
-        [yY][eE][sS]|[yY])
-            true
-            ;;
-        *)
-            false
-            ;;
-    esac
+	# call with a prompt string or use a default
+	read -r -p "${1:-Are you sure? [y/N]} " response
+	case "$response" in
+		[yY][eE][sS]|[yY])
+			true
+			;;
+		*)
+			false
+			;;
+	esac
 }
 
 main() {
