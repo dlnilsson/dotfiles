@@ -33,7 +33,28 @@ dri() {
 inteleon() {
 	ssh -i ~/.ssh/amazon.pem ubuntu@$*
 }
-
 aws_login() {
 	eval ${$(aws ecr get-login --no-include-email)}
+}
+flushdns() {
+	sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder
+	local green=$(tput setaf 2)
+	local reset=$(tput sgr0)
+	echo -e "${green}\n dns flushed ${reset}"
+}
+composer_install() {
+	docker run --rm -ti \
+	-v $(pwd):/tmp \
+	-v $HOME/.composer/cache:/root/.composer/cache \
+	***REMOVED***/php-utilities \
+	composer install --working-dir=/tmp --ignore-platform-reqs --no-scripts --no-suggest
+}
+code() {
+	if [[ $# = 0 ]]
+	then
+		open -a "Visual Studio Code" -n
+	else
+		[[ $1 = /* ]] && F="$1" || F="$PWD/${1#./}"
+		open -a "Visual Studio Code" -n --args "$F"
+	fi
 }
