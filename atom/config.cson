@@ -1,7 +1,6 @@
 "*":
   core:
     disabledPackages: [
-      "language-docker"
       "fonts"
     ]
     excludeVcsIgnoredPaths: false
