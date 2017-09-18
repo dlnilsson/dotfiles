@@ -6,9 +6,11 @@ export PATH=$HOME/dotfiles/bin:$PATH
 export PATH=/usr/local/Cellar/bison/3.0.4/bin:$PATH
 export PATH=/Users/dln/.node/bin:$PATH
 export PATH=/usr/local/sbin:$PATH
-
+export COMPOSER_HOME=$HOME/.composer
+export COMPOSER_CACHE_DIR=$COMPOSER_HOME/cache
 
 export EDITOR=nano
+export AWS_ACC=***REMOVED***
 
 alias cgs="clear; git status"
 alias lla="ls -la"
@@ -45,9 +47,16 @@ flushdns() {
 composer_install() {
 	docker run --rm -ti \
 	-v $(pwd):/tmp \
-	-v $HOME/.composer/cache:/root/.composer/cache \
-	***REMOVED***/php-utilities \
+	-v $COMPOSER_CACHE_DIR:/root/.composer/cache \
+	$AWS_ACC/php-utilities \
 	composer install --working-dir=/tmp --ignore-platform-reqs --no-scripts --no-suggest
+}
+c0mposer() {
+        docker run --rm -ti \
+        -v $(pwd):/tmp \
+        -v $COMPOSER_CACHE_DIR:/root/.composer/cache \
+        $AWS_ACC/php-utilities \
+        composer $*
 }
 code() {
 	if [[ $# = 0 ]]
