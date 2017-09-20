@@ -46,17 +46,17 @@ flushdns() {
 }
 composer_install() {
 	docker run --rm -ti \
-	-v $(pwd):/tmp \
-	-v $COMPOSER_CACHE_DIR:/root/.composer/cache \
+	-v $(pwd):/tmp/source \
+	-v $COMPOSER_CACHE_DIR:/tmp/.composer/cache \
 	$AWS_ACC/php-utilities:latest \
-	composer install --working-dir=/tmp --ignore-platform-reqs --no-scripts --no-suggest
+	bash -c "composer install --working-dir=/tmp/source --ignore-platform-reqs --no-scripts --no-suggest && chown -R $(id -u):$(id -g) /tmp/.composer/ && chown -R $(id -u):$(id -g) /tmp/source/vendor/"
 }
 c0mposer() {
-    docker run --rm -ti \
-    -v $(pwd):/tmp \
-    -v $COMPOSER_CACHE_DIR:/root/.composer/cache \
-    $AWS_ACC/php-utilities:latest \
-    composer $*
+	docker run --rm -ti \
+	-v $(pwd):/tmp/source \
+	-v $COMPOSER_CACHE_DIR:/tmp/.composer/cache \
+	$AWS_ACC/php-utilities:latest \
+	composer $*
 }
 code() {
 	if [[ $# = 0 ]]
