@@ -16,7 +16,6 @@
     ]
     packagesWithKeymapsDisabled: [
       "emmet"
-      "toggle-quotes"
       "sort-lines"
     ]
     telemetryConsent: "limited"
@@ -24,6 +23,7 @@
   docblockr:
     short_primitives: true
   editor:
+    fontSize: 12
     invisibles:
       cr: " "
       eol: " "

@@ -7,5 +7,5 @@ install-all-packages:
 	cat $(makefile_dir)packages.list | xargs apm install
 
 packages.list:
-	@rm packages.list
+	@rm -f packages.list
 	apm list --installed --bare > packages.list
