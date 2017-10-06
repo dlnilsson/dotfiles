@@ -23,6 +23,19 @@ alias compsoer="composer"
 
 #plugins=(git z zsh-autosuggestions)
 
+docker_up() {
+	local name=$(uname -s)
+	case $name in
+		'Darwin' )
+			open --hide --background -a Docker
+			;;
+		'Linux' )
+			# noop
+			;;
+		*)
+		echo 'Cant start docker daemon'
+	esac
+}
 drc() {
 	echo "\nRemoving docker containers\n";
 	for i in $(docker ps -aq); do docker rm -f $i; done
