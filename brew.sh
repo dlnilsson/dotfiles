@@ -88,6 +88,7 @@ brew install zsh
 brew tap homebrew/dupes
 brew tap homebrew/php
 brew install homebrew/php/php70
+brew install php70-intl
 brew install composer
 
 # go
