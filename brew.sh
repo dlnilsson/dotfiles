@@ -21,6 +21,9 @@ brew install gnu-sed --default-names
 
 brew cask install jumpcut
 
+# Fonts
+brew tap caskroom/fonts
+brew cask install font-fira-code
 
 # Bash 4
 # Note: don’t forget to add `/usr/local/bin/bash` to `/etc/shells` before running `chsh`.
