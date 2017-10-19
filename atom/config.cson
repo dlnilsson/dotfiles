@@ -23,7 +23,8 @@
   docblockr:
     short_primitives: true
   editor:
-    fontSize: 12
+    fontFamily: "Fira Code"
+    fontSize: 13
     invisibles:
       cr: " "
       eol: " "
@@ -53,6 +54,8 @@
   "toggle-quotes": {}
   welcome:
     showOnStartup: false
+  whitespace:
+    removeTrailingWhitespace: false
 ".blade.html.php.text":
   editor:
     commentEnd: " --}}"
