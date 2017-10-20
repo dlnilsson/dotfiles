@@ -121,6 +121,7 @@ brew install pinentry-mac
 
 #
 brew install graphviz
+brew install cloc
 
 # Remove outdated versions from the cellar
 brew cleanup
