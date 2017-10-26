@@ -104,6 +104,7 @@ brew install pip
 brew install git-lfs
 
 ## Amazon cli
+brew install jq
 brew install awscli
 
 brew tap wallix/awless
