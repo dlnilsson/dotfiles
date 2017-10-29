@@ -1,4 +1,4 @@
-advanced-open-file@0.16.6
+advanced-open-file@0.16.7
 atom-alignment@0.13.0
 editorconfig@2.2.2
 emmet@2.4.3
@@ -10,5 +10,6 @@ language-hcl@0.4.0
 language-puppet@0.23.0
 language-terraform@0.8.1
 pretty-json@1.6.4
+sort-lines@0.18.0
 toggle-quotes@1.0.1
 

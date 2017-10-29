@@ -24,7 +24,7 @@
     short_primitives: true
   editor:
     fontFamily: "Fira Code"
-    fontSize: 13
+    fontSize: 12
     invisibles:
       cr: " "
       eol: " "
@@ -54,8 +54,7 @@
   "toggle-quotes": {}
   welcome:
     showOnStartup: false
-  whitespace:
-    removeTrailingWhitespace: false
+  whitespace: {}
 ".blade.html.php.text":
   editor:
     commentEnd: " --}}"
