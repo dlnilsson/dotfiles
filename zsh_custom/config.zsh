@@ -63,6 +63,7 @@ flushdns() {
 composer_install() {
 	docker run --rm -ti \
 	-v $(pwd):/tmp/source \
+	--workdir '/tmp/source' \
 	-v $COMPOSER_CACHE_DIR:/root/.composer/cache \
 	$AWS_ACC/php-utilities:latest \
 	bash -c "composer install --working-dir=/tmp/source --ignore-platform-reqs --no-suggest"
@@ -70,6 +71,7 @@ composer_install() {
 c0mposer() {
 	docker run --rm -ti \
 	-v $(pwd):/tmp/source \
+	--workdir '/tmp/source' \
 	-v $COMPOSER_CACHE_DIR:/tmp/.composer/cache \
 	$AWS_ACC/php-utilities:latest \
 	composer $*
