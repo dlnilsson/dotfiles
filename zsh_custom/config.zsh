@@ -76,6 +76,9 @@ c0mposer() {
 	$AWS_ACC/php-utilities:latest \
 	composer $*
 }
+docker_env() {
+	docker inspect $* | jq '.[0].Config.Env'
+}
 code() {
 	if [[ $# = 0 ]]
 	then
