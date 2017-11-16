@@ -17,6 +17,7 @@
     packagesWithKeymapsDisabled: [
       "emmet"
       "sort-lines"
+      "xml-formatter"
     ]
     telemetryConsent: "limited"
     titleBar: "custom"
@@ -24,7 +25,7 @@
     short_primitives: true
   editor:
     fontFamily: "Fira Code"
-    fontSize: 12
+    fontSize: 13
     invisibles:
       cr: " "
       eol: " "
