@@ -11,7 +11,7 @@ language-puppet@0.23.0
 language-terraform@0.8.1
 pretty-json@1.6.4
 sort-lines@0.18.0
-teletype@0.1.2
+teletype@0.1.4
 toggle-quotes@1.0.1
 xml-formatter@0.11.0
 
