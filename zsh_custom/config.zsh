@@ -76,6 +76,15 @@ c0mposer() {
 	$AWS_ACC/php-utilities:latest \
 	composer $*
 }
+json_pretty() {
+	# npm install -g underscore-cli
+	underscore print --outfmt pretty
+}
+alias jsonp=json_pretty
+alias jsonpretty=json_pretty
+alias dps='docker ps -a'
+alias dia="docker images -a"
+
 docker_env() {
 	docker inspect $* | jq '.[0].Config.Env'
 }
@@ -88,3 +97,13 @@ code() {
 		open -a "Visual Studio Code" -n --args "$F"
 	fi
 }
+enter_base() {
+	docker exec -it $(docker ps --filter='name=base' | awk 'NR>1 {print $1}') bash
+}
+dbash() {
+	if [[ $# = 0  ]]; then
+		echo "No container id given"; exit 1;
+	fi
+	docker exec -it $1 bash
+}
+source <(awless completion zsh)
