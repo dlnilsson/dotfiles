@@ -98,7 +98,7 @@ code() {
 	fi
 }
 enter_base() {
-	docker exec -it $(docker ps --filter='name=base' | awk 'NR>1 {print $1}') bash
+	docker exec -it $(docker ps --filter='name=base' | awk 'NR>1 {print $1; exit}') bash
 }
 dbash() {
 	if [[ $# = 0  ]]; then
