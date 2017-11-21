@@ -18,6 +18,7 @@
       "emmet"
       "sort-lines"
       "xml-formatter"
+      "compare-files"
     ]
     telemetryConsent: "limited"
     titleBar: "custom"

@@ -1,5 +1,6 @@
 advanced-open-file@0.16.7
 atom-alignment@0.13.0
+compare-files@0.8.1
 editorconfig@2.2.2
 emmet@2.4.3
 fonts@3.0.3
@@ -11,7 +12,7 @@ language-puppet@0.23.0
 language-terraform@0.8.1
 pretty-json@1.6.4
 sort-lines@0.18.0
-teletype@0.1.4
+teletype@0.2.2
 toggle-quotes@1.0.1
 xml-formatter@0.11.0
 
