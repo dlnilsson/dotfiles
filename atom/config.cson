@@ -51,6 +51,9 @@
     showPanel: true
   "markdown-preview":
     useGitHubStyle: true
+  "pristine-ui":
+    hideDockButtons: true
+    tabSizing: "Minimum"
   "quick-highlight":
     countDisplayPosition: "Right"
   "toggle-quotes": {}
