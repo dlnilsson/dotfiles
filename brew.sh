@@ -124,6 +124,9 @@ brew install pinentry-mac
 #
 brew install graphviz
 brew install cloc
+brew install nethogs
+
+
 
 # Remove outdated versions from the cellar
 brew cleanup
