@@ -20,6 +20,8 @@ alias g="git"
 alias nah="git reset --hard; git clean -df"
 alias compsoer="composer"
 
+# Init jenv
+if which jenv > /dev/null; then eval "$(jenv init -)"; fi
 
 #plugins=(git z zsh-autosuggestions)
 

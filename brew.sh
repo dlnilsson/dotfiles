@@ -36,6 +36,9 @@ brew install homebrew/completions/brew-cask-completion
 # generic colouriser  http://kassiopeia.juls.savba.sk/~garabik/software/grc/
 brew install grc
 
+# JAVA
+brew install gradle
+
 # Install wget with IRI support
 brew install wget --with-iri
 
