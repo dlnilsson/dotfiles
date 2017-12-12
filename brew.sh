@@ -133,6 +133,8 @@ brew install graphviz
 brew install cloc
 brew install nethogs
 
+## GUI Programs
+brew cask install vlc
 
 
 # Remove outdated versions from the cellar
