@@ -18,7 +18,6 @@
       "emmet"
       "sort-lines"
       "xml-formatter"
-      "compare-files"
     ]
     telemetryConsent: "limited"
     titleBar: "custom"
@@ -51,9 +50,6 @@
     showPanel: true
   "markdown-preview":
     useGitHubStyle: true
-  "pristine-ui":
-    hideDockButtons: true
-    tabSizing: "Minimum"
   "quick-highlight":
     countDisplayPosition: "Right"
   "toggle-quotes": {}
