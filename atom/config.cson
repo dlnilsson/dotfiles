@@ -31,7 +31,6 @@
       eol: " "
       tab: " "
     scrollPastEnd: false
-    showIndentGuide: true
     showInvisibles: true
     tabLength: 4
   "exception-reporting":
