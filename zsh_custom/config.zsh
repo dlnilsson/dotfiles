@@ -23,13 +23,41 @@ alias compsoer="composer"
 # Init jenv
 if which jenv > /dev/null; then eval "$(jenv init -)"; fi
 
-#plugins=(git z zsh-autosuggestions)
+#plugins=(git z zsh-autosuggestions docker emoji)
+
+info_msg() {
+	local green=$(tput setaf 2)
+	local reset=$(tput sgr0)
+	echo -e "${green}$@${reset}"
+}
+notice_msg() {
+	local blue=$(tput setaf 4)
+	local reset=$(tput sgr0)
+	echo -e "${blue}$@${reset}"
+}
+important_msg() {
+	local yellow=$(tput setaf 3)
+	local reset=$(tput sgr0)
+	echo -e "${yellow}$@${reset}"
+}
+
+warning_msg() {
+	local red=$(tput setaf 1)
+	local reset=$(tput sgr0)
+	echo -e "${red}$@${reset}"
+}
 
 docker_up() {
 	local name=$(uname -s)
 	case $name in
 		'Darwin' )
-			open --hide --background -a Docker
+			# psuedo-code, does not work, do another check if docker daemon is running.
+			if [[ $(ps aux | grep Docker | wc -l) > 2 ]]; then
+				important_msg "seems like docker daemon is already running..."
+			else
+				notice_msg "Starting docker..."
+				open --hide --background -a Docker
+			fi
 			;;
 		'Linux' )
 			# noop
@@ -39,15 +67,15 @@ docker_up() {
 	esac
 }
 drc() {
-	echo "\nRemoving docker containers\n";
+	notice_msg "\nRemoving docker containers - $emoji[whale] \n";
 	for i in $(docker ps -aq); do docker rm -f $i; done
 }
 dri() {
-	echo "\nRemoving docker images\n";
+	notice_msg "\nRemoving docker images $emoji[whale] \n";
 	for i in $(docker images -q); do docker rmi $i; done
 }
 drn() {
-	echo "\nRemove all docket networks\n";
+	notice_msg "\nRemove all docket networks $emoji[whale]\n";
 	docker network prune --force
 }
 inteleon() {
@@ -60,7 +88,8 @@ flushdns() {
 	sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder
 	local green=$(tput setaf 2)
 	local reset=$(tput sgr0)
-	echo -e "${green}\n dns flushed ${reset}"
+	echo -e \U+1F602
+	info_msg "DNS Flushed!"
 }
 composer_install() {
 	docker run --rm -ti \
@@ -87,6 +116,9 @@ alias jsonpretty=json_pretty
 alias dps='docker ps -a'
 alias dia="docker images -a"
 
+dcfg() {
+	docker inspect $* | json_pretty
+}
 docker_env() {
 	docker inspect $* | jq '.[0].Config.Env'
 }
@@ -105,6 +137,7 @@ enter_base() {
 myip() {
 	local ip=$(http ifconfig.co/json | jq '.ip')
 	echo $ip | sed 's/^.\(.*\).$/\1/' | pbcopy
+	info_msg $ip
 }
 dbash() {
 	if [[ $# = 0  ]]; then
