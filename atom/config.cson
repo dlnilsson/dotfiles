@@ -1,5 +1,10 @@
 "*":
   core:
+    customFileTypes:
+      "Dockerfile-template": [
+        "Dockerfile"
+        "docker"
+      ]
     disabledPackages: [
       "fonts"
     ]
@@ -20,12 +25,15 @@
       "xml-formatter"
     ]
     telemetryConsent: "limited"
+    themes: [
+      "one-dark-ui"
+      "crackpot-contrast-rainglow-syntax"
+    ]
     titleBar: "custom"
   docblockr:
     short_primitives: true
   editor:
     fontFamily: "Fira Code"
-    fontSize: 13
     invisibles:
       cr: " "
       eol: " "
@@ -52,6 +60,7 @@
   "quick-highlight":
     countDisplayPosition: "Right"
   "toggle-quotes": {}
+  "tree-view": {}
   welcome:
     showOnStartup: false
   whitespace: {}
