@@ -48,6 +48,7 @@ brew install homebrew/dupes/grep
 brew install homebrew/dupes/openssh
 brew install homebrew/dupes/screen
 
+brew install tmux
 
 # run this script when this file changes guy.
 brew install entr
@@ -106,6 +107,7 @@ brew install cmake
 
 # install the python package provided with homebrew
 brew install python
+brew install pyenv
 brew install pip
 
 brew install git-lfs
