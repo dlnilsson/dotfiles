@@ -70,6 +70,10 @@ drc() {
 	notice_msg "\nRemoving docker containers - $emoji[whale] \n";
 	for i in $(docker ps -aq); do docker rm -f $i; done
 }
+drv() {
+	notice_msg "\nRemoving docker volumes - $emoji[whale] \n";
+	for i in $(docker volume ls -q); do docker volume rm -f $i; done
+}
 dri() {
 	notice_msg "\nRemoving docker images $emoji[whale] \n";
 	for i in $(docker images -q); do docker rmi $i; done
