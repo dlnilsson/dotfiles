@@ -59,7 +59,7 @@ dare-rainglow-syntax@1.0.0
 darkside-contrast-rainglow-syntax@1.0.0
 darkside-light-rainglow-syntax@1.0.0
 darkside-rainglow-syntax@1.0.0
-docblockr@0.13.6
+docblockr@0.13.7
 downpour-contrast-rainglow-syntax@1.0.0
 downpour-light-rainglow-syntax@1.0.0
 downpour-rainglow-syntax@1.0.0
@@ -68,7 +68,7 @@ earthsong-light-rainglow-syntax@1.0.0
 earthsong-rainglow-syntax@1.0.0
 editorconfig@2.2.2
 emmet@2.4.3
-file-icons@2.1.16
+file-icons@2.1.17
 fodder-contrast-rainglow-syntax@1.0.0
 fodder-light-rainglow-syntax@1.0.0
 fodder-rainglow-syntax@1.0.0
@@ -156,6 +156,7 @@ language-blade@0.38.0
 language-docker@1.1.8
 language-erlang@3.2.0
 language-hcl@0.4.0
+language-logstash@0.1.7
 language-puppet@0.23.0
 language-terraform@0.8.1
 laracasts-contrast-rainglow-syntax@1.0.0
@@ -297,7 +298,8 @@ super-rainglow-syntax@1.0.0
 tame-contrast-rainglow-syntax@1.0.0
 tame-light-rainglow-syntax@1.0.0
 tame-rainglow-syntax@1.0.0
-teletype@0.6.0
+teletype@0.9.0
+terraform-fmt@0.3.0
 tetra-contrast-rainglow-syntax@1.0.0
 tetra-light-rainglow-syntax@1.0.0
 tetra-rainglow-syntax@1.0.0

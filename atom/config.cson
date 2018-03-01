@@ -5,8 +5,12 @@
         "Dockerfile"
         "docker"
       ]
+      "source.terraform": [
+        "tf"
+      ]
     disabledPackages: [
       "fonts"
+      "terraform-fmt"
     ]
     excludeVcsIgnoredPaths: false
     fileEncoding: "windows1252"
@@ -39,6 +43,7 @@
       eol: " "
       tab: " "
     scrollPastEnd: false
+    showIndentGuide: true
     showInvisibles: true
     tabLength: 4
   "exception-reporting":
