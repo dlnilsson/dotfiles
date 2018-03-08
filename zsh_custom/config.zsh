@@ -149,4 +149,11 @@ dbash() {
 	fi
 	docker exec -it $1 bash
 }
+
+# https://twitter.com/elithrar/status/971314557372239872?s=12
+get_new_mac() {
+	sudo /System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport -z \
+	&& sudo ifconfig en0 ether a0$(openssl rand -hex 5 | sed 's/\(..\)/:\1/g') \
+	&& networksetup -detectnewhardware
+}
 source <(awless completion zsh)
