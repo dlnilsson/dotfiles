@@ -126,8 +126,8 @@ alias jsonpretty=json_pretty
 alias dps='docker ps -a'
 alias dia="docker images -a"
 
-dcfg() {
-	docker inspect $* | json_pretty
+docker_inspect() {
+	docker inspect $* | jq .
 }
 docker_env() {
 	docker inspect $* | jq '.[0].Config.Env'
