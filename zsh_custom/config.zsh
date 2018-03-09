@@ -90,9 +90,6 @@ aws_login() {
 }
 flushdns() {
 	sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder
-	local green=$(tput setaf 2)
-	local reset=$(tput sgr0)
-	echo -e \U+1F602
 	info_msg "DNS Flushed!"
 }
 composer_install() {
