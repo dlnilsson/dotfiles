@@ -111,6 +111,12 @@ c0mposer() {
 	$AWS_ACC/php-utilities:latest \
 	composer $*
 }
+php_security_checker() {
+	docker run --rm -ti \
+	-v $(pwd):/tmp \
+	$AWS_ACC/php-utilities:latest \
+	security-checker security:check /tmp/composer.lock
+}
 json_pretty() {
 	# npm install -g underscore-cli
 	underscore print --outfmt pretty
