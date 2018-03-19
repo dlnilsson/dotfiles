@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+
+# Will exit script if we would use an uninitialised variable:
+set -o nounset
+# Will exit script when a simple command (not a control structure) fails:
+set -o errexit
+
+set -e
+yell() { echo "$0: $*" >&2; }
+die() { yell "$*"; exit 111; }
+try() { echo "$ $@" 1>&2; "$@" || die "cannot $*"; }
+# log to syslog and echo output
+info() {
+	echo $1
+	logger -t localSwarmCluster "$1"
+}
+
+usage() {
+	echo "Usage:"
+	echo "local_swarm_cluster up|down"
+}
+up() {
+	for i in 1 2 3; do
+		docker-machine create \
+			-d virtualbox \
+			--engine-opt experimental=true \
+			node-$i
+	done
+
+	eval $(docker-machine env node-1)
+
+	docker swarm init \
+		--advertise-addr $(docker-machine ip node-1) \
+		--listen-addr $(docker-machine ip node-1):2377
+
+	TOKEN=$(docker swarm join-token -q worker)
+
+	for i in 2 3; do
+		eval $(docker-machine env node-$i)
+
+		docker swarm join --token $TOKEN $(docker-machine ip node-1):2377
+	done
+
+	eval $(docker-machine env node-1)
+
+	info "The Swarm Cluster is set up!"
+}
+
+down() {
+	info "Remove swarm cluster"
+	docker-machine rm -f node-1 node-2 node-3
+}
+case "${1:-""}" in
+	up)
+		up ${2:-}
+		exit 0
+	;;
+	down)
+		down ${2:-}
+		exit 0
+	;;
+
+	*)
+
+	usage $@
+
+esac
