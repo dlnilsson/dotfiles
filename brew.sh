@@ -91,6 +91,9 @@ brew install terminal-notifier
 brew install pidcat   # colored logcat guy
 
 brew install zsh
+brew install fzf
+$(brew --prefix)/opt/fzf/install
+
 
 # php
 brew tap homebrew/dupes
@@ -137,6 +140,9 @@ brew install nethogs
 
 ## GUI Programs
 brew cask install vlc
+brew install pandoc
+brew install lynx
+
 
 
 # Remove outdated versions from the cellar
