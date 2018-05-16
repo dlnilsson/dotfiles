@@ -1,19 +1,23 @@
 
 export GOPATH=$HOME/go
-export PATH=/Users/dln/.composer/vendor/bin:$PATH
 export PATH=$GOPATH/bin:$PATH
 export PATH=$HOME/dotfiles/bin:$PATH
 export PATH=/usr/local/Cellar/bison/3.0.4/bin:$PATH
-export PATH=/Users/dln/.node/bin:$PATH
+export PATH=$HOME/.node/bin:$PATH
+export PATH=$HOME/Library/Python/3.6/bin:$PATH
 export PATH=/usr/local/sbin:$PATH
 export COMPOSER_HOME=$HOME/.composer
+export PATH=$COMPOSER_HOME/vendor/bin:$PATH
 export COMPOSER_CACHE_DIR=$COMPOSER_HOME/cache
+# export PYENV_ROOT="$HOME/.pyenv"
+# export PATH="$PYENV_ROOT/bin:$PATH"
 
 export EDITOR=nano
 export AWS_ACC=***REMOVED***
 
 alias cgs="clear; git status"
 alias lla="ls -la"
+alias lal=lla
 alias pa="php artisan"
 alias puf="phpunit --verbose --debug --filter="
 alias g="git"
@@ -52,18 +56,18 @@ docker_up() {
 	case $name in
 		'Darwin' )
 			# psuedo-code, does not work, do another check if docker daemon is running.
-			if [[ $(ps aux | grep Docker | wc -l) > 2 ]]; then
-				important_msg "seems like docker daemon is already running..."
-			else
+			if [[ ! $(docker ps > /dev/null 2>&1) ]]; then
 				notice_msg "Starting docker..."
 				open --hide --background -a Docker
+			else
+				warning_msg "seems like docker daemon is already running..."
 			fi
 			;;
 		'Linux' )
 			# noop
 			;;
 		*)
-		echo 'Cant start docker daemon'
+		warning_msg 'Cant start docker daemon'
 	esac
 }
 drc() {
@@ -104,7 +108,7 @@ c0mposer() {
 	docker run --rm -ti \
 	-v $(pwd):/tmp/source \
 	--workdir '/tmp/source' \
-	-v $COMPOSER_CACHE_DIR:/tmp/.composer/cache \
+	-v $COMPOSER_CACHE_DIR:/root/.composer/cache \
 	$AWS_ACC/php-utilities:latest \
 	composer $*
 }
@@ -152,6 +156,19 @@ dbash() {
 	fi
 	docker exec -it $1 bash
 }
+docker_inspect_first() {
+	if [[ $(docker ps | wc -l) -lt 2 ]]; then
+		warning_msg "Seems like no docker container is running.."; exit 1;
+	fi
+	docker inspect $(docker ps | awk 'FNR==2 {print $1}') | jq .
+}
+# first docker container bash
+fdb() {
+	if [[ $(docker ps | wc -l) -lt 2 ]]; then
+		warning_msg "Seems like no docker container is running.."; exit 1;
+	fi
+	docker exec -it $(docker ps | awk 'FNR==2 {print $1}') bash
+}
 
 # https://twitter.com/elithrar/status/971314557372239872?s=12
 get_new_mac() {
@@ -159,4 +176,12 @@ get_new_mac() {
 	&& sudo ifconfig en0 ether a0$(openssl rand -hex 5 | sed 's/\(..\)/:\1/g') \
 	&& networksetup -detectnewhardware
 }
+rmd () {
+	pandoc $1 | lynx -stdin
+}
+alin() {
+	awless ls instances --sort uptime --filter name=$1
+}
 source <(awless completion zsh)
+source "/usr/local/opt/fzf/shell/key-bindings.zsh"
+source "/usr/local/opt/fzf/shell/completion.zsh" 2> /dev/null
