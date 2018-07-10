@@ -11,9 +11,7 @@ export PATH=$COMPOSER_HOME/vendor/bin:$PATH
 export COMPOSER_CACHE_DIR=$COMPOSER_HOME/cache
 # export PYENV_ROOT="$HOME/.pyenv"
 # export PATH="$PYENV_ROOT/bin:$PATH"
-
 export EDITOR=nano
-export AWS_ACC=***REMOVED***
 
 alias cgs="clear; git status"
 alias lla="ls -la"
@@ -86,9 +84,7 @@ drn() {
 	notice_msg "\nRemove all docket networks $emoji[whale]\n";
 	docker network prune --force
 }
-inteleon() {
-	ssh -i ~/.ssh/amazon.pem ubuntu@$*
-}
+
 aws_login() {
 	eval ${$(aws ecr get-login --no-include-email)}
 }
@@ -96,28 +92,7 @@ flushdns() {
 	sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder
 	info_msg "DNS Flushed!"
 }
-composer_install() {
-	docker run --rm -ti \
-	-v $(pwd):/tmp/source \
-	--workdir '/tmp/source' \
-	-v $COMPOSER_CACHE_DIR:/root/.composer/cache \
-	$AWS_ACC/php-utilities:latest \
-	bash -c "composer install --working-dir=/tmp/source --ignore-platform-reqs --no-suggest"
-}
-c0mposer() {
-	docker run --rm -ti \
-	-v $(pwd):/tmp/source \
-	--workdir '/tmp/source' \
-	-v $COMPOSER_CACHE_DIR:/root/.composer/cache \
-	$AWS_ACC/php-utilities:latest \
-	composer $*
-}
-php_security_checker() {
-	docker run --rm -ti \
-	-v $(pwd):/tmp \
-	$AWS_ACC/php-utilities:latest \
-	security-checker security:check /tmp/composer.lock
-}
+
 json_pretty() {
 	# npm install -g underscore-cli
 	underscore print --outfmt pretty
