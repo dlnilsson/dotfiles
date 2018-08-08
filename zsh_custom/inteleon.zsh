@@ -1,5 +1,12 @@
 # private enviornment variables
-source $HOME/.secrets
+
+SECRET_ENV=$HOME/.secrets
+
+if [[ ! -a $SECRET_ENV ]] then
+	warning_msg $SECRET_ENV "not found."
+else
+	source $SECRET_ENV
+fi
 
 
 composer_install() {
