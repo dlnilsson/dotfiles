@@ -33,7 +33,7 @@ php_security_checker() {
 }
 
 inteleon() {
-	ssh -i $INT_PEM $INT_USR@$*
+	ssh -o StrictHostKeyChecking=no -i $INT_PEM $INT_USR@$*
 }
 swarm_prod() {
 	docker --tls -H $INT_SWARM_PRODUCTION $*
