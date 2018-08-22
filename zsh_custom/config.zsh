@@ -121,8 +121,8 @@ enter_base() {
 	docker exec -it $(docker ps --filter='name=base' | awk 'NR>1 {print $1; exit}') bash
 }
 myip() {
-	local ip=$(http ifconfig.co/json | jq '.ip')
-	echo $ip | sed 's/^.\(.*\).$/\1/' | pbcopy
+	local ip=$(http ifconfig.co/json | jq '.ip' -r)
+	echo -n $ip | pbcopy
 	info_msg $ip
 }
 dbash() {
