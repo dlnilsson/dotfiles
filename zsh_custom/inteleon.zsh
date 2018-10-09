@@ -42,3 +42,12 @@ swarm_prod() {
 swarm_staging() {
 	docker --tls -H $INT_SWARM_STAGING $*
 }
+eval_manager() {
+	eval $(docker-machine env virtualbox-node-manager-1)
+}
+eval_local() {
+	eval $(docker-machine env --unset)
+}
+eval_worker() {
+	eval $(docker-machine env virtualbox-node-worker-1)
+}
