@@ -168,7 +168,9 @@ aidssh() {
 vacuum() {
 	find . -name '*.zip' -o -name '.terraform' -o -name "*.tfstate.backup" | xargs rm -rf -
 }
-
+ff() {
+	find . -type f -name $1
+}
 source <(awless completion zsh)
 source "/usr/local/opt/fzf/shell/key-bindings.zsh"
 source "/usr/local/opt/fzf/shell/completion.zsh" 2> /dev/null
