@@ -8,6 +8,7 @@ else
 	source $SECRET_ENV
 fi
 
+export VIRTUALBOX_DISK_SIZE=40000
 
 composer_install() {
 	docker run --rm -ti \
