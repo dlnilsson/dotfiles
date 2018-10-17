@@ -8,6 +8,9 @@ eval cyan=$fg[cyan]
 eval white=$fg[white]
 eval grey=$fg[grey]
 
+ZSH_THEME_DOCKER_PROMPT_SHA_BEFORE="%{$white%}[%{$cyan%}"
+ZSH_THEME_DOCKER_PROMPT_SHA_AFTER="%{$white%}]"
+
 # PROMPT='$(_user_host)${_current_dir}$(git_prompt_info)
 PROMPT='${_current_dir}$(git_prompt_info)
 %{$white%}>%{$reset_color%} '
@@ -34,7 +37,7 @@ _docker_info() {
             ;;
     esac
     if [[ ! -z $VAL ]]; then
-        echo "$ZSH_THEME_GIT_PROMPT_SHA_BEFORE$VAL$ZSH_THEME_GIT_PROMPT_SHA_AFTER"
+        echo "$ZSH_THEME_DOCKER_PROMPT_SHA_BEFORE$VAL$ZSH_THEME_DOCKER_PROMPT_SHA_AFTER"
     fi
 }
 
