@@ -12,13 +12,30 @@ eval grey=$fg[grey]
 PROMPT='${_current_dir}$(git_prompt_info)
 %{$white%}>%{$reset_color%} '
 PROMPT2='%{$grey%}◀%{$reset_color%} '
-RPROMPT='$(_vi_status)%{$(echotc UP 1)%}$(git_remote_status) $(git_prompt_short_sha) ${_return_status} %{$white%}%T%{$(echotc DO 1)%}%{$reset_color%}'
+RPROMPT='$(_vi_status)%{$(echotc UP 1)%}$(_docker_info)$(git_remote_status) $(git_prompt_short_sha) ${_return_status} %{$white%}%T%{$(echotc DO 1)%}%{$reset_color%}'
 
 local _current_dir="%{$green%}%0~%{$reset_color%} "
 local _return_status="%{$red%}%(?..×)%{$reset_color%}"
 
 function _user_host() {
   echo "%{$red%}%n%{$reset_color%} %{$white%}in "
+}
+_docker_info() {
+    local VAL
+    case ${DOCKER_HOST:-} in
+        "tcp://192.168.99.100:2376")
+            VAL=Manager
+            ;;
+        "tcp://192.168.99.101:2376")
+            VAL=Worker
+            ;;
+        *)
+            VAL=$DOCKER_HOST
+            ;;
+    esac
+    if [[ ! -z $VAL ]]; then
+        echo "$ZSH_THEME_GIT_PROMPT_SHA_BEFORE$VAL$ZSH_THEME_GIT_PROMPT_SHA_AFTER"
+    fi
 }
 
 function _vi_status() {
