@@ -42,11 +42,35 @@ swarm_prod() {
 swarm_staging() {
 	docker --tls -H $INT_SWARM_STAGING $*
 }
+eval_staging() {
+	eval_local
+	export DOCKER_TLS=1
+	export DOCKER_HOST=$INT_SWARM_STAGING
+}
 eval_manager() {
 	eval $(docker-machine env virtualbox-node-manager-1)
 }
 eval_local() {
-	eval $(docker-machine env --unset)
+	# https://docs.docker.com/engine/reference/commandline/cli/#environment-variables
+	variables=(
+		DOCKER_API_VERSION
+		DOCKER_CONFIG
+		DOCKER_CERT_PATH
+		DOCKER_DRIVER
+		DOCKER_HOST
+		DOCKER_NOWARN_KERNEL_VERSION
+		DOCKER_RAMDISK
+		DOCKER_TLS
+		DOCKER_TLS_VERIFY
+		DOCKER_CONTENT_TRUST
+		DOCKER_CONTENT_TRUST_SERVER
+		DOCKER_HIDE_LEGACY_COMMANDS
+		DOCKER_TMPDIR
+		DOCKER_MACHINE_NAME
+	)
+	for i in $variables; do
+		unset $i
+	done
 }
 eval_worker() {
 	eval $(docker-machine env virtualbox-node-worker-1)
