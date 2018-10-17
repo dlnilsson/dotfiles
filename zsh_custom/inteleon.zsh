@@ -75,3 +75,8 @@ eval_local() {
 eval_worker() {
 	eval $(docker-machine env virtualbox-node-worker-1)
 }
+add_ssh_key_local_swarm() {
+	eval_worker
+	cat $PUBLIC_SSH_KEY | docker exec -i $(docker ps --filter='name=ssh' -q) /bin/bash -c "cat >> /root/.ssh/authorized_keys"
+	info_msg "Added $PUBLIC_SSH_KEY to ssh container"
+}
