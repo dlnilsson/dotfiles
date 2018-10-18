@@ -171,6 +171,22 @@ vacuum() {
 ff() {
 	find . -type f -name $1
 }
+
+# https://junegunn.kr/2015/04/browsing-chrome-history-with-fzf/
+chistory() {
+	local cols sep
+	cols=$(( COLUMNS / 3 ))
+	sep='{::}'
+
+	cp -f ~/Library/Application\ Support/Google/Chrome/Default/History /tmp/h
+
+	sqlite3 -separator $sep /tmp/h \
+	"select substr(title, 1, $cols), url
+	from urls order by last_visit_time desc" |
+	awk -F $sep '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
+	fzf --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs open
+}
+
 source <(awless completion zsh)
 source "/usr/local/opt/fzf/shell/key-bindings.zsh"
 source "/usr/local/opt/fzf/shell/completion.zsh" 2> /dev/null
