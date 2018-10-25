@@ -23,6 +23,7 @@ alias puf="phpunit --verbose --debug --filter="
 alias g="git"
 alias nah="git reset --hard; git clean -df"
 alias compsoer="composer"
+alias awk="gawk"
 
 # Init jenv
 if which jenv > /dev/null; then eval "$(jenv init -)"; fi

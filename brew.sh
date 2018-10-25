@@ -109,6 +109,7 @@ brew install go --cross-compile-common
 brew install glide
 
 brew install cmake
+brew install gawk
 
 # install the python package provided with homebrew
 brew install python
