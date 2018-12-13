@@ -105,7 +105,7 @@ alias jsonp=json_pretty
 alias jsonpretty=json_pretty
 alias dps='docker ps -a'
 alias dia="docker images -a"
-
+alias dsl='docker service ls'
 docker_inspect() {
 	docker inspect $* | jq .
 }
@@ -134,6 +134,12 @@ dbash() {
 		echo "No container id given"; exit 1;
 	fi
 	docker exec -it $1 bash
+}
+dsh() {
+	if [[ $# = 0  ]]; then
+		echo "No container id given"; exit 1;
+	fi
+	docker exec -it $1 sh
 }
 docker_inspect_first() {
 	if [[ $(docker ps | wc -l) -lt 2 ]]; then
