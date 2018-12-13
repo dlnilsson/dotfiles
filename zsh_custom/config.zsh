@@ -97,12 +97,6 @@ flushdns() {
 	info_msg "DNS Flushed!"
 }
 
-json_pretty() {
-	# npm install -g underscore-cli
-	underscore print --outfmt pretty
-}
-alias jsonp=json_pretty
-alias jsonpretty=json_pretty
 alias dps='docker ps -a'
 alias dia="docker images -a"
 alias dsl='docker service ls'
