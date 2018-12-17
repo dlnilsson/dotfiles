@@ -42,6 +42,11 @@ swarm_prod() {
 swarm_staging() {
 	docker --tls -H $INT_SWARM_STAGING $*
 }
+eval_prod() {
+	eval_local
+	export DOCKER_TLS=1
+	export DOCKER_HOST=$INT_SWARM_PRODUCTION
+}
 eval_staging() {
 	eval_local
 	export DOCKER_TLS=1
@@ -52,7 +57,7 @@ eval_manager() {
 }
 eval_local() {
 	# https://docs.docker.com/engine/reference/commandline/cli/#environment-variables
-	variables=(
+	local variables=(
 		DOCKER_API_VERSION
 		DOCKER_CONFIG
 		DOCKER_CERT_PATH
