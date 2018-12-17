@@ -188,7 +188,9 @@ chistory() {
 	awk -F $sep '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
 	fzf --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs open
 }
-
+goland() {
+	/usr/local/bin/goland .
+}
 source <(awless completion zsh)
 source "/usr/local/opt/fzf/shell/key-bindings.zsh"
 source "/usr/local/opt/fzf/shell/completion.zsh" 2> /dev/null
