@@ -26,10 +26,10 @@ function _user_host() {
 _docker_info() {
     local VAL
     case ${DOCKER_HOST:-} in
-        "tcp://192.168.99.100:2376")
+        "tcp://192.168.99.100:2376"|"tcp://192.168.99.104:2376")
             VAL=Manager
             ;;
-        "tcp://192.168.99.101:2376")
+        "tcp://192.168.99.101:2376"|"tcp://192.168.99.105:2376")
             VAL=Worker
             ;;
         *)
