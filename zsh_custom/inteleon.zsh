@@ -36,6 +36,9 @@ php_security_checker() {
 inteleon() {
 	ssh -o StrictHostKeyChecking=no -i $INT_PEM $INT_USR@$*
 }
+inteleon_ssh() {
+	vault ssh -address=$VAULT_PROD_URL -role $INT_USR -mode otp ubuntu@$*
+}
 swarm_prod() {
 	docker --tls -H $INT_SWARM_PRODUCTION $*
 }
