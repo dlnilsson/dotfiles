@@ -3,7 +3,7 @@
 	email = daniel.nilsson1989@gmail.com
 	signingkey = F9282329DBF9544827B99D6FF23E000A2F0D0C55
 [color]
-	ui = auto
+	ui = true
 [color "branch"]
 	# good looking colors i copy/pasted from somewhere
 	current = green bold
@@ -66,6 +66,7 @@
 	editor = nano
 	excludesfile = /Users/dln/.gitignore_global
 	autocrlf = input
+	pager = diff-so-fancy | less --tabs=4 -RFX
 [push]
 	default = simple
 [difftool "sourcetree"]
@@ -75,12 +76,18 @@
 	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
 [filter "lfs"]
-	clean = git lfs clean %f
-	smudge = git lfs smudge %f
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
 	required = true
+	process = git-lfs filter-process
 [commit]
 	gpgsign = true
 [gpg]
 	program = gpg
 [rebase]
 	missingCommitsCheck = error
+[color "diff-highlight"]
+	oldNormal = red bold
+	oldHighlight = red bold 52
+	newNormal = green bold
+	newHighlight = green bold 22
