@@ -119,9 +119,14 @@ enter_base() {
 	docker exec -it $(docker ps --filter='name=base' | awk 'NR>1 {print $1; exit}') bash
 }
 myip() {
-	local ip=$(http ifconfig.co/json | jq '.ip' -r)
-	echo -n $ip | pbcopy
-	info_msg $ip
+	local resp="$(curl -s ifconfig.co/json 2> /dev/null)"
+	if [[ $resp ]]; then
+		local ip=$(echo $resp | jq '.ip' -r)
+		echo -n $ip | pbcopy
+		info_msg $ip
+	else
+		warning_msg "Request failed. 🙀"
+	fi
 }
 dbash() {
 	if [[ $# = 0  ]]; then
