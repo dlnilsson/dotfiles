@@ -97,3 +97,11 @@
 
 '.platform-darwin atom-workspace':
   'cmd-shift-end': 'toggle-quotes:toggle'
+
+# unset!
+'.platform-darwin':
+  'alt-cmd-f': ''
+
+'body':
+  'alt-cmd-left': ''
+  'alt-cmd-right': ''

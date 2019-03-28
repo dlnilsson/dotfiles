@@ -1,5 +1,6 @@
 "*":
   core:
+    audioBeep: false
     closeDeletedFileTabs: true
     customFileTypes:
       "Dockerfile-template": [
@@ -14,6 +15,7 @@
       "terraform-fmt"
     ]
     excludeVcsIgnoredPaths: false
+    fileEncoding: "iso88591"
     ignoredNames: [
       ".git"
       ".hg"
@@ -38,7 +40,7 @@
     short_primitives: true
   editor:
     fontFamily: "Fira Code"
-    fontSize: 17
+    fontSize: 15
     invisibles:
       cr: " "
       eol: " "
