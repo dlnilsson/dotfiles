@@ -169,9 +169,6 @@ alin() {
 aid() {
 	awless ls instances --filter id=$1
 }
-aidssh() {
-	inteleon $(awless ls instances --filter id=$1 | awk 'FNR==3 {print $13}')
-}
 vacuum() {
 	find . -name '*.zip' -o -name '.terraform' -o -name "*.tfstate.backup" -o -name ".DS_Store" | xargs rm -rf -
 }

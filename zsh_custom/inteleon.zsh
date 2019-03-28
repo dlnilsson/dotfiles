@@ -37,7 +37,10 @@ inteleon() {
 	ssh -o StrictHostKeyChecking=no -i $INT_PEM $INT_USR@$*
 }
 inteleon_ssh() {
-	vault ssh -address=$VAULT_PROD_URL -role $INT_USR -mode otp ubuntu@$*
+	vault ssh -strict-host-key-checking=no -address=$VAULT_PROD_URL -role $INT_USR -mode otp ubuntu@$*
+}
+aidssh() {
+	inteleon_ssh $(awless ls instances --filter id=$1 | awk 'FNR==3 {print $13}')
 }
 swarm_prod() {
 	docker --tls -H $INT_SWARM_PRODUCTION $*
