@@ -1,12 +1,10 @@
-
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$PATH
 export PATH=$HOME/dotfiles/bin:$PATH
-export PATH=/usr/local/Cellar/bison/3.0.4/bin:$PATH
-# export PATH=$HOME/.node/bin:$PATH
 export PATH=$HOME/Library/Python/3.6/bin:$PATH
 export PATH=$HOME/Library/Python/3.7/bin:$PATH
 export PATH=/usr/local/sbin:$PATH
+export PATH=$HOME/.local/bin:$PATH
 export COMPOSER_HOME=$HOME/.composer
 export PATH=$COMPOSER_HOME/vendor/bin:$PATH
 export COMPOSER_CACHE_DIR=$COMPOSER_HOME/cache
@@ -15,6 +13,8 @@ export COMPOSER_CACHE_DIR=$COMPOSER_HOME/cache
 # export PYENV_ROOT="$HOME/.pyenv"
 # export PATH="$PYENV_ROOT/bin:$PATH"
 export EDITOR=nano
+export LANG=en_US.UTF-8
+
 
 alias cgs="clear; git status"
 alias lla="ls -la"
@@ -196,3 +196,5 @@ goland() {
 source <(awless completion zsh)
 source "/usr/local/opt/fzf/shell/key-bindings.zsh"
 source "/usr/local/opt/fzf/shell/completion.zsh" 2> /dev/null
+source "/usr/local/share/zsh/site-functions"
+# eval "$(pipenv --completion)"
