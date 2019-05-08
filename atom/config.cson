@@ -15,7 +15,6 @@
       "terraform-fmt"
     ]
     excludeVcsIgnoredPaths: false
-    fileEncoding: "iso88591"
     ignoredNames: [
       ".git"
       ".hg"
