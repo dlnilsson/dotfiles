@@ -1,7 +1,9 @@
-[submodule "zsh-autosuggestions"]
+[submodule "zsh_custom/plugins/zsh-autosuggestions"]
 	path = zsh_custom/plugins/zsh-autosuggestions
 	url = https://github.com/zsh-users/zsh-autosuggestions
-
 [submodule "nano"]
 	path = nano
 	url = https://github.com:scopatz/nanorc.git
+[submodule "zsh_custom/plugins/git-open"]
+	path = zsh_custom/plugins/git-open
+	url = git@github.com:paulirish/git-open.git
