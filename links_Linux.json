@@ -9,6 +9,10 @@
             "to": ".i3/"
         },
         {
+            "from": "i3status",
+            "to": ".config/i3status/"
+        },
+        {
             "from": "atom",
             "to": ".atom/"
         }
