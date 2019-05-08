@@ -19,7 +19,8 @@ sudo pacman -S \
   keybase \
   kbfs \
   ttf-fira-code \
-  diff-so-fancy
+  diff-so-fancy \
+  python-pip
 
 
 sudo pacman -R palemoon-bin
