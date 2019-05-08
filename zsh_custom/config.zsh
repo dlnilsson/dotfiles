@@ -1,6 +1,6 @@
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$PATH
-export PATH=$HOME/dotfiles/bin:$PATH
+export PATH=$HOME/.dotfiles/bin:$PATH
 #export PATH=$HOME/Library/Python/3.6/bin:$PATH
 #export PATH=$HOME/Library/Python/3.7/bin:$PATH
 #export PATH=/usr/local/sbin:$PATH
