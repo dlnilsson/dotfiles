@@ -14,7 +14,7 @@ export PATH=$HOME/.local/bin:$PATH
 # export PATH="$PYENV_ROOT/bin:$PATH"
 export EDITOR=nano
 export LANG=en_US.UTF-8
-
+export BROWSER=google-chrome-stable
 
 alias cgs="clear; git status"
 alias lla="ls -la"
