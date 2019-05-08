@@ -1,0 +1,16 @@
+{
+    "symlinks": [
+        {
+            "from": "root",
+            "to": "/"
+        },
+        {
+            "from": "i3",
+            "to": ".i3/"
+        },
+        {
+            "from": "atom",
+            "to": ".atom/"
+        }
+    ]
+}

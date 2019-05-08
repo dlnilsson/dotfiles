@@ -7,13 +7,14 @@ import os
 import sys
 import json
 import pprint
-
+import platform
 # Base path to symlink from
 # All paths are based from $HOME
 home =  os.environ['HOME'] + '/'
 current = os.getcwd() + '/'
+cfg = 'links_%s.json' % platform.uname().system
 
-with open('links.json') as data_file:
+with open(cfg) as data_file:
     jsonObject = json.load(data_file)
 
 
@@ -53,10 +54,10 @@ def force_symlink(file1, file2):
     file1    -    file to link
     file2    -    destination
     """
-    print file1 + u'\t\u2192\t' + file2
+    print(file1 + u'\t\u2192\t' + file2)
     try:
         os.symlink(file1, file2)
-    except OSError, e:
+    except OSError as e:
         if e.errno == errno.EEXIST:
             if os.path.isdir(file2):
                 shutil.rmtree(file2)
@@ -72,11 +73,8 @@ for item in jsonObject['symlinks']:
     pp = pprint.PrettyPrinter(indent=4)
     pp.pprint(files)
 
-    print "Create symlink"
-    print "FROM \t\t\t\t\t TO"
+    print("Create symlink")
+    print("FROM \t\t\t\t\t TO")
     for file in files:
         new_path = DESTINATION + path_leaf(file)
         force_symlink(file, new_path)
-
-
-
