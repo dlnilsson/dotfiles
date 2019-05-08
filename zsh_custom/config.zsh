@@ -1,13 +1,13 @@
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$PATH
 export PATH=$HOME/dotfiles/bin:$PATH
-export PATH=$HOME/Library/Python/3.6/bin:$PATH
-export PATH=$HOME/Library/Python/3.7/bin:$PATH
-export PATH=/usr/local/sbin:$PATH
+#export PATH=$HOME/Library/Python/3.6/bin:$PATH
+#export PATH=$HOME/Library/Python/3.7/bin:$PATH
+#export PATH=/usr/local/sbin:$PATH
 export PATH=$HOME/.local/bin:$PATH
-export COMPOSER_HOME=$HOME/.composer
-export PATH=$COMPOSER_HOME/vendor/bin:$PATH
-export COMPOSER_CACHE_DIR=$COMPOSER_HOME/cache
+#export COMPOSER_HOME=$HOME/.composer
+#export PATH=$COMPOSER_HOME/vendor/bin:$PATH
+#export COMPOSER_CACHE_DIR=$COMPOSER_HOME/cache
 # export FLUTTER=$HOME/dev/flutter
 # export PATH=$FLUTTER/bin:$PATH
 # export PYENV_ROOT="$HOME/.pyenv"
@@ -24,7 +24,11 @@ alias puf="phpunit --verbose --debug --filter="
 alias g="git"
 alias nah="git reset --hard; git clean -df"
 alias compsoer="composer"
-alias awk="gawk"
+#alias awk="gawk"
+
+alias pbcopy='xsel --clipboard --input'
+alias pbpaste='xsel --clipboard --output'
+
 
 # Init jenv
 if which jenv > /dev/null; then eval "$(jenv init -)"; fi
@@ -193,8 +197,8 @@ chistory() {
 goland() {
 	/usr/local/bin/goland .
 }
-source <(awless completion zsh)
-source "/usr/local/opt/fzf/shell/key-bindings.zsh"
-source "/usr/local/opt/fzf/shell/completion.zsh" 2> /dev/null
-source "/usr/local/share/zsh/site-functions"
+#source <(awless completion zsh)
+source "/usr/share/fzf/key-bindings.zsh"
+source "/usr/share/fzf/completion.zsh" 2> /dev/null
+source "/usr/share/zsh/site-functions"
 # eval "$(pipenv --completion)"
