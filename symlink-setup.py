@@ -54,7 +54,8 @@ def force_symlink(file1, file2):
     file1    -    file to link
     file2    -    destination
     """
-    print(file1 + u'\t\u2192\t' + file2)
+
+    print('{:45} \u2192 {}'.format(file1, file2))
     try:
         os.symlink(file1, file2)
     except OSError as e:
@@ -74,7 +75,7 @@ for item in jsonObject['symlinks']:
     pp.pprint(files)
 
     print("Create symlink")
-    print("FROM \t\t\t\t\t TO")
+    print('{:55} {}'.format("From", "To"))
     for file in files:
         new_path = DESTINATION + path_leaf(file)
         force_symlink(file, new_path)

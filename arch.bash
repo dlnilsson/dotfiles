@@ -3,7 +3,7 @@
 # Ask for the administrator password upfront
 sudo -v
 
-# Keep-alive: update existing `sudo` time stamp until `.osx` has finished
+# Keep-alive: update existing `sudo` time stamp until `.arch.bash` has finished
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
 sudo pacman -S \
@@ -20,7 +20,15 @@ sudo pacman -S \
   kbfs \
   ttf-fira-code \
   diff-so-fancy \
-  python-pip
+  python-pip \
+  screen \
+  git-lfs \
+  jq \
+  mtr \
+  unzip \
+  py3status
 
-
-sudo pacman -R palemoon-bin
+echo "Remove standard packages..."
+sudo pacman -R \
+    palemoon-bin \
+    &> /dev/null
