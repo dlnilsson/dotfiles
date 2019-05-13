@@ -13,6 +13,10 @@
             "to": ".config/i3status/"
         },
         {
+            "from": "py3status",
+            "to": ".config/i3status/py3status/"
+        },
+        {
             "from": "config",
             "to": ".config/"
         },
