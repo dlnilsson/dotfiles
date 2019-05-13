@@ -13,7 +13,7 @@ class Py3status:
         self.client = docker.from_env()
 
     def containers_running(self):
-        txt = '🐋 '
+        txt = ''
         stauses = {
             'created': 0,
             'restarting': 0,
@@ -26,6 +26,9 @@ class Py3status:
         for container in self.client.containers.list(all=True):
             stauses[container.status] += 1
         stauses = {k: v for k, v in stauses.items() if v > 0}
+
+        if len(stauses) > 0:
+            txt = '🐋 '
 
         for key, val in stauses.items():
             txt += " {}: {}".format(key, val)
