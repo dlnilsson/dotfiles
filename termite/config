@@ -1,2 +1,5 @@
 [colors]
-background = rgb(34, 45, 49)
+background = rgba(34, 45, 49, .98)
+
+[options]
+font = Source Code Pro 14px
