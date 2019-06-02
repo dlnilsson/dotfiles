@@ -15,6 +15,7 @@ export PATH=$HOME/.local/bin:$PATH
 export EDITOR=nano
 export LANG=en_US.UTF-8
 export BROWSER=google-chrome-stable
+export TERM=termite
 
 alias cgs="clear; git status"
 alias lla="ls -la"

@@ -6,6 +6,9 @@ sudo -v
 # Keep-alive: update existing `sudo` time stamp until `.arch.bash` has finished
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
+# update
+sudo pacman -Syy
+
 sudo pacman -S \
   the_silver_searcher \
   awless \
@@ -26,7 +29,10 @@ sudo pacman -S \
   jq \
   mtr \
   unzip \
-  py3status
+  py3status \
+  termite
+
+
 
 echo "Remove standard packages..."
 sudo pacman -R \

@@ -6,7 +6,15 @@
         },
         {
             "from": "i3",
-            "to": ".i3/"
+            "to": ".config/i3/"
+        },
+        {
+            "from": "polybar",
+            "to": ".config/polybar/"
+        },
+        {
+            "from": "termite",
+            "to": ".config/termite/"
         },
         {
             "from": "i3status",
