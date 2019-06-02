@@ -30,7 +30,11 @@ sudo pacman -S \
   mtr \
   unzip \
   py3status \
-  termite
+  termite \
+  polybar \
+  rofi \
+  ttf-font-awesome-4 \
+  adobe-source-code-pro-fonts \
 
 
 
