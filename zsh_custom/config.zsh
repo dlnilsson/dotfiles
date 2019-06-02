@@ -17,6 +17,7 @@ export LANG=en_US.UTF-8
 export BROWSER=google-chrome-stable
 export TERM=termite
 
+alias pacmane="pacman"
 alias cgs="clear; git status"
 alias lla="ls -la"
 alias lal=lla
