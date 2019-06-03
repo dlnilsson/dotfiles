@@ -10,3 +10,5 @@ __pycache__/*
 __pycache__/
 terraform.tfstate.backup
 coverage.out
+.mypy_cache/*
+.mypy_cache/
