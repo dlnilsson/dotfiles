@@ -9,34 +9,37 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 # update
 sudo pacman -Syy
 
-sudo pacman -S \
-  the_silver_searcher \
-  awless \
-  fzf \
-  go \
-  docker \
-  docker-compose \
-  neo-fetch \
-  xsel \
-  fzf \
-  keybase \
-  kbfs \
-  ttf-fira-code \
-  diff-so-fancy \
-  python-pip \
-  screen \
-  git-lfs \
-  jq \
-  mtr \
-  unzip \
-  py3status \
-  termite \
-  polybar \
-  rofi \
-  ttf-font-awesome-4 \
-  adobe-source-code-pro-fonts \
+sudo pacman -S --noconfirm the_silver_searcher
+sudo pacman -S --noconfirm awless
+sudo pacman -S --noconfirm fzf
+sudo pacman -S --noconfirm go
+sudo pacman -S --noconfirm docker
+sudo pacman -S --noconfirm docker-compose
+sudo pacman -S --noconfirm neofetch
+sudo pacman -S --noconfirm xsel
+sudo pacman -S --noconfirm fzf
+sudo pacman -S --noconfirm keybase
+sudo pacman -S --noconfirm kbfs
+sudo pacman -S --noconfirm ttf-fira-code
+sudo pacman -S --noconfirm diff-so-fancy
+sudo pacman -S --noconfirm python-pip
+sudo pacman -S --noconfirm screen
+sudo pacman -S --noconfirm git-lfs
+sudo pacman -S --noconfirm jq
+sudo pacman -S --noconfirm mtr
+sudo pacman -S --noconfirm unzip
+sudo pacman -S --noconfirm py3status
+sudo pacman -S --noconfirm termite
+sudo pacman -S --noconfirm polybar
+sudo pacman -S --noconfirm rofi
+sudo pacman -S --noconfirm bind-tools
+sudo pacman -S --noconfirm adobe-source-code-pro-fonts
+sudo pacman -S --noconfirm noto-fonts-emoji
+sudo pacman -S --noconfirm ttf-nerd-fonts-symbol
 
 
+yay \
+    ttf-font-awesome-4
 
 echo "Remove standard packages..."
 sudo pacman -R \
