@@ -199,6 +199,16 @@ chistory() {
 goland() {
 	/usr/local/bin/goland .
 }
+
+# private enviornment variables
+SECRET_ENV=$HOME/.secrets
+
+if [[ ! -a $SECRET_ENV ]] then
+	warning_msg $SECRET_ENV "not found."
+else
+	source $SECRET_ENV
+fi
+
 #source <(awless completion zsh)
 source "/usr/share/fzf/key-bindings.zsh"
 source "/usr/share/fzf/completion.zsh" 2> /dev/null

@@ -1,13 +1,3 @@
-# private enviornment variables
-
-SECRET_ENV=$HOME/.secrets
-
-if [[ ! -a $SECRET_ENV ]] then
-	warning_msg $SECRET_ENV "not found."
-else
-	source $SECRET_ENV
-fi
-
 export VIRTUALBOX_DISK_SIZE=40000
 
 composer_install() {
