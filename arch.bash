@@ -36,10 +36,13 @@ sudo pacman -S --noconfirm bind-tools
 sudo pacman -S --noconfirm adobe-source-code-pro-fonts
 sudo pacman -S --noconfirm noto-fonts-emoji
 sudo pacman -S --noconfirm ttf-nerd-fonts-symbol
+sudo pacman -S --noconfirm gnu-netcat
+sudo pacman -S --noconfirm whois
 
 
 yay \
-    ttf-font-awesome-4
+    ttf-font-awesome-4 \
+    rofi-greenclip
 
 echo "Remove standard packages..."
 sudo pacman -R \
