@@ -12,6 +12,8 @@ while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
 sleep .5
 
 if ! pgrep -x polybar; then
+	MONITOR=$(polybar -m|tail -1|sed -e 's/:.*$//g')
+	export MONITOR
 	polybar base &
 	polybar mon2 &
 else
