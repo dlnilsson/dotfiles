@@ -40,9 +40,14 @@ sudo pacman -S --noconfirm gnu-netcat
 sudo pacman -S --noconfirm whois
 
 
+
 yay \
     ttf-font-awesome-4 \
-    rofi-greenclip
+    rofi-greenclip \
+    termsyn-font \
+    ttf-iosevka \
+    feh \
+    betterlockscreen
 
 echo "Remove standard packages..."
 sudo pacman -R \
