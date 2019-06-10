@@ -2,8 +2,18 @@
 	name = Daniel Nilsson
 	email = daniel.nilsson1989@gmail.com
 	signingkey = F9282329DBF9544827B99D6FF23E000A2F0D0C55
+
+[includeIf "gitdir:~/dev/"]
+	path = ~/dev/.config/work/.gituser-work
+
 [color]
+	diff = auto
+	status = auto
+	branch = auto
+	interactive = auto
 	ui = true
+	pager = true
+
 [color "branch"]
 	# good looking colors i copy/pasted from somewhere
 	current = green bold
@@ -15,13 +25,16 @@
 	frag = magenta bold
 	old = red bold
 	new = green bold
+
 [color "status"]
 	# good looking colors i copy/pasted from somewhere
 	added = green bold
 	changed = yellow bold
 	untracked = red
+
 [color "sh"]
 	branch = yellow
+
 [url "git@github.com:"]
 	insteadOf = https://github.com/
 [alias]
@@ -38,7 +51,6 @@
 	co = checkout
 	df = diff
 	rb = rebase
-
 	# If you use shortened hashes, sometimes you may encounter a collision. The following alias prints out all commits whose hash start with given string.
 	abbr = "!sh -c 'git rev-list --all | grep ^$1 | while read commit; do git --no-pager log -n1 --pretty=format:\"%H %ci %an %s%n\" $commit; done' -"
 
@@ -86,6 +98,7 @@
 	program = gpg
 [rebase]
 	missingCommitsCheck = error
+
 [color "diff-highlight"]
 	oldNormal = red bold
 	oldHighlight = red bold 52

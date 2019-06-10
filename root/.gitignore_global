@@ -12,3 +12,4 @@ terraform.tfstate.backup
 coverage.out
 .mypy_cache/*
 .mypy_cache/
+venv/*
