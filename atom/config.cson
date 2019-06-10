@@ -23,12 +23,14 @@
       "._*"
       "Thumbs.db"
       "ci/build/*"
+      ".mypy_cache"
     ]
     packagesWithKeymapsDisabled: [
       "emmet"
       "sort-lines"
       "xml-formatter"
     ]
+    projectHome: "/home/dln/dev"
     telemetryConsent: "limited"
     themes: [
       "one-dark-ui"
@@ -38,7 +40,8 @@
   docblockr:
     short_primitives: true
   editor:
-    fontFamily: "Fira Code"
+    confirmCheckoutHeadRevision: false
+    fontFamily: "Fira Code, FontAwesome, DejaVu Sans Mono, monospace"
     fontSize: 15
     invisibles:
       cr: " "

@@ -8,4 +8,4 @@ install-all-packages:
 
 packages-list:
 	@rm -f $(makefile_dir)packages.list
-	apm list --installed --bare > packages.list
+	apm list --installed --bare | awk 'BEGIN {FS = "@"} {print $1}' > packages.list
