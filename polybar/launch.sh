@@ -14,8 +14,8 @@ sleep .5
 if ! pgrep -x polybar; then
 	MONITOR=$(polybar -m|tail -1|sed -e 's/:.*$//g')
 	export MONITOR
-	polybar base &
-	polybar mon2 &
+	polybar -c $HOME/.config/polybar/config.ini base &
+	polybar -c $HOME/.config/polybar/config.ini bottom &
 else
 	pkill -USR1 polybar
 fi
