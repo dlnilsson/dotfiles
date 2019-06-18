@@ -27,15 +27,19 @@ alias g="git"
 alias nah="git reset --hard; git clean -df"
 alias compsoer="composer"
 #alias awk="gawk"
-
 alias pbcopy='xsel --clipboard --input'
 alias pbpaste='xsel --clipboard --output'
+alias dps='docker ps -a'
+alias dia="docker images -a"
+alias dsl='docker service ls'
+# private enviornment variables
+SECRET_ENV=$HOME/.secrets
 
-
-# Init jenv
-if which jenv > /dev/null; then eval "$(jenv init -)"; fi
-
-#plugins=(git z zsh-autosuggestions docker emoji)
+if [[ ! -a $SECRET_ENV ]] then
+	warning_msg $SECRET_ENV "not found."
+else
+	source $SECRET_ENV
+fi
 
 info_msg() {
 	local green=$(tput setaf 2)
@@ -52,32 +56,15 @@ important_msg() {
 	local reset=$(tput sgr0)
 	echo -e "${yellow}$@${reset}"
 }
-
+random_wallpaper() {
+	feh --recursive --randomize --bg-fill ~/Wallpapers &> /dev/null
+}
 warning_msg() {
 	local red=$(tput setaf 1)
 	local reset=$(tput sgr0)
 	echo -e "${red}$@${reset}"
 }
 
-docker_up() {
-	local name=$(uname -s)
-	case $name in
-		'Darwin' )
-			# psuedo-code, does not work, do another check if docker daemon is running.
-			if [[ ! $(docker ps > /dev/null 2>&1) ]]; then
-				notice_msg "Starting docker..."
-				open --hide --background -a Docker
-			else
-				warning_msg "seems like docker daemon is already running..."
-			fi
-			;;
-		'Linux' )
-			# noop
-			;;
-		*)
-		warning_msg 'Cant start docker daemon'
-	esac
-}
 drc() {
 	notice_msg "\nRemoving docker containers - $emoji[whale] \n";
 	for i in $(docker ps -aq); do docker rm -f $i; done
@@ -94,7 +81,6 @@ drn() {
 	notice_msg "\nRemove all docket networks $emoji[whale]\n";
 	docker network prune --force
 }
-
 aws_login() {
 	eval ${$(aws ecr get-login --no-include-email)}
 }
@@ -102,25 +88,21 @@ flushdns() {
 	sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder
 	info_msg "DNS Flushed!"
 }
-
-alias dps='docker ps -a'
-alias dia="docker images -a"
-alias dsl='docker service ls'
 docker_inspect() {
 	docker inspect $* | jq .
 }
 docker_env() {
 	docker inspect $* | jq '.[0].Config.Env'
 }
-code() {
-	if [[ $# = 0 ]]
-	then
-		open -a "Visual Studio Code" -n
-	else
-		[[ $1 = /* ]] && F="$1" || F="$PWD/${1#./}"
-		open -a "Visual Studio Code" -n --args "$F"
-	fi
-}
+# code() {
+# 	if [[ $# = 0 ]]
+# 	then
+# 		open -a "Visual Studio Code" -n
+# 	else
+# 		[[ $1 = /* ]] && F="$1" || F="$PWD/${1#./}"
+# 		open -a "Visual Studio Code" -n --args "$F"
+# 	fi
+# }
 enter_base() {
 	docker exec -it $(docker ps --filter='name=base' | awk 'NR>1 {print $1; exit}') bash
 }
@@ -200,14 +182,6 @@ goland() {
 	/usr/local/bin/goland .
 }
 
-# private enviornment variables
-SECRET_ENV=$HOME/.secrets
-
-if [[ ! -a $SECRET_ENV ]] then
-	warning_msg $SECRET_ENV "not found."
-else
-	source $SECRET_ENV
-fi
 
 #source <(awless completion zsh)
 source "/usr/share/fzf/key-bindings.zsh"
