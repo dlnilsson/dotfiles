@@ -59,6 +59,9 @@ important_msg() {
 random_wallpaper() {
 	feh --recursive --randomize --bg-fill ~/Wallpapers &> /dev/null
 }
+open() {
+	xdg-open "$@"
+}
 warning_msg() {
 	local red=$(tput setaf 1)
 	local reset=$(tput sgr0)
@@ -181,7 +184,23 @@ chistory() {
 goland() {
 	/usr/local/bin/goland .
 }
-
+kill_dnsmasq() {
+	docker stop $(docker ps  --filter name=dnsmasq -qa)
+	docker rm $(docker ps  --filter name=dnsmasq -qa)
+}
+run_dnsmasq() {
+	docker run \
+	--name dnsmasq \
+	-d \
+	-p 53:53/udp \
+	-p 5380:8080 \
+	-v $HOME/scripts/dnsmasq.conf:/etc/dnsmasq.conf \
+	--log-opt "max-size=100m" \
+	-e "HTTP_USER=foo" \
+	-e "HTTP_PASS=bar" \
+	--restart always \
+	jpillora/dnsmasq
+}
 
 #source <(awless completion zsh)
 source "/usr/share/fzf/key-bindings.zsh"

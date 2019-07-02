@@ -51,6 +51,7 @@
 	co = checkout
 	df = diff
 	rb = rebase
+	do = checkout -b
 	# If you use shortened hashes, sometimes you may encounter a collision. The following alias prints out all commits whose hash start with given string.
 	abbr = "!sh -c 'git rev-list --all | grep ^$1 | while read commit; do git --no-pager log -n1 --pretty=format:\"%H %ci %an %s%n\" $commit; done' -"
 
