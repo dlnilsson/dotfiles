@@ -5,6 +5,7 @@ if ! updates=$(checkupdates 2> /dev/null | wc -l ); then
 fi
 
 if [ "$updates" -gt 0 ]; then
-	echo -e "<$updates>"
-    #echo -e "📦"
+	echo -e " $updates "
+else
+	echo ""
 fi
