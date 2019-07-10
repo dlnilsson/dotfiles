@@ -38,6 +38,7 @@ sudo pacman -S --noconfirm noto-fonts-emoji
 sudo pacman -S --noconfirm ttf-nerd-fonts-symbol
 sudo pacman -S --noconfirm gnu-netcat
 sudo pacman -S --noconfirm whois
+sudo pacman -S --noconfirm exa
 # python-gnupg
 
 
@@ -47,6 +48,7 @@ yay termsyn-font
 #yay ttf-iosevka
 yay feh
 yay betterlockscreen
+yay uthash
 
 echo "Remove standard packages..."
 sudo pacman -R \

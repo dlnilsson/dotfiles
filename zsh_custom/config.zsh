@@ -19,6 +19,8 @@ export TERM=termite
 
 alias pacmane="pacman"
 alias cgs="clear; git status"
+alias ls="exa"
+alias tree="exa --tree "
 alias lla="ls -la"
 alias lal=lla
 alias pa="php artisan"
