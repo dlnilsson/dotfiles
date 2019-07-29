@@ -13,3 +13,4 @@ coverage.out
 .mypy_cache/*
 .mypy_cache/
 venv/*
+temp_creds.json
