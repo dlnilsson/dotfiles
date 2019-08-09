@@ -1,14 +1,17 @@
+# Copyright (c) 2016-present Arctic Ice Studio <development@arcticicestudio.com>
+# Copyright (c) 2016-present Sven Greb <code@svengreb.de>
+
+# Project:    Nord Termite
+# Repository: https://github.com/arcticicestudio/nord-termite
+# License:    MIT
+
 [colors]
-
-
-cursor = #d8dee9
-cursor_foreground = #2e3440
-
-foreground = #d8dee9
-foreground_bold = #d8dee9
-background = rgba(46, 52, 64, .90)
-
-highlight = #4c566a
+#cursor = #d8dee9
+#cursor_foreground = #2e3440'
+#foreground = #d8dee9
+#foreground_bold = #d8dee9
+#background = #2e3440
+#highlight = #4c566a
 
 color0  = #3b4252
 color1  = #bf616a
@@ -26,24 +29,6 @@ color12 = #81a1c1
 color13 = #b48ead
 color14 = #8fbcbb
 color15 = #eceff4
-
-# background = rgba(30, 45, 49, .90)
-# color0 = #3f3f3f
-# color1 = #705050
-# color2 = #60b48a
-# color3 = #dfaf8f
-# color4 = #506070
-# color5 = #dc8cc3
-# color6 = #8cd0d3
-# color7 = #dcdccc
-# color8 = #709080
-# color9 = #dca3a3
-# color10 = #c3bf9f
-# color11 = #f0dfaf
-# color12 = #94bff3
-# color13 = #ec93d3
-# color14 = #93e0e3
-# color15 = #ffffff
 
 [options]
 font = Source Code Pro 14px

@@ -18,10 +18,12 @@ main() {
 		count=$(echo $gh | jq -r ". | length")
 
 		if [[ $count -gt 0 ]]; then
-			output+="\t\t  work: $count"
+			output+="\t\t   work: $count"
 		fi
 	fi
-	echo -e $output
+	if [[ ! -z $output ]]; then
+		echo -e $output
+	fi
 }
 
 open_url() {
@@ -47,13 +49,15 @@ open_url() {
 
 case "${1:-""}" in
 	left_click)
+		echo "left"
 		open_url "https://github.com/notifications"
 		exit 0
 	;;
 	right_click)
+		echo "right"
 		open_url $(echo ${ENTERPRISE_URL/api\/v3/notifications})
 		exit 0
 	;;
 	*)
-		main $@
+		main
 esac

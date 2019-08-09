@@ -1,6 +1,7 @@
 #!/bin/python
 # https://github.com/Jvanrhijn/polybar-spotify/blob/456625b5a534efc43b309e4ec4c68d24d4f65146/spotify_status.py
 
+import os
 import sys
 import dbus
 import argparse
@@ -53,7 +54,8 @@ def fix_string(string):
 # Default parameters
 output = fix_string(u'{play_pause} {artist}: {song}')
 trunclen = 25
-play_pause = fix_string(u'\u25B6,\u23F8') # first character is play, second is paused
+# play_pause = fix_string(u'\u25B6,\u23F8') # first character is play, second is paused
+play_pause = " ,  "
 
 label_with_font = '%{{T{font}}}{label}%{{T-}}'
 font = args.font
@@ -114,7 +116,9 @@ try:
             artist = label_with_font.format(font=font, label=artist)
             song = label_with_font.format(font=font, label=song)
 
-        print(output.format(artist=artist, song=song, play_pause=play_pause))
+        title = output.format(artist=artist, song=song, play_pause=play_pause)
+        # os.system(f'notify-send -u low "{title}"')
+        print(' ' + title)
 
 except Exception as e:
     if isinstance(e, dbus.exceptions.DBusException):
