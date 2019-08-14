@@ -345,7 +345,7 @@ set_from_resource $term_color15    color15
 # class                   border  backgr. text    indic.   child_border
 #  client.focused          #556064 #556064 #80FFF9 #FDF6E3
 #  client.focused          #f370ff #f370ff #80FFF9 #FDF6E3
-  client.focused          $term_color8 $term_color8 $term_color4 $term_color4
+  client.focused          $term_color8 $term_color8 $term_color4 $term_color15
   client.focused_inactive #2F3D44 #2F3D44 #1ABC9C #454948
   client.unfocused        #2F3D44 #2F3D44 #1ABC9C #454948
   client.urgent           $term_color10 #FDF6E3 #1ABC9C #268BD2

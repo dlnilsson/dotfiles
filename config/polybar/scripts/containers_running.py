@@ -1,18 +1,19 @@
+#!/bin/python
 # -*- coding: utf-8 -*-
 """
 Show all containers on current DOCKER_HOST
-https://py3status.readthedocs.io/en/latest/writing_modules.html
-https://i3wm.org/docs/user-contributed/py3status.html
 """
 
 import docker
+import argparse
 
-class Py3status:
+
+class ListContainers:
     def __init__(self):
-        self.full_text = ''
         self.client = docker.from_env()
 
-    def containers_running(self):
+    def containers_running(self, prefix_font):
+        prefix = prefix_font or ''
         txt = ''
         stauses = {
             'created': 0,
@@ -28,22 +29,26 @@ class Py3status:
         stauses = {k: v for k, v in stauses.items() if v > 0}
 
         if len(stauses) > 0:
-            txt = '🐋 '
+            txt = f'{prefix} '
 
         for key, val in stauses.items():
-            txt += " {}: {}".format(key, val)
+            txt += f' {key}: {val}'
 
-        self.full_text = txt
-
-        return {
-            'full_text': self.full_text,
-            'cached_until': self.py3.time_in(30)
-        }
+        if len(txt) > 0:
+            return txt
+        return None
 
 if __name__ == "__main__":
-    """
-    Run module in test mode.
-    """
-    from py3status.module_test import module_test
-
-    module_test(Py3status)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--prefix',
+        type=str,
+        metavar='',
+        dest='prefix_font'
+    )
+    args = parser.parse_args()
+    prefix_font = args.prefix_font
+    list = ListContainers()
+    r = list.containers_running(prefix_font)
+    if r is not None:
+        print(r)

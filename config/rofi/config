@@ -1,0 +1,13 @@
+; https://github.com/devdevdevdevdeo/dotfiles/blob/c4566c6c7781f045d055e9afae2d639ba168bd23/rofi/config
+rofi.show-icons:            false
+rofi.modi:                  drun,run,window,ssh
+rofi.lines:                 7
+rofi.line-padding:          10
+rofi.matching:              fuzzy
+rofi.bw:                    0
+rofi.padding:               0
+rofi.separator-style:       none
+rofi.hide-scrollbar:        true
+rofi.line-margin:           0
+rofi.font:                  sans-serif 10
+rofi.theme: themes/custom-nord.rasi

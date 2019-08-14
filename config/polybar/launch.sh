@@ -20,7 +20,7 @@ if ! pgrep -x polybar; then
 			# MONITOR=$m polybar --reload example &
 			# MONITOR=$m polybar --reload example &
 			# MONITOR=$m polybar -c $HOME/.config/polybar/config.ini secondary &> /home/dln/logs/polybar.log &
-			MONITOR=$m polybar -c $HOME/.config/polybar/config.ini bottom &> /home/dln/logs/polybar.log &
+			MONITOR=$m polybar -c $HOME/.config/polybar/config.ini -l info bottom &> /home/dln/logs/polybar.log &
 		done
 	else
 		export MONITOR="HDMI1"

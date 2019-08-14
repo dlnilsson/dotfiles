@@ -1,23 +1,3 @@
-[Default Applications]
-x-scheme-handler/http=google-chrome-stable.desktop
-x-scheme-handler/https=google-chrome-stable.desktop
-x-scheme-handler/ftp=google-chrome-stable.desktop
-x-scheme-handler/chrome=google-chrome-stable.desktop
-text/html=google-chrome-stable.desktop
-application/x-extension-htm=google-chrome-stable.desktop
-application/x-extension-html=google-chrome-stable.desktop
-application/x-extension-shtml=google-chrome-stable.desktop
-application/xhtml+xml=google-chrome-stable.desktop
-application/x-extension-xhtml=google-chrome-stable.desktop
-application/x-extension-xht=google-chrome-stable.desktop
-image/jpeg=viewnior.desktop;gpicview.desktop;
-image/png=viewnior.desktop;gpicview.desktop;
-text/plain=mousepad.desktop
-x-scheme-handler/mailto=userapp-Thunderbird.desktop
-message/rfc822=userapp-Thunderbird.desktop
-application/pdf=epdfview.desktop
-application/x-bittorrent=deluge.desktop
-
 [Added Associations]
 x-scheme-handler/ftp=google-chrome.desktop;
 x-scheme-handler/chrome=google-chrome.desktop;
@@ -30,8 +10,32 @@ application/x-extension-xhtml=google-chrome.desktop;
 application/x-extension-xht=google-chrome.desktop;
 image/jpeg=viewnior.desktop;gpicview.desktop;
 image/png=viewnior.desktop;gpicview.desktop;
-text/plain=mousepad.desktop;
+text/plain=google-chrome.desktop;mousepad.desktop;atom.desktop;
 x-scheme-handler/mailto=userapp-Thunderbird.desktop;
 message/rfc822=userapp-Thunderbird.desktop;
 application/pdf=epdfview.desktop;
 application/x-bittorrent=deluge.desktop;
+application/x-shellscript=userapp-nano-PDSN3Z.desktop;userapp-nano-7GJM3Z.desktop;
+
+[Default Applications]
+x-scheme-handler/http=google-chrome.desktop
+x-scheme-handler/https=google-chrome.desktop
+x-scheme-handler/ftp=google-chrome.desktop
+x-scheme-handler/chrome=google-chrome.desktop
+application/x-extension-htm=google-chrome.desktop
+application/x-extension-html=google-chrome.desktop
+application/x-extension-shtml=google-chrome.desktop
+application/x-extension-xhtml=google-chrome.desktop
+application/x-extension-xht=google-chrome.desktop
+image/jpeg=viewnior.desktop;gpicview.desktop;
+image/png=viewnior.desktop;gpicview.desktop;
+text/plain=atom.desktop
+x-scheme-handler/mailto=userapp-Thunderbird.desktop
+message/rfc822=userapp-Thunderbird.desktop
+application/pdf=epdfview.desktop
+application/x-bittorrent=deluge.desktop
+application/x-shellscript=userapp-nano-7GJM3Z.desktop
+x-scheme-handler/webcal=google-chrome.desktop
+inode/directory=pcmanfm.desktop
+application/xhtml+xml=google-chrome.desktop
+text/html=google-chrome.desktop

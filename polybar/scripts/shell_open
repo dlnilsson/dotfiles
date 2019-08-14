@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-echo "executing $@"
-
-termite -e "$1" & disown &> /dev/null

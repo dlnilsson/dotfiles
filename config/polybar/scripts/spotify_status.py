@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python3
 # https://github.com/Jvanrhijn/polybar-spotify/blob/456625b5a534efc43b309e4ec4c68d24d4f65146/spotify_status.py
 
 import os
@@ -53,7 +53,7 @@ def fix_string(string):
 
 # Default parameters
 output = fix_string(u'{play_pause} {artist}: {song}')
-trunclen = 25
+trunclen = 55
 # play_pause = fix_string(u'\u25B6,\u23F8') # first character is play, second is paused
 play_pause = " ,  "
 
@@ -117,7 +117,6 @@ try:
             song = label_with_font.format(font=font, label=song)
 
         title = output.format(artist=artist, song=song, play_pause=play_pause)
-        # os.system(f'notify-send -u low "{title}"')
         print(' ' + title)
 
 except Exception as e:

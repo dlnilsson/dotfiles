@@ -5,26 +5,6 @@
             "to": "/"
         },
         {
-            "from": "i3",
-            "to": ".config/i3/"
-        },
-        {
-            "from": "polybar",
-            "to": ".config/polybar/"
-        },
-        {
-            "from": "termite",
-            "to": ".config/termite/"
-        },
-        {
-            "from": "i3status",
-            "to": ".config/i3status/"
-        },
-        {
-            "from": "py3status",
-            "to": ".config/i3status/py3status/"
-        },
-        {
             "from": "config",
             "to": ".config/"
         },
