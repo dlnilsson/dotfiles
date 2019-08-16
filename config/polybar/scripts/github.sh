@@ -6,8 +6,12 @@ source $HOME/.github
 CACHE=$HOME/.cache/github-notifications
 ENTERPRISE_NOTIFICATION=${ENTERPRISE_URL/api\/v3/notifications}
 
+teardown() {
+	echo " Github down."
+}
+trap teardown EXIT
 main() {
-	gh=$(curl -fs https://api.github.com/notifications?access_token=$GITHUB_NOTIFICATION_TOKEN)
+	gh=$(curl -fs https://api.github.com/notifications?access_token=$GITHUB_NOTIFICATION_TOKEN 2>/dev/null)
 	count=$(echo $gh | jq -r ". | length")
 	output=""
 	if [[ $count -gt 0 ]]; then
@@ -15,7 +19,7 @@ main() {
 	fi
 
 	if [[ ! -z $ENTERPRISE_URL ]]; then
-		gh=$(curl -fs $ENTERPRISE_URL/notifications\?access_token\=$ENTERPRISE_NOTIFICATION_TOKEN)
+		gh=$(curl -fs --max-time 3 $ENTERPRISE_URL/notifications\?access_token\=$ENTERPRISE_NOTIFICATION_TOKEN 2>/dev/null)
 		count=$(echo $gh | jq -r ". | length")
 		for row in $(echo "${gh}" | jq -r '.[] | @base64'); do
 			_jq() {
@@ -26,7 +30,8 @@ main() {
 			_url=$(_jq $ '.subject.url') # api url, not HTML
 			if [[ ! $(grep "$_id" "$CACHE") ]]; then
 				echo $_title
-				notify-send.sh "Github" "$_title" \
+				notify-send.sh " Github" "$_title" \
+				-a "github" \
 				-o "View:xdg-open $ENTERPRISE_NOTIFICATION &>/dev/null"
 				echo $_id >> $CACHE
 			fi
