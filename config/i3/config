@@ -415,5 +415,5 @@ mode "$mode_gaps_outer" {
 }
 
 
-bindsym $mod+d exec --no-startup-id "rofi -show drun -font \\"DejaVu 9\\" -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
-bindsym $mod+Shift+v exec --no-startup-id  --no-startup-id "rofi -modi 'clipboard:greenclip print' -show clipboard -run-command '{cmd}'"
+bindsym $mod+d exec --no-startup-id "rofi -show drun -show-icons -font \\"DejaVu 12\\" -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
+bindsym $mod+Shift+v exec --no-startup-id  --no-startup-id "rofi -show-icons -modi 'clipboard:greenclip print' -show clipboard -run-command '{cmd}'"
