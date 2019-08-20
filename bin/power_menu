@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Source: https://gist.githubusercontent.com/adnan360/f86012baeb4c9ca4f1af033550b03033/raw/069a2f6b309cbd60b60ce8643817f77b72ed6944/power.sh
+# Simple script to handle a DIY shutdown menu. When run you should see a bunch of options (shutdown, reboot etc.)
+#
+# Requirements:
+# - rofi
+# - systemd, but you can replace the commands for OpenRC or anything else
+#
+# Instructions:
+# - Save this file as power.sh or anything
+# - Give it exec priviledge, or chmod +x /path/to/power.sh
+# - Run it
+chosen=$(echo -e "[Cancel]\nLock\nLogout\nShutdown\nReboot\nSuspend\nHibernate\nHybrid-sleep\nSuspend-then-hibernate" | rofi -dmenu -i -p "Options:")
+# Info about some states are available here:
+# https://www.freedesktop.org/software/systemd/man/systemd-sleep.conf.html#Description
+
+if [[ $chosen = "Lock" ]]; then
+	betterlockscreen -l dim
+elif [[ $chosen = "Logout" ]]; then
+	jwm -exit
+elif [[ $chosen = "Shutdown" ]]; then
+	systemctl poweroff
+elif [[ $chosen = "Reboot" ]]; then
+	systemctl reboot
+elif [[ $chosen = "Suspend" ]]; then
+	systemctl suspend
+elif [[ $chosen = "Hibernate" ]]; then
+	systemctl hibernate
+elif [[ $chosen = "Hybrid-sleep" ]]; then
+	systemctl hibernate
+elif [[ $chosen = "Suspend-then-hibernate" ]]; then
+	systemctl suspend-then-hibernate
+fi

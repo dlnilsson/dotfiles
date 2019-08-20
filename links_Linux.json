@@ -11,6 +11,10 @@
         {
             "from": "atom",
             "to": ".atom/"
+        },
+        {
+            "from": "local",
+            "to": ".local/"
         }
     ]
 }
