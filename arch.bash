@@ -39,6 +39,7 @@ sudo pacman -S --noconfirm ttf-nerd-fonts-symbol
 sudo pacman -S --noconfirm gnu-netcat
 sudo pacman -S --noconfirm whois
 sudo pacman -S --noconfirm exa
+sudo pacman -S imagemagick
 sudo pacman -S copyq
 # python-gnupg
 
@@ -51,6 +52,7 @@ yay betterlockscreen
 yay uthash
 yay deadd-notification-center
 yay notify-send.sh
+yay wpgtk
 
 echo "Remove standard packages..."
 sudo pacman -R \
