@@ -39,11 +39,11 @@ sudo pacman -S --noconfirm ttf-nerd-fonts-symbol
 sudo pacman -S --noconfirm gnu-netcat
 sudo pacman -S --noconfirm whois
 sudo pacman -S --noconfirm exa
+sudo pacman -S copyq
 # python-gnupg
 
 
 yay ttf-font-awesome-4
-yay rofi-greenclip
 yay termsyn-font
 #yay ttf-iosevka
 yay feh

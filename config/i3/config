@@ -292,7 +292,7 @@ bindsym $mod+l exec --no-startup-id betterlockscreen --lock
 
 # Autostart applications
 exec --no-startup-id  deadd-notification-center
-exec_always --no-startup-id  "killall greenclip; exec greenclip daemon"
+exec_always --no-startup-id  "killall copyq; exec copyq"
 
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # exec --no-startup-id nitrogen --restore; sleep 1; compton -b
@@ -416,4 +416,4 @@ mode "$mode_gaps_outer" {
 
 
 bindsym $mod+d exec --no-startup-id "rofi -show drun -show-icons -font \\"DejaVu 12\\" -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
-bindsym $mod+Shift+v exec --no-startup-id  --no-startup-id "rofi -show-icons -modi 'clipboard:greenclip print' -show clipboard -run-command '{cmd}'"
+bindsym $mod+Shift+v exec --no-startup-id "/home/dln/.dotfiles/bin/rofi-copyq"
