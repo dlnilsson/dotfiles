@@ -9,7 +9,7 @@ ENTERPRISE_NOTIFICATION=${ENTERPRISE_URL/api\/v3/notifications}
 teardown() {
 	echo " Github down."
 }
-trap teardown EXIT
+trap teardown ERR
 main() {
 	gh=$(curl -fs https://api.github.com/notifications?access_token=$GITHUB_NOTIFICATION_TOKEN 2>/dev/null)
 	count=$(echo $gh | jq -r ". | length")
