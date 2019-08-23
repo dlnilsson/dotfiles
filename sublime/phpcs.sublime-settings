@@ -1,5 +1,0 @@
-{
-    "phpcbf_executable_path": "/Users/dln/.composer/vendor/bin/phpcbf",
-    "phpcs_executable_path": "/Users/dln/.composer/vendor/bin/phpcs",
-    "php_cs_fixer_executable_path": "/Users/dln/.composer/vendor/bin/php-cs-fixer"
-}

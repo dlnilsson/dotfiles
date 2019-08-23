@@ -1,6 +1,0 @@
-# ~/.dotfiles
-
-
-### TODO
-
-- npm packages
