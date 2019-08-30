@@ -230,7 +230,12 @@ for_window [class="(?i)virtualbox"] floating enable border normal
 for_window [class="Xfburn"] floating enable
 for_window [class="termite"] move position center
 # for_window [class="Spotify"] floating enable normal
-#for_window [class="google-chrome"] floating enable
+# for_window [class="google-chrome"] floating enable
+# for_window [class="google-chrome-stable"] floating enable
+# for_window [class="Google-chrome-stable"] floating enable
+# for_window [class="Google-chrome"] floating enable
+for_window [class="Keybase"] floating enable
+# for_window [class="Slack"] floating enable
 
 # switch to workspace with urgent window automatically
 for_window [urgent=latest] focus
@@ -286,7 +291,7 @@ mode "resize" {
 }
 
 # Lock screen
-bindsym $mod+l exec --no-startup-id betterlockscreen --lock
+bindsym $mod+l exec --no-startup-id "pactl set-sink-mute 1 toggle && $HOME/.dotfiles/bin/lock"
 
 # Autostart applications
 exec --no-startup-id  deadd-notification-center
@@ -302,7 +307,7 @@ exec --no-startup-id pamac-tray
 exec --no-startup-id betterlockscreen -w dim
 # exec --no-startup-id blueman-applet
 # exec_always --no-startup-id sbxkb
-exec --no-startup-id xautolock -time 3 -locker "betterlockscreen --lock"
+exec_always --no-startup-id xautolock -time 3 -locker "$HOME/.dotfiles/bin/lock" &
 exec_always --no-startup-id fix_xcursor
 exec_always --no-startup-id $HOME/.config/polybar/launch.sh
 
