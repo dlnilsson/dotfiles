@@ -7,6 +7,3 @@
 [submodule "zsh_custom/plugins/git-open"]
 	path = zsh_custom/plugins/git-open
 	url = git@github.com:paulirish/git-open.git
-[submodule "config/spicetify/Themes/google-spicetify"]
-	path = config/spicetify/Themes/google-spicetify
-	url = git@github.com:khanhas/google-spicetify.git
