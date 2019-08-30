@@ -1,21 +1,13 @@
 export GOPATH=$HOME/go
 export PATH=$GOPATH/bin:$PATH
 export PATH=$HOME/.dotfiles/bin:$PATH
-#export PATH=$HOME/Library/Python/3.6/bin:$PATH
-#export PATH=$HOME/Library/Python/3.7/bin:$PATH
-#export PATH=/usr/local/sbin:$PATH
 export PATH=$HOME/.local/bin:$PATH
-#export COMPOSER_HOME=$HOME/.composer
-#export PATH=$COMPOSER_HOME/vendor/bin:$PATH
-#export COMPOSER_CACHE_DIR=$COMPOSER_HOME/cache
-# export FLUTTER=$HOME/dev/flutter
-# export PATH=$FLUTTER/bin:$PATH
-# export PYENV_ROOT="$HOME/.pyenv"
-# export PATH="$PYENV_ROOT/bin:$PATH"
 export EDITOR=nano
 export LANG=en_US.UTF-8
 export BROWSER=google-chrome-stable
-export TERM=termite
+export TERM=xterm-256color
+export TERMINAL=termite
+
 
 alias pacmane="pacman"
 alias cgs="clear; git status"
@@ -203,7 +195,17 @@ run_dnsmasq() {
 	--restart always \
 	jpillora/dnsmasq
 }
-
+ping_sound() {
+	paplay /usr/share/sounds/freedesktop/stereo/complete.oga &> /dev/null
+}
+imgcat() {
+	if [ ! -z $KITTY_WINDOW_ID ]; then
+		kitty +kitten icat $1
+	else
+		warning_msg "cant view image in this terminal."
+		xdg-open $1
+	fi
+}
 #source <(awless completion zsh)
 source "/usr/share/fzf/key-bindings.zsh"
 source "/usr/share/fzf/completion.zsh" 2> /dev/null
