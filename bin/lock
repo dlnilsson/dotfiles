@@ -1,4 +1,2 @@
-#!/usr/bin/env bash
-
-
-betterlockscreen -l dim
+#!/usr/bin/env sh
+xdotool key XF86AudioMute && betterlockscreen -l dim &> /dev/null
