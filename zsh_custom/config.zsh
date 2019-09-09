@@ -156,6 +156,7 @@ aid() {
 }
 vacuum() {
 	find . -name '*.zip' -o -name '.terraform' -o -name "*.tfstate.backup" -o -name ".DS_Store" | xargs rm -rf -
+	find . -type f -name "*.py[co]" -delete -or -type d -name "__pycache__" -delete
 }
 ff() {
 	find . -type f -name $1
