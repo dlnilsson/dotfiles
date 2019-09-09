@@ -166,15 +166,16 @@ bindsym $mod+8 workspace $ws8
 #Media keys
 
 # Pulse Audio controls
-bindsym XF86AudioRaiseVolume exec "pactl set-sink-volume 1 +5% && /home/dln/.dotfiles/bin/notify-volume  &> /dev/null"
-bindsym XF86AudioLowerVolume exec "pactl set-sink-volume 1 -5% && /home/dln/.dotfiles/bin/notify-volume  &> /dev/null"
+bindsym XF86AudioRaiseVolume exec "pactl set-sink-volume 1 +5% && $HOME/.dotfiles/bin/notify-volume  &> /dev/null"
+bindsym XF86AudioLowerVolume exec "pactl set-sink-volume 1 -5% && $HOME/.dotfiles/bin/notify-volume  &> /dev/null"
 bindsym XF86AudioMute exec "pactl set-sink-mute 1 toggle"
 
 # Media player controls
-bindsym XF86AudioPlay exec playerctl play-pause
-bindsym XF86AudioPause exec playerctl play-pause
-bindsym XF86AudioNext exec playerctl next
-bindsym XF86AudioPrev exec playerctl previous
+bindsym XF86AudioPlay exec playerctl play-pause &> /dev/null
+bindsym XF86AudioPause exec playerctl play-pause &> /dev/null
+bindsym XF86AudioNext exec playerctl next &> /dev/null
+bindsym XF86AudioPrev exec playerctl previous &> /dev/null
+bindsym XF86Calculator exec "rofi -show calc -modi calc -no-show-match -no-sort"
 
 # Move focused container to workspace
 bindsym $mod+Ctrl+1 move container to workspace $ws1

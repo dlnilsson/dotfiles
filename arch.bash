@@ -55,6 +55,7 @@ yay uthash
 yay deadd-notification-center
 yay notify-send.sh
 yay wpgtk
+yay rofi-calc
 
 echo "Remove standard packages..."
 sudo pacman -R \
