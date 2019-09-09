@@ -212,6 +212,13 @@ imgcat() {
 		xdg-open $1
 	fi
 }
+reload_gtk_theme() {
+	theme=$(gsettings get org.gnome.desktop.interface gtk-theme)
+	gsettings set org.gnome.desktop.interface gtk-theme ''
+	sleep 1
+	gsettings set org.gnome.desktop.interface gtk-theme $theme
+}
+
 #source <(awless completion zsh)
 source "/usr/share/fzf/key-bindings.zsh"
 source "/usr/share/fzf/completion.zsh" 2> /dev/null
