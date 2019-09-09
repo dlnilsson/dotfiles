@@ -1,6 +1,6 @@
 ; https://github.com/devdevdevdevdeo/dotfiles/blob/c4566c6c7781f045d055e9afae2d639ba168bd23/rofi/config
 rofi.show-icons:            false
-rofi.modi:                  drun,run,window,ssh
+rofi.modi:                  drun,run,window,ssh,calc
 rofi.lines:                 7
 rofi.line-padding:          10
 rofi.matching:              fuzzy

@@ -202,6 +202,11 @@ bindsym $mod+Shift+8 move container to workspace $ws8; workspace $ws8
 # assign [class="Pale moon"] $ws2
 # assign [class="Pcmanfm"] $ws3
 # assign [class="Skype"] $ws5
+assign [class="Spotify"] $ws5
+assign [class="google-chrome"] $ws1
+assign [class="google-chrome-stable"] $ws1
+assign [class="Google-chrome-stable"] $ws1
+assign [class="Google-chrome"] $ws1
 
 # Open specific applications in floating mode
 for_window [title="alsamixer"] floating enable border pixel 1
@@ -231,12 +236,12 @@ for_window [class="Timeset-gui"] floating enable border normal
 for_window [class="(?i)virtualbox"] floating enable border normal
 for_window [class="Xfburn"] floating enable
 for_window [class="termite"] move position center
-# for_window [class="Spotify"] floating enable normal
+for_window [class="Spotify"] move position center
 # for_window [class="google-chrome"] floating enable
 # for_window [class="google-chrome-stable"] floating enable
 # for_window [class="Google-chrome-stable"] floating enable
 # for_window [class="Google-chrome"] floating enable
-for_window [class="Keybase"] floating enable
+# for_window [class="Keybase"] floating enable
 # for_window [class="Slack"] floating enable
 
 # switch to workspace with urgent window automatically
@@ -296,8 +301,7 @@ mode "resize" {
 bindsym $mod+l exec --no-startup-id "pactl set-sink-mute 1 toggle && $HOME/.dotfiles/bin/lock"
 
 # Autostart applications
-exec --no-startup-id  deadd-notification-center
-exec_always --no-startup-id  "killall copyq; exec copyq"
+exec --no-startup-id  "deadd-notification-center &"
 
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # exec --no-startup-id nitrogen --restore; sleep 1; compton -b

@@ -117,7 +117,7 @@ try:
             song = label_with_font.format(font=font, label=song)
 
         title = output.format(artist=artist, song=song, play_pause=play_pause)
-        print(' ' + title)
+        print(title)
 
 except Exception as e:
     if isinstance(e, dbus.exceptions.DBusException):
