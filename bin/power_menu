@@ -10,7 +10,7 @@
 # - Save this file as power.sh or anything
 # - Give it exec priviledge, or chmod +x /path/to/power.sh
 # - Run it
-chosen=$(echo -e "Lock\nLogout\nShutdown\nReboot\nSuspend\nHibernate\nHybrid-sleep\nSuspend-then-hibernate" | rofi -dmenu -theme Arc-Dark -i -p "  Select option")
+chosen=$(echo -e "Lock\nLogout\nShutdown\nReboot\nSuspend" | rofi -dmenu -theme Arc-Dark -i -p "  Select option")
 # Info about some states are available here:
 # https://www.freedesktop.org/software/systemd/man/systemd-sleep.conf.html#Description
 locker="$HOME/.dotfiles/bin/lock"
@@ -24,11 +24,5 @@ elif [[ $chosen = "Shutdown" ]]; then
 elif [[ $chosen = "Reboot" ]]; then
 	systemctl reboot
 elif [[ $chosen = "Suspend" ]]; then
-	$locker && systemctl suspend
-elif [[ $chosen = "Hibernate" ]]; then
-	$locker && systemctl hibernate
-elif [[ $chosen = "Hybrid-sleep" ]]; then
-	$locker && systemctl hibernate
-elif [[ $chosen = "Suspend-then-hibernate" ]]; then
-	$locker && systemctl suspend-then-hibernate
+	systemctl suspend && $locker # hibernate
 fi
