@@ -34,6 +34,7 @@ main() {
 				-a "github" \
 				-o "View:xdg-open $ENTERPRISE_NOTIFICATION &>/dev/null"
 				echo $_id >> $CACHE
+				sleep 1
 			fi
 		done
 		if [[ $count -gt 0 ]]; then
