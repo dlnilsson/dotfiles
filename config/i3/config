@@ -32,7 +32,8 @@ bindsym $mod+Return exec termite
 # kill focused window
 bindsym $mod+Shift+q kill
 
-bindsym Mod1+Tab exec --no-startup-id "rofi -show window -show-icons -theme sidebar"
+bindsym $mod+section exec --no-startup-id "tilix --quake"
+bindsym Mod1+Tab exec --no-startup-id "rofi -show window -show-icons"
 # launch categorized menu
 bindsym $mod+z exec --no-startup-id morc_menu
 

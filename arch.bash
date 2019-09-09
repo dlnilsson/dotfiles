@@ -39,8 +39,10 @@ sudo pacman -S --noconfirm ttf-nerd-fonts-symbol
 sudo pacman -S --noconfirm gnu-netcat
 sudo pacman -S --noconfirm whois
 sudo pacman -S --noconfirm exa
-sudo pacman -S imagemagick
-sudo pacman -S copyq
+sudo pacman -S --noconfirm imagemagick
+sudo pacman -S --noconfirm copyq
+sudo pacman -S --noconfirm kitty
+sudo pacman -S --noconfirm tilix
 # python-gnupg
 
 
