@@ -11,7 +11,7 @@ Name=Power menu
 
 # A comment which can/will be used as a tooltip
 Comment=Computer state menu
-
+GenericName=Toggle power state
 # The path to the folder in which the executable is run
 Path=/home/dln/.dotfiles/bin/
 

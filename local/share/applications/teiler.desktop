@@ -7,23 +7,22 @@ Type=Application
 Version=1.0
 
 # The name of the application
-Name=Lock
+Name=Screenshot teiler
 
 # A comment which can/will be used as a tooltip
-Comment=Lock screen
-GenericName=Lock computer
-
+Comment=screenshot menu for teiler
+GenericName=Screenshot manager
 # The path to the folder in which the executable is run
-Path=/home/dln/.dotfiles/bin/
+Path=/usr/bin/
 
 # The executable of the application, possibly with arguments.
-Exec=/home/dln/.dotfiles/bin/lock
+Exec=/usr/bin/teiler
 
 # The name of the icon that will be used to display this entry
-Icon=/usr/share/icons/Adwaita/96x96/status/system-lock-screen-symbolic.symbolic.png
+Icon=/usr/share/icons/Adwaita/96x96/status/image-loading-symbolic.symbolic.png
 
 # Describes whether this application needs to be run in a terminal or not
 Terminal=false
 
 # Describes the categories in which this entry should be shown
-# Categories=Education;Languages;Java;
+Categories=Tools;Tool;
