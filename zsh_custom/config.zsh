@@ -6,11 +6,12 @@ export EDITOR=nano
 export LANG=en_US.UTF-8
 export BROWSER=google-chrome-stable
 export TERM=xterm-256color
-export TERMINAL=termite
+# export TERMINAL=termite
 
 
 alias pacmane="pacman"
 alias cgs="clear; git status"
+alias las="ls"
 alias ls="exa"
 alias tree="exa --tree "
 alias lla="ls -la"
@@ -155,7 +156,7 @@ aid() {
 	awless ls instances --filter id=$1
 }
 vacuum() {
-	find . -name '*.zip' -o -name '.terraform' -o -name "*.tfstate.backup" -o -name ".DS_Store" | xargs rm -rf -
+	find . -o -name '.terraform' -o -name "*.tfstate.backup" -o -name ".DS_Store" | xargs rm -rf -
 	find . -type f -name "*.py[co]" -delete -or -type d -name "__pycache__" -delete
 }
 ff() {
