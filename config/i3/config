@@ -301,7 +301,6 @@ mode "resize" {
 bindsym $mod+l exec --no-startup-id "pactl set-sink-mute 1 toggle && $HOME/.dotfiles/bin/lock"
 
 # Autostart applications
-exec --no-startup-id  "deadd-notification-center &"
 
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # exec --no-startup-id nitrogen --restore; sleep 1; compton -b
