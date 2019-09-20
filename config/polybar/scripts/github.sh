@@ -4,6 +4,7 @@ set -eou pipefail
 
 source $HOME/.github
 CACHE=$HOME/.cache/github-notifications
+NID=$HOME/.cache/github-nid
 ENTERPRISE_NOTIFICATION=${ENTERPRISE_URL/api\/v3/notifications}
 
 teardown() {
@@ -29,13 +30,19 @@ main() {
 			_title=$(_jq $ '.subject.title')
 			_url=$(_jq $ '.subject.url') # api url, not HTML
 			if [[ ! $(grep "$_id" "$CACHE") ]]; then
-				echo $_title
+				nid=$(cat $NID)
+				# notify-send.sh -r $(cat $cache) -u low "Volume: $(pamixer --get-volume)%"  -p > $cache
+
+				echo $_id >> $CACHE
+				# echo $_title
 				notify-send.sh " Github" "$_title" \
 				-a "github" \
-				-o "View:xdg-open $ENTERPRISE_NOTIFICATION &>/dev/null"
-				echo $_id >> $CACHE
-				sleep 1
+				-r $nid \
+				-o "View:xdg-open $ENTERPRISE_NOTIFICATION &>/dev/null" \
+				-p > $NID
+				sleep 3
 			fi
+			sleep .5
 		done
 		if [[ $count -gt 0 ]]; then
 			output+="\t\t   work: $count"
@@ -48,13 +55,13 @@ case "${1:-""}" in
 	left_click)
 		echo "left"
 		sleep .1
-		xdg-open "https://github.com/notifications"
+		xdg-open "https://github.com/notifications" &> /dev/null
 		exit 0
 	;;
 	right_click)
 		echo "right"
 		sleep .1
-		xdg-open $(echo $ENTERPRISE_NOTIFICATION)
+		xdg-open $(echo $ENTERPRISE_NOTIFICATION) &> /dev/null
 		exit 0
 	;;
 	*)
