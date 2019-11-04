@@ -1,0 +1,8 @@
+#!/bin/sh
+
+cache=$HOME/.cache/redshift
+
+case $1 in
+  period-changed)
+    notify-send.sh -a "redshift" -r $(cat $cache) "Period changed to $3" -p > $cache
+esac
