@@ -107,7 +107,7 @@ bindsym $mod+Shift+b move container to workspace back_and_forth; workspace back_
 # split orientation
 bindsym $mod+h split h;exec notify-send 'tile horizontally'
 bindsym $mod+v split v;exec notify-send 'tile vertically'
-bindsym $mod+q split toggle; exec notify-send 'toggle'
+bindsym $mod+q split toggle
 
 # toggle fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
@@ -368,8 +368,8 @@ set_from_resource $term_color15    color15
 #############################
 
 # Set inner/outer gaps
-gaps inner 8
-gaps outer 8
+gaps inner 10
+gaps outer 6
 
 
 # Additionally, you can issue commands with the following syntax. This is useful to bind keys to changing the gap size.
@@ -423,5 +423,5 @@ mode "$mode_gaps_outer" {
 }
 
 
-bindsym $mod+d exec --no-startup-id "rofi -show drun -show-icons -font \\"DejaVu 12\\" -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
+bindsym $mod+d exec --no-startup-id "rofi -show drun -show-icons -font \\"DejaVu 12\\" -display-drun  -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
 bindsym $mod+Shift+v exec --no-startup-id "/home/dln/.dotfiles/bin/rofi-copyq"
