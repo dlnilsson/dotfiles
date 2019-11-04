@@ -1,7 +1,7 @@
 ; https://github.com/devdevdevdevdeo/dotfiles/blob/c4566c6c7781f045d055e9afae2d639ba168bd23/rofi/config
 rofi.show-icons:            false
-rofi.modi:                  drun,run,window,ssh,calc
-rofi.lines:                 7
+rofi.modi:                  drun,window,calc,ssh
+rofi.lines:                 10
 rofi.line-padding:          10
 rofi.matching:              fuzzy
 rofi.bw:                    0
@@ -11,3 +11,5 @@ rofi.hide-scrollbar:        true
 rofi.line-margin:           0
 rofi.font:                  sans-serif 10
 rofi.theme: themes/custom-nord.rasi
+! Terminal to use
+rofi.terminal:                       kitty
