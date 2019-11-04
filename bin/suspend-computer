@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+locker="$HOME/.dotfiles/bin/lock"
+systemctl suspend && $locker
