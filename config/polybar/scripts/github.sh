@@ -37,6 +37,7 @@ main() {
 				# echo $_title
 				notify-send.sh " Github" "$_title" \
 				-a "github" \
+				-i "/usr/share/icons/Vibrancy-Colors/apps/96/web-github.png" \
 				-r $nid \
 				-o "View:xdg-open $ENTERPRISE_NOTIFICATION &>/dev/null" \
 				-p > $NID
