@@ -4,7 +4,8 @@ export PATH=$HOME/.dotfiles/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 export EDITOR=nano
 export LANG=en_US.UTF-8
-export BROWSER=google-chrome-stable
+#export BROWSER=google-chrome-stable
+export BROWSER=firefox
 export TERM=xterm-256color
 # export TERMINAL=termite
 
