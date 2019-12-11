@@ -10,7 +10,8 @@
 # - Save this file as power.sh or anything
 # - Give it exec priviledge, or chmod +x /path/to/power.sh
 # - Run it
-chosen=$(echo -e "Lock\nLogout\nShutdown\nReboot\nSuspend" | rofi -dmenu -theme Arc-Dark -i -p "  Select option")
+#  
+chosen=$(echo -e "Lock\nLogout\nShutdown\nReboot\nSuspend" | rofi -lines 5 -dmenu -i -p "  Select option")
 # Info about some states are available here:
 # https://www.freedesktop.org/software/systemd/man/systemd-sleep.conf.html#Description
 locker="$HOME/.dotfiles/bin/lock"
