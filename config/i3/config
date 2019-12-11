@@ -62,8 +62,6 @@ bindsym $mod+Shift+F3 exec gksu pcmanfm
 bindsym $mod+F5 exec spotify
 bindsym $mod+t exec --no-startup-id pkill compton
 bindsym $mod+Ctrl+t exec --no-startup-id compton -b
-# bindsym $mod+Shift+d --release exec "killall dunst; exec notify-send 'restart dunst'"
-bindsym $mod+Shift+h --release exec "kill -s USR1 $(pidof deadd-notification-center)"
 bindsym Print exec --no-startup-id i3-scrot
 bindsym $mod+Print --release exec --no-startup-id i3-scrot -w
 bindsym $mod+Shift+Print --release exec --no-startup-id i3-scrot -s
@@ -237,8 +235,9 @@ for_window [class="Spotify"] move position center
 # for_window [class="google-chrome-stable"] floating enable
 # for_window [class="Google-chrome-stable"] floating enable
 # for_window [class="Google-chrome"] floating enable
-# for_window [class="Keybase"] floating enable
 # for_window [class="Slack"] floating enable
+for_window [class="^Twitter$"] floating enable
+for_window [class="crx_panfkkhihbglmaommdcbgghogdofkjpi"] floating enable border normal
 
 # switch to workspace with urgent window automatically
 for_window [urgent=latest] focus
