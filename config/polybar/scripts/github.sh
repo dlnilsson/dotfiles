@@ -31,16 +31,11 @@ main() {
 			_url=$(_jq $ '.subject.url') # api url, not HTML
 			if [[ ! $(grep "$_id" "$CACHE") ]]; then
 				nid=$(cat $NID)
-				# notify-send.sh -r $(cat $cache) -u low "Volume: $(pamixer --get-volume)%"  -p > $cache
 
 				echo $_id >> $CACHE
-				# echo $_title
 				notify-send.sh " Github" "$_title" \
 				-a "github" \
-				-i "/usr/share/icons/Vibrancy-Colors/apps/96/web-github.png" \
-				-r $nid \
-				-o "View:xdg-open $ENTERPRISE_NOTIFICATION &>/dev/null" \
-				-p > $NID
+				-o "View:xdg-open $ENTERPRISE_NOTIFICATION &>/dev/null"
 				sleep 3
 			fi
 			sleep .5

@@ -6,13 +6,13 @@ Show all containers on current DOCKER_HOST
 
 import docker
 import argparse
-
+from typing import Optional
 
 class ListContainers:
-    def __init__(self):
+    def __init__(self) -> None:
         self.client = docker.from_env()
 
-    def containers_running(self, prefix_font):
+    def containers_running(self, prefix_font) -> Optional[str]:
         prefix = prefix_font or ''
         txt = ''
         stauses = {
@@ -34,9 +34,7 @@ class ListContainers:
         for key, val in stauses.items():
             txt += f' {key}: {val}'
 
-        if len(txt) > 0:
-            return txt
-        return None
+        return txt
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
