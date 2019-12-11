@@ -7,6 +7,7 @@ export LANG=en_US.UTF-8
 #export BROWSER=google-chrome-stable
 export BROWSER=firefox
 export TERM=xterm-256color
+export STEAM_FRAME_FORCE_CLOSE=1
 # export TERMINAL=termite
 
 
@@ -52,9 +53,7 @@ important_msg() {
 	local reset=$(tput sgr0)
 	echo -e "${yellow}$@${reset}"
 }
-random_wallpaper() {
-	feh --recursive --randomize --bg-fill ~/Wallpapers &> /dev/null
-}
+
 open() {
 	xdg-open "$@"
 }
@@ -157,8 +156,11 @@ aid() {
 	awless ls instances --filter id=$1
 }
 vacuum() {
-	find . -o -name '.terraform' -o -name "*.tfstate.backup" -o -name ".DS_Store" | xargs rm -rf -
-	find . -type f -name "*.py[co]" -delete -or -type d -name "__pycache__" -delete
+	find . \
+	-name '.terraform' \
+	-or -name '*.tfstate.backup' \
+	-or -name '.DS_Store' | xargs rm -rf -
+	# find . -type f -name "*.py[co]" -delete -or -type d -name "__pycache__" -delete
 }
 ff() {
 	find . -type f -name $1
@@ -220,7 +222,10 @@ reload_gtk_theme() {
 	sleep 1
 	gsettings set org.gnome.desktop.interface gtk-theme $theme
 }
-
+# get human readable timestamp from unixtimestamp
+uts() {
+	date --date=\@$1
+}
 #source <(awless completion zsh)
 source "/usr/share/fzf/key-bindings.zsh"
 source "/usr/share/fzf/completion.zsh" 2> /dev/null
