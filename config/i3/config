@@ -424,4 +424,5 @@ mode "$mode_gaps_outer" {
 
 
 bindsym $mod+d exec --no-startup-id "rofi -show drun -show-icons -font \\"DejaVu 12\\" -display-drun  -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
+bindsym $mod+Shift+d exec --no-startup-id  "rofi -lines 0 -dmenu -p \\"\\" | xargs -I{} xdg-open https://www.google.se/search\?q\=\{\}"
 bindsym $mod+Shift+v exec --no-startup-id "/home/dln/.dotfiles/bin/rofi-copyq"
