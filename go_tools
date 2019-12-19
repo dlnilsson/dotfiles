@@ -1,0 +1,13 @@
+gocode
+gopkgs
+go-outline
+go-symbols
+guru
+gorename
+gotests
+gomodifytags
+dlv
+gocode-gomod
+gogetdoc
+goimports
+golint
