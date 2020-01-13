@@ -21,7 +21,8 @@ bindsym $mod+n border normal
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
-font xft:URWGothic-Book 11
+font pango:Ubuntu Condensed 11
+
 
 # Use Mouse+$mod to drag floating windows
 floating_modifier $mod
@@ -365,10 +366,10 @@ set $nord-pink #b48ead
 
 # Theme colors
 #class                      border        backgr       text	    indicator   childborder
-client.focused		    $nord-grey1  $nord-grey4  $nord-white1  $nord-white1  $nord-white1
-client.focused_inactive	    $nord-grey1  $nord-grey1  $nord-white1  $nord-grey4   $nord-grey4
+client.focused		    $nord-grey4  $nord-grey4  $nord-white1  $nord-white1  $nord-white1
+client.focused_inactive	    $nord-grey1  $nord-grey4  $nord-white1  $nord-grey4   $nord-grey4
 client.unfocused	    $nord-grey1  $nord-grey1  $nord-white1  $nord-grey4   $nord-grey4
-client.urgent		    $nord-grey1  $nord-grey1  $nord-white1  $nord-pink    $nord-pink
+client.urgent		    $nord-orange  $nord-orange  $nord-white1  $nord-pink    $nord-pink
 client.placeholder	    $nord-grey1  $nord-grey1  $nord-white1  $nord-pink    $nord-pink
 client.background	    $nord-grey1
 
