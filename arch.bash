@@ -12,13 +12,13 @@ sudo pacman -Syy
 arch_packages="$HOME/.dotfiles/arch_packages"
 echo "Installing packages from $arch_packages"
 while IFS= read -r pkg; do
-	sudo pacman -S --noconfirm  $pkg
+	sudo pacman -S --noconfirm  "$pkg"
 done <"$arch_packages"
 
 aur_packages="$HOME/.dotfiles/aur_packages"
 echo "Installing AUR packages from $aur_packages"
 while IFS= read -r pkg; do
-	yay $pkg
+	yay "$pkg"
 done <"$aur_packages"
 
 echo "Remove standard packages..."

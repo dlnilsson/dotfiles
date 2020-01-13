@@ -8,3 +8,4 @@ notify-send.sh
 wpgtk
 rofi-calc
 spicetify-cli
+shellcheck-static
