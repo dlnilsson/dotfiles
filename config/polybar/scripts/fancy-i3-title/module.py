@@ -20,32 +20,29 @@ HOSTNAME = platform.node()
 USER = getpass.getuser()
 
 ICONS = [
-    ('name=youtube', '\uf167'),
-    ('class=Slack', '\uf198'),
-    ('class=Rocket.Chat', '\uf135'),
-
-    ('class=chrome', '\uf268'),
-    ('class=Google-chrome', '\uf268'),
-    # ('class=Firefox', '\uf738'),
-    ('class=firefox', '\uf269'),
-    ('class=URxvt', '\ue795'),
-    ('class=kitty', '\uf120'),
-
-    ('class=spotify', '\uf1bc'),
-
-    ('class=Code', '\ue70c'),
-    ('class=code-oss-dev', '\ue70c'),
-
-    ('class=atom', '\ue764'),
-
-    ('class=pcmanfm', '\uf07b'),
-    ('class=steam', '\uf9d2'),
-    ('title=steam', '\uf9d2'),
-    ('class=pdf', '\uf725'),
-
-
-
     ('name=mutt', '\uf199'),
+    ('name=thunderbird', '\uf199'),
+    ('class=thunderbird', '\uf199'),
+    ('name=youtube', '\uf167'),
+    ('title=lazylocker', '\uf308'),
+    ('title=ranger', '\uf413'),
+    ('title=steam', '\uf9d2'),
+    ('class=atom', '\ue764'),
+    ('class=chrome', '\uf268'),
+    ('class=code-oss', '\ue70c'),
+    ('class=discord', '\ufb6e'),
+    ('class=firefox', '\uf269'),
+    ('class=Google-chrome', '\uf268'),
+    ('class=kitty', '\uf120'),
+    ('class=pcmanfm', '\uf07b'),
+    ('class=pdf', '\uf725'),
+    ('class=Rocket.Chat', '\uf135'),
+    ('class=Slack', '\uf198'),
+    ('class=Microsoft Teams - Preview', '\uf871'),
+    ('class=spotify', '\uf1bc'),
+    ('class=steam', '\uf9d2'),
+    ('class=URxvt', '\ue795'),
+    ('class=vlc', '\ufa7b'),
 
     ('*', ''),
     # ('*', '\ufaae'),
@@ -53,9 +50,15 @@ ICONS = [
 
 FORMATERS = {
     'chromium': lambda title: title.replace(' - Chromium', ''),
+    'Google-chrome': lambda title: title.replace(' - Google Chrome', ''),
     'firefox': lambda title: title.replace(' - Mozilla Firefox', ''),
     'urxvt': lambda title: title.replace('%s@%s: ' % (USER, HOSTNAME), ''),
+    'code-oss': lambda title: title.replace(' - Code - OSS', ''),
+    'jetbrains-idea-ce': lambda title: title.replace(' - IntelliJ IDEA', ''),
+    'jetbrains-pycharm-ce': lambda title: title.replace(' - PyCharm', ''),
     'kitty': lambda title: title.replace('%s@%s: ' % (USER, HOSTNAME), ''),
+    'Microsoft Teams - Preview': lambda title: title.replace(' | Microsoft Teams', ''),
+
 }
 
 SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -98,6 +101,7 @@ def get_prefix(app):
         icon = icon_resolver.resolve({
             'class': app.window_class,
             'name': app.name,
+            'title': app.window_title,
         })
 
         return ('%%{T%s}%s%%{T-}' % (ICON_FONT, icon))
