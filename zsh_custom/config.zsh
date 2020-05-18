@@ -15,6 +15,7 @@ alias pacmane="pacman"
 alias cgs="clear; git status"
 alias las="ls"
 alias ls="exa"
+alias cat="ccat"
 alias tree="exa --tree "
 alias lla="ls -la"
 alias lal=lla
