@@ -235,5 +235,12 @@ source "/usr/share/zsh/site-functions"
 
 
 put_editorconfig() {
-	cp $HOME/.dotfiles/.editorconfig $PWD
+	if [[ $(git ls-files --error-unmatch .editorconfig 2> /dev/null) ]]; then
+		echo 'file being tracked; do nothing'
+	elif [[ -f .editorconfig ]]; then
+		echo 'file exist already; do nothing'
+	else
+		echo 'creating symlink'
+		ln -s $HOME/.dotfiles/.editorconfig $PWD
+	fi
 }
