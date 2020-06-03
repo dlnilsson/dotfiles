@@ -1,0 +1,6 @@
+# https://wiki.archlinux.org/index.php/OpenVPN#Route_configuration_fails_with_systemd-networkd
+[Match]
+Name=tun*
+
+[Link]
+Unmanaged=true
