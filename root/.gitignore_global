@@ -16,3 +16,4 @@ venv/*
 temp_creds.json
 .pytest_cache
 *.code-workspace
+.editorconfig
