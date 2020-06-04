@@ -19,6 +19,7 @@ alias cat="ccat"
 alias tree="exa --tree "
 alias lla="ls -la"
 alias lal=lla
+alias cat=ccat
 alias pa="php artisan"
 alias puf="phpunit --verbose --debug --filter="
 alias g="git"
@@ -56,7 +57,7 @@ important_msg() {
 }
 
 open() {
-	xdg-open "$@"
+	$(xdg-open "$@" &> /dev/null)
 }
 warning_msg() {
 	local red=$(tput setaf 1)
