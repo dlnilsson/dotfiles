@@ -1,4 +1,3 @@
 #!/bin/sh
 
-cache=$HOME/.cache/volume-notificaton
-notify-send.sh -a "volume" -r $(cat $cache) -u low "Volume: $(pamixer --get-volume)%"  -p > $cache
+notify-send.sh Volume "$(pamixer --get-volume 2> /dev/null)%" -R  "$HOME/.cache/volume-notificaton"
