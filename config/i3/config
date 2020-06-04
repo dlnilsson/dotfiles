@@ -204,6 +204,7 @@ assign [class="Google-chrome-stable"] $ws1
 assign [class="Google-chrome"] $ws1
 
 # Open specific applications in floating mode
+for_window [class=".*"] split toggle
 for_window [title="alsamixer"] floating enable border pixel 1
 for_window [class="calamares"] floating enable border normal
 for_window [class="Msgcompose"] floating enable border normal
@@ -303,7 +304,7 @@ exec --no-startup-id "feh --recursive --randomize --bg-fill ~/Wallpapers"
 # exec --no-startup-id nm-applet
 exec --no-startup-id xfce4-power-manager
 exec --no-startup-id pamac-tray
-exec --no-startup-id python3 /home/dln/.dotfiles/bin/alternating_layouts &
+#exec --no-startup-id python3 /home/dln/.dotfiles/bin/alternating_layouts &
 exec --no-startup-id betterlockscreen -w dim
 # exec --no-startup-id blueman-applet
 # exec_always --no-startup-id sbxkb
