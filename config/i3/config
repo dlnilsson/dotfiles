@@ -209,6 +209,7 @@ for_window [title="alsamixer"] floating enable border pixel 1
 for_window [class="calamares"] floating enable border normal
 for_window [class="Msgcompose"] floating enable border normal
 for_window [class="Thunderbird"] floating enable border normal
+for_window [class="kgpg"] floating enable border normal
 for_window [class="Clipgrab"] floating enable
 for_window [class="vlc"] floating enable sticky
 for_window [class="viewnior"] floating enable sticky
