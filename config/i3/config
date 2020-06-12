@@ -205,6 +205,7 @@ assign [class="Google-chrome"] $ws1
 
 # Open specific applications in floating mode
 #for_window [class=".*"] split toggle
+for_window [title="Microsoft Teams Notification"] floating enable
 for_window [title="alsamixer"] floating enable border pixel 1
 for_window [class="calamares"] floating enable border normal
 for_window [class="Msgcompose"] floating enable border normal
