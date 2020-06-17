@@ -8,6 +8,7 @@ import i3ipc
 import platform
 from time import sleep
 import argparse
+import subprocess
 
 from icon_resolver import IconResolver
 
@@ -15,7 +16,14 @@ from icon_resolver import IconResolver
 MAX_LENGTH = 85
 #: Base 1 index of the font that should be used for icons
 ICON_FONT = 3
+OUTPUT = 'DP-1'
 
+def screens():
+    output = [l for l in subprocess.check_output(
+        ["xrandr"]).decode("utf-8").splitlines()]
+    return [l.split()[0] for l in output if " connected " in l]
+
+SCREENS = screens()
 HOSTNAME = platform.node()
 USER = getpass.getuser()
 
@@ -58,6 +66,7 @@ FORMATERS = {
     'jetbrains-pycharm-ce': lambda title: title.replace(' - PyCharm', ''),
     'kitty': lambda title: title.replace('%s@%s: ' % (USER, HOSTNAME), ''),
     'Microsoft Teams - Preview': lambda title: title.replace(' | Microsoft Teams', ''),
+    'Slack': lambda title: title.replace('Slack | ', ''),
 
 }
 
@@ -72,14 +81,26 @@ def on_change(i3, e):
 
 
 def render_apps(i3):
-    tree = i3.get_tree()
-    focused = tree.find_focused()
-    if focused is not None:
-        print(format_entry(focused), flush=True)
+    global SCREENS
+    workspaces = i3.get_workspaces()
+    for w in workspaces:
+        if w.focused and w.visible:
+            tree = i3.get_tree()
+            focused = tree.find_focused()
+            if focused is None:
+                return
+
+            if w.output == OUTPUT:
+                # [for screen in SCREENS if screen == OUTPUT]
+                for screen in SCREENS:
+                    if screen == OUTPUT:
+                        print(format_entry(focused), flush=True)
+                        return
 
 
 def format_entry(app):
     title = make_title(app)
+
     u_color = '#b4619a' if app.focused else\
         '#e84f4f' if app.urgent else\
         '#404040'
@@ -88,7 +109,7 @@ def format_entry(app):
 
 
 def make_title(app):
-    out = '{0} {1}'.format(get_prefix(app), format_title(app))
+    out = '{0}  {1}'.format(get_prefix(app), format_title(app))
 
     if app.focused:
         out = '%{F#fff}' + out + '%{F-}'
@@ -122,7 +143,7 @@ def format_title(app):
 
         return title
     except:
-        return 'Y'
+        return ''
 
 
 def main():
@@ -151,6 +172,11 @@ if __name__ == '__main__':
             metavar='trunclen'
         )
         parser.add_argument(
+            '-o',
+            '--output',
+            metavar='output'
+        )
+        parser.add_argument(
             '-f',
             '--font',
             type=int,
@@ -163,6 +189,9 @@ if __name__ == '__main__':
 
         if args.font is not None:
             ICON_FONT = args.font
+
+        if args.output is not None:
+            OUTPUT = args.output
 
         main()
     except KeyboardInterrupt:
