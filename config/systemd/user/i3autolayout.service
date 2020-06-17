@@ -1,0 +1,11 @@
+[Unit]
+Description=i3 auto layout
+
+[Service]
+Type=simple
+ExecStart=/home/dln/.cargo/bin/i3-auto-layout
+Restart=on-failure
+
+
+[Install]
+WantedBy=multi-user.target
