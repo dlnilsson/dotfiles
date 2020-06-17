@@ -9,16 +9,18 @@ while pgrep -u "$UID" -x polybar >/dev/null; do sleep 1; done
 
 sleep .5
 
-MONITOR="DP-1"
+PRIMARY_MONITOR=$(xrandr --query | grep " primary" | cut -d" " -f1 )
+MONITOR="DP-3"
 
 
 if ! pgrep -x polybar; then
 
 	if type "xrandr"; then
-		MONITOR=$MONITOR polybar -c "$HOME/.config/polybar/config.ini" base &
-		for m in $(xrandr --query | grep " connected" | cut -d" " -f1); do
-			MONITOR=$m polybar -c "$HOME"/.config/polybar/config.ini -l info bottom &
-		done
+		# MONITOR=$MONITOR polybar -c "$HOME/.config/polybar/config.ini" base &
+		MONITOR="DP-1" polybar -c "$HOME/.config/polybar/config.ini" secondary_top &
+		MONITOR="DP-1" polybar -c "$HOME/.config/polybar/config.ini" secondary &
+		MONITOR=$PRIMARY_MONITOR polybar -c "$HOME/.config/polybar/config.ini" base &
+		MONITOR=$PRIMARY_MONITOR polybar -c "$HOME/.config/polybar/config.ini" bottom &
 	fi
 else
 	pkill -USR1 polybar
