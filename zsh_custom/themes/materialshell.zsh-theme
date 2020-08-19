@@ -36,6 +36,9 @@ _docker_info() {
             VAL=$DOCKER_HOST
             ;;
     esac
+    if [ ! -z $SSH_CLIENT ]; then
+      VAL="SSH: $(hostname)"
+    fi
     if [[ ! -z $VAL ]]; then
         echo "$ZSH_THEME_DOCKER_PROMPT_SHA_BEFORE$VAL$ZSH_THEME_DOCKER_PROMPT_SHA_AFTER"
     fi
