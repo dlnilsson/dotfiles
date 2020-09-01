@@ -57,7 +57,7 @@ important_msg() {
 }
 
 open() {
-	$(xdg-open "$@" &> /dev/null)
+	$(xdg-open "$@" &> /dev/null &)
 }
 warning_msg() {
 	local red=$(tput setaf 1)
@@ -94,15 +94,6 @@ docker_inspect() {
 docker_env() {
 	docker inspect $* | jq '.[0].Config.Env'
 }
-# code() {
-# 	if [[ $# = 0 ]]
-# 	then
-# 		open -a "Visual Studio Code" -n
-# 	else
-# 		[[ $1 = /* ]] && F="$1" || F="$PWD/${1#./}"
-# 		open -a "Visual Studio Code" -n --args "$F"
-# 	fi
-# }
 enter_base() {
 	docker exec -it $(docker ps --filter='name=base' | awk 'NR>1 {print $1; exit}') bash
 }
@@ -216,6 +207,13 @@ imgcat() {
 	else
 		warning_msg "cant view image in this terminal."
 		xdg-open $1
+	fi
+}
+pretty_diff() {
+		if [ ! -z $KITTY_WINDOW_ID ]; then
+		kitty +kitten diff $1 $2
+	else
+		diff $1 $2
 	fi
 }
 reload_gtk_theme() {
