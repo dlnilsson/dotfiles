@@ -1,0 +1,15 @@
+configuration {
+	modi: "drun,window,calc,ssh";
+	lines: 10;
+	font: "sans-serif 10";
+	bw: 0;
+	padding: 0;
+	show-icons: false;
+	terminal: "kitty";
+	matching: "fuzzy";
+	line-margin: 0;
+	line-padding: 10;
+	separator-style: "none";
+	hide-scrollbar: true;
+	theme: "themes/custom-nord.rasi";
+}
