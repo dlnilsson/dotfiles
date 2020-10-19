@@ -37,6 +37,13 @@
 
 [url "git@github.com:"]
 	insteadOf = https://github.com/
+
+[core]
+	editor = nano
+	excludesfile = /home/dln/.gitignore_global
+	autocrlf = input
+	pager = delta
+
 [alias]
 	# https://gist.github.com/nh2/66e1cd83a86da7fe43b1
 	# Usage: git signoff-rebase [base-commit]
@@ -75,11 +82,24 @@
 	graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
 [rerere]
 	enabled = true
-[core]
-	editor = nano
-	excludesfile = /home/dln/.gitignore_global
-	autocrlf = input
-	pager = diff-so-fancy | less --tabs=4 -RFX
+
+
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    plus-color = "#012800"
+    minus-color = "#340001"
+    syntax-theme = Monokai Extended
+	side-by-side = true
+	line-numbers-left-format = ""
+	line-numbers-right-format = "│ "
+	#inspect-raw-lines = false
+
+[diff]
+    colorMoved = default
+
 [push]
 	default = simple
 [difftool "sourcetree"]
@@ -105,3 +125,7 @@
 	oldHighlight = red bold 52
 	newNormal = green bold
 	newHighlight = green bold 22
+
+
+[pull]
+	rebase = false
