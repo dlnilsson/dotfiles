@@ -116,7 +116,6 @@ def make_title(app):
 
     return '%%{A1:%s %s:}%s%%{A-}' % (COMMAND_PATH, app.id, out)
 
-
 def get_prefix(app):
     try:
         icon = icon_resolver.resolve({
@@ -125,7 +124,7 @@ def get_prefix(app):
             'title': app.window_title,
         })
 
-        return ('%%{T%s}%s%%{T-}' % (ICON_FONT, icon))
+        return '{:13}'.format(('%%{T%s}%s%%{T-}' % (ICON_FONT, icon)))
     except:
         return '\ufaaf'
 

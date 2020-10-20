@@ -307,14 +307,17 @@ exec --no-startup-id "feh --recursive --randomize --bg-fill ~/Wallpapers"
 exec --no-startup-id xfce4-power-manager
 exec --no-startup-id pamac-tray
 # exec --no-startup-id /home/dln/.dotfiles/bin/alternating_layouts
-exec_always --no-startup-id /home/dln/.cargo/bin/i3-auto-layout
+exec_always --no-startup-id /home/dln/.cargo/bin/i3-auto-layout &
 exec --no-startup-id betterlockscreen -w dim
 # exec --no-startup-id blueman-applet
 # exec_always --no-startup-id sbxkb
-exec --no-startup-id birdtray
-exec_always --no-startup-id xautolock -time 3 -locker "$HOME/.dotfiles/bin/lock" &
+#exec --no-startup-id birdtray
+exec_always --no-startup-id xautolock -time 15 -locker "$HOME/.dotfiles/bin/lock" &
 exec_always --no-startup-id fix_xcursor
 exec_always --no-startup-id $HOME/.config/polybar/launch.sh
+exec --no-startup-id "setxkbmap -layout us,se"
+exec --no-startup-id "setxkbmap -option 'grp:alt_shift_toggle'"
+exec --no-startup-id copyq
 
 # Color palette used for the terminal ( ~/.Xresources file )
 # Colors are gathered based on the documentation:

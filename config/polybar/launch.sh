@@ -17,8 +17,8 @@ if ! pgrep -x polybar; then
 
 	if type "xrandr"; then
 		# MONITOR=$MONITOR polybar -c "$HOME/.config/polybar/config.ini" base &
-		MONITOR="DP-1" polybar -c "$HOME/.config/polybar/config.ini" secondary_top &
-		MONITOR="DP-1" polybar -c "$HOME/.config/polybar/config.ini" secondary &
+		# MONITOR="DP-1" polybar -c "$HOME/.config/polybar/config.ini" secondary_top &
+		# MONITOR="DP-1" polybar -c "$HOME/.config/polybar/config.ini" secondary &
 		MONITOR=$PRIMARY_MONITOR polybar -c "$HOME/.config/polybar/config.ini" base &
 		MONITOR=$PRIMARY_MONITOR polybar -c "$HOME/.config/polybar/config.ini" bottom &
 	fi

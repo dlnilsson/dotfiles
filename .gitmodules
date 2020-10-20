@@ -7,3 +7,6 @@
 [submodule "zsh_custom/plugins/git-open"]
 	path = zsh_custom/plugins/git-open
 	url = git@github.com:paulirish/git-open.git
+[submodule "zsh_custom/plugins/zsh-completions"]
+	path = zsh_custom/plugins/zsh-completions
+	url = git@github.com:zsh-users/zsh-completions.git
