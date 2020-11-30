@@ -40,7 +40,7 @@
 
 [core]
 	editor = nano
-	excludesfile = /home/dln/.gitignore_global
+	excludesfile = ~/.gitignore_global
 	autocrlf = input
 	pager = delta
 
@@ -50,10 +50,10 @@
 	signoff-rebase = "!EDITOR='sed -i -re s/^pick/e/' sh -c 'git rebase -i $1 && while test -f .git/rebase-merge/interactive; do git commit --amend --signoff --no-edit && git rebase --continue; done' -"
 	amend = commit -S --amend
 	cm = commit -S -m
-	commit = commit -s
+	commit = commit -S
 	s = status
 	st = status
-	ci = commit -s
+	ci = commit -S
 	br = branch
 	co = checkout
 	df = diff
@@ -131,3 +131,5 @@
 
 [pull]
 	rebase = false
+[gist]
+	home = ~/dev/github-gists
