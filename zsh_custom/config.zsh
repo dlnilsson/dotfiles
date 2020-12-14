@@ -19,11 +19,10 @@ alias pacmane="pacman"
 alias cgs="clear; git status"
 alias las="ls"
 alias ls="exa"
-alias cat="ccat"
+alias cat="bat -p"
 alias tree="exa --tree "
 alias lla="ls -la"
 alias lal=lla
-alias cat=ccat
 alias pa="php artisan"
 alias puf="phpunit --verbose --debug --filter="
 alias g="git"
@@ -246,4 +245,15 @@ put_editorconfig() {
 		echo 'creating symlink'
 		ln -s $HOME/.dotfiles/.editorconfig $PWD
 	fi
+}
+
+ghpr() {
+	PAGER=delta
+	gh pr list | \
+	awk 'FNR>1 ; BEGIN { FS = "\t" } ; {print $0}' | \
+	uniq | \
+	fzf --ansi --multi --layout=reverse \
+	--preview 'gh pr view {1}' \
+	--bind 'enter:execute(gh pr view {1} --web)' \
+	--bind "ctrl-f:execute:(gh pr diff {1})"
 }
