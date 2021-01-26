@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# pip install --upgrade git+http://github.com/bcbnz/python-rofi.git
 
 import i3ipc
 from rofi import Rofi
