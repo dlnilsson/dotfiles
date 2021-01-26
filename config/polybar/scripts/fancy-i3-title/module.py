@@ -59,7 +59,8 @@ ICONS = [
 FORMATERS = {
     'chromium': lambda title: title.replace(' - Chromium', ''),
     'Google-chrome': lambda title: title.replace(' - Google Chrome', ''),
-    'firefox': lambda title: title.replace(' - Mozilla Firefox', ''),
+    'firefox': lambda title: title.replace(' — Mozilla Firefox', ''),
+    'Navigator': lambda title: title.replace(' — Mozilla Firefox', ''),
     'urxvt': lambda title: title.replace('%s@%s: ' % (USER, HOSTNAME), ''),
     'code-oss': lambda title: title.replace(' - Code - OSS', ''),
     'jetbrains-idea-ce': lambda title: title.replace(' - IntelliJ IDEA', ''),
@@ -133,7 +134,6 @@ def format_title(app):
     try:
         class_name = app.window_class
         name = app.name
-
         title = FORMATERS[class_name](
             name) if class_name in FORMATERS else name
 
