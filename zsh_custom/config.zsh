@@ -257,3 +257,27 @@ ghpr() {
 	--bind 'enter:execute(gh pr view {1} --web)' \
 	--bind "ctrl-f:execute:(gh pr diff {1})"
 }
+
+
+gh_gist() {
+	local args=""
+	if [[ ! $# = 0  ]]; then
+		args="--$1" # public or secret
+	fi
+
+	PAGER=delta
+	gh gist list $args | \
+	awk 'FNR>1 ; BEGIN { FS = "\t" } ; {print $0}' | \
+	uniq | \
+	fzf --ansi --multi --layout=reverse \
+	--preview 'gh gist view {1} --raw' \
+	--bind 'enter:execute(gh gist view {1} --web)'
+}
+
+gshow() {
+	git log --oneline | \
+	fzf --ansi --layout=reverse \
+	--preview-window=right:65%:wrap \
+	--preview 'git show {1} | delta --file-style=omit --width=${FZF_PREVIEW_COLUMNS:-$COLUMNS}' \
+	--preview-window=up:90%:wrap
+}
