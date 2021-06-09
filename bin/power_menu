@@ -11,7 +11,9 @@
 # - Give it exec priviledge, or chmod +x /path/to/power.sh
 # - Run it
 #  
-chosen=$(echo -e "Lock\nLogout\nShutdown\nReboot\nSuspend" | rofi  -theme themes/custom-power.rasi -lines 5 -dmenu -i -p "  Select option")
+prompt="Uptime: $(uptime --pretty | sed -e 's/up //g')"
+chosen=$(echo -e "Lock\nLogout\nShutdown\nReboot\nSuspend" |
+ rofi  -theme themes/custom-power.rasi -lines 5 -dmenu -i -p "  $prompt")
 # Info about some states are available here:
 # https://www.freedesktop.org/software/systemd/man/systemd-sleep.conf.html#Description
 locker="$HOME/.dotfiles/bin/lock"
