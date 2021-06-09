@@ -59,7 +59,8 @@ ICONS = [
 FORMATERS = {
     'chromium': lambda title: title.replace(' - Chromium', ''),
     'Google-chrome': lambda title: title.replace(' - Google Chrome', ''),
-    'firefox': lambda title: title.replace(' - Mozilla Firefox', ''),
+    'firefox': lambda title: title.replace(' — Mozilla Firefox', ''),
+    'Navigator': lambda title: title.replace(' — Mozilla Firefox', ''),
     'urxvt': lambda title: title.replace('%s@%s: ' % (USER, HOSTNAME), ''),
     'code-oss': lambda title: title.replace(' - Code - OSS', ''),
     'jetbrains-idea-ce': lambda title: title.replace(' - IntelliJ IDEA', ''),
