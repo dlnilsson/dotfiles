@@ -64,7 +64,7 @@ FORMATERS = {
     'code-oss': lambda title: title.replace(' - Code - OSS', ''),
     'jetbrains-idea-ce': lambda title: title.replace(' - IntelliJ IDEA', ''),
     'jetbrains-pycharm-ce': lambda title: title.replace(' - PyCharm', ''),
-    'kitty': lambda title: title.replace('%s@%s: ' % (USER, HOSTNAME), ''),
+    'kitty': lambda title: title.replace('%s@%s:' % (USER, HOSTNAME), ''),
     'Microsoft Teams - Preview': lambda title: title.replace(' | Microsoft Teams', ''),
     'Slack': lambda title: title.replace('Slack | ', ''),
 
