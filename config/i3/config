@@ -29,6 +29,7 @@ floating_modifier $mod
 
 # start a terminal
 bindsym $mod+Return exec kitty
+bindsym $mod+shift+Return exec kitty --class floating-kitty --detach
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -212,6 +213,7 @@ for_window [class="Msgcompose"] floating enable border normal
 for_window [class="Thunderbird"] floating enable border normal
 for_window [class="kgpg"] floating enable border normal
 for_window [class="Clipgrab"] floating enable
+for_window [class="floating-kitty"] floating enable border pixel 0
 for_window [class="vlc"] floating enable sticky
 for_window [class="viewnior"] floating enable sticky
 for_window [class="Viewnior"] floating enable sticky
