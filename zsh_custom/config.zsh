@@ -32,7 +32,6 @@ alias g="git"
 alias nah="git reset --hard; git clean -df"
 alias compsoer="composer"
 #alias awk="gawk"
-alias pbcopy='xsel --clipboard --input'
 alias pbpaste='xsel --clipboard --output'
 alias dps='docker ps -a'
 alias dia="docker images -a"
@@ -46,6 +45,14 @@ if [[ ! -a $SECRET_ENV ]] then
 else
 	source $SECRET_ENV
 fi
+
+pbcopy() {
+	if [ -z "$KITTY_WINDOW_ID" ] | [ -z "$DISPLAY" ]; then
+		kitty +kitten clipboard
+	else
+		xsel --clipboard --input
+	fi
+}
 
 info_msg() {
 	local green=$(tput setaf 2)
