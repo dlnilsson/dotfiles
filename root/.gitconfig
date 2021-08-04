@@ -53,7 +53,7 @@
 	commit = commit -s
 	s = status
 	st = status
-	ci = commit -s
+	ci = commit -S
 	br = branch
 	co = checkout
 	df = diff

@@ -6,6 +6,7 @@
 .php_cs.cache
 .terraform
 .vscode
+.vscode/
 __pycache__/*
 __pycache__/
 terraform.tfstate.backup
@@ -17,3 +18,4 @@ temp_creds.json
 .pytest_cache
 *.code-workspace
 .editorconfig
+temp_config/*
