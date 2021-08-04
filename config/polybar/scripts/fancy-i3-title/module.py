@@ -63,6 +63,7 @@ FORMATERS = {
     'Navigator': lambda title: title.replace(' — Mozilla Firefox', ''),
     'urxvt': lambda title: title.replace('%s@%s: ' % (USER, HOSTNAME), ''),
     'code-oss': lambda title: title.replace(' - Code - OSS', ''),
+    'Code': lambda title: title.replace(' - Visual Studio Code', ''),
     'jetbrains-idea-ce': lambda title: title.replace(' - IntelliJ IDEA', ''),
     'jetbrains-pycharm-ce': lambda title: title.replace(' - PyCharm', ''),
     'kitty': lambda title: title.replace('%s@%s:' % (USER, HOSTNAME), ''),
@@ -126,9 +127,9 @@ def get_prefix(app):
             'title': app.window_title,
         })
 
-        return ('%%{T%s}%s%%{T-}' % (ICON_FONT, icon))
+        return ('%%{T%s}%s%%{T-} ' % (ICON_FONT, icon))
     except:
-        return '\ufaaf'
+        return '\ufaaf '
 
 
 def format_title(app):
