@@ -107,3 +107,9 @@
     border: 1px;
     border-color: #ff0000;
 }
+
+element-text, element-icon {
+    background-color: inherit;
+    text-color:       inherit;
+}
+
