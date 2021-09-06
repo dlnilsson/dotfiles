@@ -150,3 +150,7 @@ textbox-prompt-colon {
     margin:     0px 0.3000em 0.0000em 0.0000em ;
     text-color: inherit;
 }
+element-text, element-icon {
+    background-color: inherit;
+    text-color:       inherit;
+}
