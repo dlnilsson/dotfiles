@@ -133,3 +133,5 @@
 	rebase = false
 [gist]
 	home = ~/dev/github-gists
+[init]
+	defaultBranch = main
