@@ -321,6 +321,9 @@ exec --no-startup-id "setxkbmap -layout us,se"
 exec --no-startup-id "setxkbmap -option 'grp:alt_shift_toggle'"
 exec --no-startup-id copyq
 
+exec_always --no-startup-id kitti3 -- -o background_opacity=99
+bindsym $mod+Escape nop kitti3
+
 # Color palette used for the terminal ( ~/.Xresources file )
 # Colors are gathered based on the documentation:
 # https://i3wm.org/docs/userguide.html#xresources
