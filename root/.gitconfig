@@ -40,7 +40,7 @@
 
 [core]
 	editor = nano
-	excludesfile = /home/dln/.gitignore_global
+	excludesfile = ~/.gitignore_global
 	autocrlf = input
 	pager = delta
 
@@ -50,7 +50,7 @@
 	signoff-rebase = "!EDITOR='sed -i -re s/^pick/e/' sh -c 'git rebase -i $1 && while test -f .git/rebase-merge/interactive; do git commit --amend --signoff --no-edit && git rebase --continue; done' -"
 	amend = commit -S --amend
 	cm = commit -S -m
-	commit = commit -s
+	commit = commit -S
 	s = status
 	st = status
 	ci = commit -S
@@ -89,8 +89,8 @@
     diffFilter = delta --color-only
 
 [delta]
-    plus-color = "#012800"
-    minus-color = "#340001"
+    plus-style = syntax "#012800"
+    minus-style = normal "#340001"
     syntax-theme = Monokai Extended
 	side-by-side = true
 	line-numbers-left-format = ""
@@ -129,3 +129,6 @@
 
 [pull]
 	rebase = false
+
+[gist]
+home = ~/dev/github-gists
