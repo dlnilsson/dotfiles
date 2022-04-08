@@ -1,4 +1,4 @@
-#! /usr/bin/python3
+#!/usr/bin/python3
 
 import os
 import asyncio
@@ -16,7 +16,7 @@ from icon_resolver import IconResolver
 MAX_LENGTH = 85
 #: Base 1 index of the font that should be used for icons
 ICON_FONT = 3
-OUTPUT = 'DP-1'
+OUTPUT = 'eDP-1'
 
 def screens():
     output = [l for l in subprocess.check_output(
@@ -34,10 +34,13 @@ ICONS = [
     ('name=youtube', '\uf167'),
     ('title=lazylocker', '\uf308'),
     ('title=ranger', '\uf413'),
+    ('classf=org.gnome.Nautilus', '\uf413'),
+    ('class=Org.gnome.Nautilus', '\uf413'),
     ('title=steam', '\uf9d2'),
     ('class=atom', '\ue764'),
     ('class=chrome', '\uf268'),
     ('class=code-oss', '\ue70c'),
+    ('class=code', '\ue70c'),
     ('class=discord', '\ufb6e'),
     ('class=firefox', '\uf269'),
     ('class=Google-chrome', '\uf268'),
@@ -102,21 +105,22 @@ def render_apps(i3):
 
 def format_entry(app):
     title = make_title(app)
+    return title
+    # u_color = '#b4619a' if app.focused else\
+    #     '#e84f4f' if app.urgent else\
+    #     '#404040'
 
-    u_color = '#b4619a' if app.focused else\
-        '#e84f4f' if app.urgent else\
-        '#404040'
-
-    return '%%{u%s} %s %%{u-}' % (u_color, title)
+    # return '%%{u%s} %s %%{u-}' % (u_color, title)
 
 
 def make_title(app):
     out = '{0}  {1}'.format(get_prefix(app), format_title(app))
+    return out
+    # if app.focused:
+    #     out = '%{F#fff}' + out + '%{F-}'
 
-    if app.focused:
-        out = '%{F#fff}' + out + '%{F-}'
+    # return '%%{A1:%s %s:} %s %%{A-}' % (COMMAND_PATH, app.id, out)
 
-    return '%%{A1:%s %s:}%s%%{A-}' % (COMMAND_PATH, app.id, out)
 
 
 def get_prefix(app):
@@ -127,7 +131,7 @@ def get_prefix(app):
             'title': app.window_title,
         })
 
-        return ('%%{T%s}%s%%{T-} ' % (ICON_FONT, icon))
+        return ('%%{T%s}%s%%{T-}' % (ICON_FONT, icon))
     except:
         return '\ufaaf '
 
