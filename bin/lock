@@ -1,2 +1,3 @@
 #!/usr/bin/env sh
-xdotool key XF86AudioMute && betterlockscreen -l dim &> /dev/null
+# xdotool key XF86AudioMute &&
+betterlockscreen -l dim &> /dev/null
