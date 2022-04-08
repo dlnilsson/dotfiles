@@ -13,10 +13,10 @@ Name=Power menu
 Comment=Computer state menu
 GenericName=Toggle power state
 # The path to the folder in which the executable is run
-Path=/home/dln/.dotfiles/bin/
+Path=/home/daniel/.dotfiles/bin/
 
 # The executable of the application, possibly with arguments.
-Exec=/home/dln/.dotfiles/bin/power_menu
+Exec=/home/daniel/.dotfiles/bin/power_menu
 
 
 # The name of the icon that will be used to display this entry

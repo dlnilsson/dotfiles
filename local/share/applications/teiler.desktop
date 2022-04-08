@@ -13,10 +13,10 @@ Name=Screenshot teiler
 Comment=screenshot menu for teiler
 GenericName=Screenshot manager
 # The path to the folder in which the executable is run
-Path=/usr/bin/
+Path=/usr/local/bin/
 
 # The executable of the application, possibly with arguments.
-Exec=/usr/bin/teiler
+Exec=/usr/local/bin/teiler
 
 # The name of the icon that will be used to display this entry
 Icon=/usr/share/icons/Adwaita/96x96/status/image-loading-symbolic.symbolic.png
