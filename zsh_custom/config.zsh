@@ -80,6 +80,20 @@ warning_msg() {
 	echo -e "${red}$@${reset}"
 }
 
+giphymd() {
+	info_msg "search giphy for $1"
+	items=()
+	for img in $(giphy search $1); do
+		kitty +kitten icat --align left --silent $img
+		items+=("![]($img)")
+	done
+
+	res=$(printf "%s\n" "${items[@]}" | fzf --layout=reverse --ansi --height 20% \
+	--bind 'ctrl-y:execute-silent(echo {})+abort')
+	echo $res | xsel --clipboard --input
+	clear
+}
+
 drc() {
 	notice_msg "\nRemoving docker containers - $emoji[whale] \n";
 	for i in $(docker ps -aq); do docker rm -f $i; done
