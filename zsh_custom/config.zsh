@@ -40,6 +40,30 @@ alias dps='docker ps -a'
 alias dia="docker images -a"
 alias dsl='docker service ls'
 
+
+
+info_msg() {
+	local green=$(tput setaf 2)
+	local reset=$(tput sgr0)
+	echo -e "${green}$@${reset}"
+}
+notice_msg() {
+	local blue=$(tput setaf 4)
+	local reset=$(tput sgr0)
+	echo -e "${blue}$@${reset}"
+}
+important_msg() {
+	local yellow=$(tput setaf 3)
+	local reset=$(tput sgr0)
+	echo -e "${yellow}$@${reset}"
+}
+warning_msg() {
+	local red=$(tput setaf 1)
+	local reset=$(tput sgr0)
+	echo -e "${red}$@${reset}"
+}
+
+
 # private enviornment variables
 SECRET_ENV=$HOME/.secrets
 
@@ -57,29 +81,8 @@ pbcopy() {
 	fi
 }
 
-info_msg() {
-	local green=$(tput setaf 2)
-	local reset=$(tput sgr0)
-	echo -e "${green}$@${reset}"
-}
-notice_msg() {
-	local blue=$(tput setaf 4)
-	local reset=$(tput sgr0)
-	echo -e "${blue}$@${reset}"
-}
-important_msg() {
-	local yellow=$(tput setaf 3)
-	local reset=$(tput sgr0)
-	echo -e "${yellow}$@${reset}"
-}
-
 open() {
 	$(xdg-open "$@" &> /dev/null &)
-}
-warning_msg() {
-	local red=$(tput setaf 1)
-	local reset=$(tput sgr0)
-	echo -e "${red}$@${reset}"
 }
 
 drc() {
