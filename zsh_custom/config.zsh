@@ -3,6 +3,7 @@ export PATH=$GOPATH/bin:$PATH
 export PATH=$HOME/.dotfiles/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 export EDITOR=nano
+export PAGER=less
 export LANG=en_US.UTF-8
 #export BROWSER=google-chrome-stable
 export BROWSER=firefox
@@ -20,6 +21,8 @@ alias cgs="clear; git status"
 alias las="ls"
 alias ls="exa"
 alias cat="bat -p"
+alias cls="clear"
+alias tf="terraform"
 alias tree="exa --tree "
 alias lla="ls -la"
 alias lal=lla
@@ -29,7 +32,7 @@ alias g="git"
 alias nah="git reset --hard; git clean -df"
 alias compsoer="composer"
 #alias awk="gawk"
-alias pbcopy='xsel --clipboard --input'
+# alias pbcopy='xsel --clipboard --input'
 alias pbpaste='xsel --clipboard --output'
 alias dps='docker ps -a'
 alias dia="docker images -a"
@@ -39,7 +42,7 @@ SECRET_ENV=$HOME/.secrets
 
 if [[ ! -a $SECRET_ENV ]] then
 	warning_msg $SECRET_ENV "not found."
-else
+
 	source $SECRET_ENV
 fi
 
@@ -62,6 +65,15 @@ important_msg() {
 open() {
 	$(xdg-open "$@" &> /dev/null &)
 }
+
+pbcopy() {
+	if [ -z "$KITTY_WINDOW_ID" ] | [ -z "$DISPLAY" ]; then
+		kitty +kitten clipboard $1
+	else
+		xsel --clipboard --input
+	fi
+}
+
 warning_msg() {
 	local red=$(tput setaf 1)
 	local reset=$(tput sgr0)
@@ -248,7 +260,7 @@ put_editorconfig() {
 }
 
 ghpr() {
-	PAGER=delta
+	PAGER=delta \
 	gh pr list | \
 	awk 'FNR>1 ; BEGIN { FS = "\t" } ; {print $0}' | \
 	uniq | \
@@ -265,7 +277,7 @@ gh_gist() {
 		args="--$1" # public or secret
 	fi
 
-	PAGER=delta
+	PAGER=delta \
 	gh gist list $args | \
 	awk 'FNR>1 ; BEGIN { FS = "\t" } ; {print $0}' | \
 	uniq | \
