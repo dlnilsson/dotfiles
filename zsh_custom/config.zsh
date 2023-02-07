@@ -42,7 +42,7 @@ SECRET_ENV=$HOME/.secrets
 
 if [[ ! -a $SECRET_ENV ]] then
 	warning_msg $SECRET_ENV "not found."
-
+else
 	source $SECRET_ENV
 fi
 
@@ -137,16 +137,12 @@ myip() {
 	fi
 }
 dbash() {
-	if [[ $# = 0  ]]; then
-		echo "No container id given"; exit 1;
-	fi
-	docker exec -it $1 bash
+	ID=$(docker ps --format "{{.ID}}\t{{.Names}}\t{{.Image }}" | fzf --height=40% --bind "enter:execute(echo {1})+abort")
+	docker exec -it $ID bash
 }
 dsh() {
-	if [[ $# = 0  ]]; then
-		echo "No container id given"; exit 1;
-	fi
-	docker exec -it $1 sh
+	ID=$(docker ps --format "{{.ID}}\t{{.Names}}\t{{.Image }}" | fzf --height=40% --bind "enter:execute(echo {1})+abort")
+	docker exec -it $ID sh
 }
 docker_inspect_first() {
 	if [[ $(docker ps | wc -l) -lt 2 ]]; then
