@@ -303,3 +303,8 @@ gshow() {
 	--preview 'git show {1} | delta --file-style=omit --width=${FZF_PREVIEW_COLUMNS:-$COLUMNS}' \
 	--preview-window=up:90%:wrap
 }
+
+jwtd() {
+	jq -R 'split(".") | .[0],.[1] | @base64d | fromjson' <<< $(cat "${1}") || cat "${1}"
+}
+
