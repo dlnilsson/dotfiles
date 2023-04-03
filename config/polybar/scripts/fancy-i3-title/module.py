@@ -34,8 +34,7 @@ ICONS = [
     ('name=youtube', '\uf167'),
     ('title=lazylocker', '\uf308'),
     ('title=ranger', '\uf413'),
-    ('classf=org.gnome.Nautilus', '\uf413'),
-    ('class=Org.gnome.Nautilus', '\uf413'),
+    ('class=org.gnome.Nautilus', '\uf413'),
     ('title=steam', '\uf9d2'),
     ('class=atom', '\ue764'),
     ('class=chrome', '\uf268'),
@@ -160,7 +159,7 @@ def main():
     i3.on('window', on_change)
 
     loop = asyncio.get_event_loop()
-
+    # asyncio.run()
     loop.run_in_executor(None, i3.main)
 
     render_apps(i3)

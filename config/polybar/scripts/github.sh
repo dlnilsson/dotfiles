@@ -26,9 +26,8 @@ main() {
             nid=$(cat $NID)
 
             echo "$_id" >> $CACHE
-            notify-send.sh " Github" "$_title" \
-            -a "github" \
-            -o "View:xdg-open $GITHUB_NOTIFICATION &>/dev/null"
+            notify-send " Github" "$_title" \
+            -a "github"
             sleep 3
         fi
         sleep .5
