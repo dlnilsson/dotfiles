@@ -11,5 +11,6 @@ configuration {
 	line-padding: 10;
 	separator-style: "none";
 	hide-scrollbar: true;
-	theme: "themes/custom-nord.rasi";
 }
+
+@theme "themes/custom-nord.rasi"
