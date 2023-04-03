@@ -8,7 +8,7 @@ set $mod Mod4
 # workspace_layout tabbed <stacking|tabbed>
 
 # Configure border style <normal|1pixel|pixel xx|none|pixel>
-new_window pixel 4
+new_window pixel 2
 new_float normal
 
 # Hide borders
@@ -34,10 +34,8 @@ bindsym $mod+shift+Return exec kitty --class floating-kitty --detach
 # kill focused window
 bindsym $mod+Shift+q kill
 
-bindsym $mod+section exec --no-startup-id "tilix --quake"
 bindsym Mod1+Tab exec --no-startup-id "rofi -show window -show-icons"
 # launch categorized menu
-bindsym $mod+z exec --no-startup-id morc_menu
 
 ################################################################################################
 ## sound-section - DO NOT EDIT if you wish to automatically upgrade Alsa -> Pulseaudio later! ##
@@ -50,6 +48,7 @@ exec --no-startup-id volumeicon
 bindsym $mod+Ctrl+m exec pavucontrol
 
 exec --no-startup-id picom --experimental-backends -b
+exec --no-startup-id /home/daniel/dev/xborder/xborders --config /home/daniel/dev/xborder/example_config.json &
 ################################################################################################
 
 # Screen brightness controls
@@ -57,12 +56,12 @@ exec --no-startup-id picom --experimental-backends -b
 # bindsym XF86MonBrightnessDown exec "xbacklight -dec 10; notify-send 'brightness down'"
 
 # Start Applications
-bindsym $mod+Ctrl+b exec terminal -e 'bmenu'
+# bindsym $mod+Ctrl+b exec terminal -e 'bmenu'
 bindsym $mod+F2 exec firefox
-bindsym $mod+F3 exec pcmanfm
+# bindsym $mod+F3 exec pcmanfm
 # bindsym $mod+F3 exec ranger
-bindsym $mod+Shift+F3 exec gksu pcmanfm
-bindsym $mod+F5 exec spotify
+# bindsym $mod+Shift+F3 exec gksu pcmanfm
+# bindsym $mod+F5 exec spotify
 bindsym $mod+t exec --no-startup-id pkill picom
 bindsym $mod+Ctrl+t exec --no-startup-id picom --experimental-backends -b
 bindsym Print exec --no-startup-id teiler --quickcopy fullscreen
@@ -310,7 +309,9 @@ mode "resize" {
 bindsym $mod+l exec --no-startup-id "pactl set-sink-mute 0 toggle  &> /dev/null && $HOME/.dotfiles/bin/lock"
 
 # Autostart applications
-exec xrandr --dpi 205
+
+
+#exec xrandr --dpi 192
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # exec --no-startup-id nitrogen --restore; sleep 1; compton -b
 exec --no-startup-id "feh --recursive --randomize --bg-fill ~/Wallpapers"
@@ -324,9 +325,9 @@ exec --no-startup-id copyq
 
 # exec --no-startup-id blueman-applet
 # exec_always --no-startup-id sbxkb
-exec --no-startup-id birdtray
+# exec --no-startup-id birdtray
 exec_always --no-startup-id xautolock -time 3 -locker "$HOME/.dotfiles/bin/lock" &
-exec_always --no-startup-id fix_xcursor
+# exec_always --no-startup-id fix_xcursor
 exec_always --no-startup-id $HOME/.config/polybar/launch.sh
 
 # Color palette used for the terminal ( ~/.Xresources file )
@@ -456,6 +457,7 @@ mode "$mode_gaps_outer" {
 }
 
 
-bindsym $mod+d exec --no-startup-id "rofi -dpi 220 -show drun -show-icons -font \\"Ubuntu Condensed 12\\" -display-drun  -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
+#bindsym $mod+d exec --no-startup-id "rofi -dpi 192 -show drun -show-icons -font \\"Ubuntu Condensed 12\\" -display-drun  -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
+bindsym $mod+d exec --no-startup-id "rofi -show drun -show-icons -font \\"Ubuntu Condensed 12\\" -display-drun  -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
 bindsym $mod+Shift+d exec --no-startup-id  "rofi -lines 0 -dmenu -p \\"\\" | xargs -I{} xdg-open https://www.google.se/search\?q\=\{\}"
 bindsym $mod+Shift+v exec --no-startup-id "/home/daniel/.dotfiles/bin/rofi-copyq"
