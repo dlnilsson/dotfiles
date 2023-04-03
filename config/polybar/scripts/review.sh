@@ -6,9 +6,9 @@ set -eou pipefail
 GITHUB_NOTIFICATION="https://github.com/pulls/review-requested"
 
 main() {
-    count=$(gh search prs --review-requested=@me --draft=false --state=open --json url | jq '. | length')
+    count=$(gh search prs --draft=false --review-requested=@me  --state=open --json url | jq '. | length')
     if [[ $count -gt 0 ]]; then
-        echo -e "\uf12a Review requested: $count"
+        echo -e "\uf12a Review requested: $count "
     fi
 }
 
