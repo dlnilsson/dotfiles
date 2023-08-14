@@ -1,0 +1,7 @@
+## Scrollwheel left
+"~/.dotfiles/bin/MX-Master-3-bindings.sh Scroll_L"
+  b:7 + release
+
+## Scrollwheel right
+"~/.dotfiles/bin/MX-Master-3-bindings.sh Scroll_R"
+  b:6 + release
