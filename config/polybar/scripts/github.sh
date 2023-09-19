@@ -12,6 +12,9 @@ teardown() {
 }
 trap teardown ERR
 main() {
+	if [[ ! -v GITHUB_NOTIFICATION_TOKEN ]]; then
+		exit 0
+	fi
 	gh=$(curl -fs -H "Authorization: token $GITHUB_NOTIFICATION_TOKEN" https://api.github.com/notifications 2>/dev/null)
 	count=$(echo $gh | jq -r ". | length")
 	output=""
