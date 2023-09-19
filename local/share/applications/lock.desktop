@@ -14,10 +14,10 @@ Comment=Lock screen
 GenericName=Lock computer
 
 # The path to the folder in which the executable is run
-Path=/home/daniel/.dotfiles/bin/
+Path=/home/dln/.dotfiles/bin/
 
 # The executable of the application, possibly with arguments.
-Exec=/home/daniel/.dotfiles/bin/lock
+Exec=/home/dln/.dotfiles/bin/lock
 
 # The name of the icon that will be used to display this entry
 Icon=/usr/share/icons/Adwaita/96x96/status/system-lock-screen-symbolic.symbolic.png
