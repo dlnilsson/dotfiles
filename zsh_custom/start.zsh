@@ -1,18 +1,16 @@
-autoload -U +X compinit && compinit
-autoload -U +X bashcompinit && bashcompinit
+# autoload -U +X compinit && compinit
+# autoload -U +X bashcompinit && bashcompinit
+
+autoload -Uz compinit
+compinit
+
+
 fpath=($HOME/completions $fpath)
 
 if [ -d "$HOME/completions" ]; then
-
-    source $HOME/completions/*.bash
+	for f in $HOME/completions/*; do source $f; done
 fi
 
 if [ -d "$HOME/lib/azure-cli" ]; then
     source $HOME/lib/azure-cli/az.completion
 fi
-
-# if [ -d "$HOME/.cache/yay/azure-cli/src/azure-cli" ]; then
-# 	source "$HOME/.cache/yay/azure-cli/src/azure-cli/az.completion"
-# fi
-
-

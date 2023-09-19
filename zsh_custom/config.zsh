@@ -1,8 +1,11 @@
 export GOPATH=$HOME/go
+export PATH=$PATH:/usr/local/go/bin
 export PATH=$GOPATH/bin:$PATH
 export PATH=$HOME/.dotfiles/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
+export PATH=$HOME/.npm-global/bin:$PATH
 export EDITOR=nano
+export GLAB_PAGER=cat
 export LANG=en_US.UTF-8
 #export BROWSER=google-chrome-stable
 export BROWSER=firefox
@@ -22,12 +25,12 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
 alias pacmane="pacman"
 alias cgs="clear; git status"
 alias las="ls"
-alias ls="exa"
+alias ls="lsd"
 alias tf="terraform"
-# alias bat="batcat"
+alias bat="batcat"
 alias cat="bat -pp"
 alias cls="clear"
-alias tree="exa --tree "
+# alias tree="lsd -tree"
 alias lla="ls -la"
 alias lal=lla
 alias pa="php artisan"
@@ -142,17 +145,24 @@ myip() {
 		warning_msg "Request failed. 🙀"
 	fi
 }
-dbash() {
-	if [[ $# = 0  ]]; then
-		echo "No container id given"; exit 1;
+
+dshell() {
+	ID=$(docker ps --format "{{.ID}}\t{{.Names}}\t{{.Image }}" | fzf --height=40% --bind "enter:execute(echo {1})+abort")
+	docker exec -it $ID /bin/zsh
+	exit_code=$?
+	if [ ! $exit_code -eq 0 ]; then
+		important_msg "bash not found, using sh"
+		docker exec -it $ID sh
 	fi
-	docker exec -it $1 bash
+}
+
+dbash() {
+	ID=$(docker ps --format "{{.ID}}\t{{.Names}}\t{{.Image }}" | fzf --height=40% --bind "enter:execute(echo {1})+abort")
+	docker exec -it $ID bash
 }
 dsh() {
-	if [[ $# = 0  ]]; then
-		echo "No container id given"; exit 1;
-	fi
-	docker exec -it $1 sh
+	ID=$(docker ps --format "{{.ID}}\t{{.Names}}\t{{.Image }}" | fzf --height=40% --bind "enter:execute(echo {1})+abort")
+	docker exec -it $ID sh
 }
 docker_inspect_first() {
 	if [[ $(docker ps | wc -l) -lt 2 ]]; then
@@ -261,10 +271,11 @@ reload_gtk_theme() {
 uts() {
 	date --date=\@$1
 }
+#TODO
 #source <(awless completion zsh)
-source "/usr/share/fzf/key-bindings.zsh"
-source "/usr/share/fzf/completion.zsh" 2> /dev/null
-source "/usr/share/zsh/site-functions"
+#source "/usr/share/fzf/key-bindings.zsh"
+#source "/usr/share/fzf/completion.zsh" 2> /dev/null
+#source "/usr/share/zsh/site-functions"
 # eval "$(pipenv --completion)"
 
 
@@ -276,5 +287,27 @@ put_editorconfig() {
 	else
 		echo 'creating symlink'
 		ln -s $HOME/.dotfiles/.editorconfig $PWD
+	fi
+}
+
+
+mr() {
+glab mr list \
+	| awk '{ if (NF > 0) if (NR>1) print substr($1,2);}' \
+	| fzf --ansi \
+	--color "hl:-1:underline,hl+:-1:underline:reverse" \
+	--preview 'glab mr view {} --comments | batcat --plain --color=always && glab mr approvers {} | batcat --plain --color=always' \
+	--preview-window 'up,85%,border-bottom,+{2}+3/3,~3' \
+	--bind 'enter:become(glab mr view {} --web 2> /dev/null)'
+
+
+}
+
+
+kctx() {
+	local current=$(kubectl config current-context)
+	answer=$(GUM_CHOOSE_SELECTED=$current gum choose --height 30 $(kubectl config get-contexts | awk '(NR>1) {print $2}'))
+	if [[ ! -z $answer ]]; then
+		kubectl config use-context $answer
 	fi
 }
