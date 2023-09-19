@@ -15,13 +15,20 @@ ZSH_THEME_DOCKER_PROMPT_SHA_AFTER="%{$white%}]"
 PROMPT='${_current_dir}$(git_prompt_info)
 %{$white%}>%{$reset_color%} '
 PROMPT2='%{$grey%}◀%{$reset_color%} '
-RPROMPT='$(_vi_status)%{$(echotc UP 1)%}$(_docker_info)$(git_remote_status) $(git_prompt_short_sha) ${_return_status} %{$white%}%T%{$(echotc DO 1)%}%{$reset_color%}'
+RPROMPT='$(_vi_status)%{$(echotc UP 1)%}$(_docker_info)$(_kubectl_ctx)$(git_remote_status) $(git_prompt_short_sha) ${_return_status} %{$white%}%T%{$(echotc DO 1)%}%{$reset_color%}'
 
 local _current_dir="%{$green%}%0~%{$reset_color%} "
 local _return_status="%{$red%}%(?..×)%{$reset_color%}"
 
 function _user_host() {
   echo "%{$red%}%n%{$reset_color%} %{$white%}in "
+}
+_kubectl_ctx() {
+  local VAL
+  VAL=$(kubectl config current-context)
+  if [[ ! -z $VAL ]]; then
+      echo "$ZSH_THEME_DOCKER_PROMPT_SHA_BEFORE$VAL$ZSH_THEME_DOCKER_PROMPT_SHA_AFTER"
+  fi
 }
 _docker_info() {
     local VAL
