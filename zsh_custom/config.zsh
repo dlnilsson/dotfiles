@@ -21,7 +21,7 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
 
 # export TERMINAL=termite
 
-
+alias yat="bat --language=yaml -p"
 alias pacmane="pacman"
 alias cgs="clear; git status"
 alias las="ls"
