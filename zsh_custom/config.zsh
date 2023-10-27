@@ -305,9 +305,32 @@ glab mr list \
 
 
 kctx() {
-	local current=$(kubectl config current-context)
+	local current=$(kubectl config current-context &> /dev/null || echo "")
 	answer=$(GUM_CHOOSE_SELECTED=$current gum choose --height 30 $(kubectl config get-contexts | awk '(NR>1) {print $2}'))
 	if [[ ! -z $answer ]]; then
 		kubectl config use-context $answer
 	fi
+}
+
+gshow() {
+	git log --oneline | \
+	fzf --ansi --layout=reverse \
+	--preview-window=right:65%:wrap \
+	--preview 'git show {1} | delta --file-style=omit --width=${FZF_PREVIEW_COLUMNS:-$COLUMNS}' \
+	--preview-window=up:90%:wrap
+}
+
+root() {
+	local dir
+	dir=$PWD
+
+	while [ "$dir" != "/" ]; do
+		if [ -d "$dir/.git" ]; then
+			cd "$dir"
+			return
+		fi
+		dir=$(dirname "$dir")
+	done
+
+	warning_msg "No .git directory found in any parent directory." >&2
 }
