@@ -327,10 +327,17 @@ root() {
 	while [ "$dir" != "/" ]; do
 		if [ -d "$dir/.git" ]; then
 			cd "$dir"
+			kitty @ send-text "\n"
 			return
 		fi
 		dir=$(dirname "$dir")
 	done
 
 	warning_msg "No .git directory found in any parent directory." >&2
+	kitty @ send-text "\n"
 }
+
+
+zle -N root
+# showkey -a
+bindkey '^[[1;5H' root
