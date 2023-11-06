@@ -127,7 +127,18 @@ flushdns() {
 	info_msg "DNS Flushed!"
 }
 docker_inspect() {
-	docker inspect $* | jq .
+	ID=$(docker ps --format '{{json  .ID}} {{json .Image}} {{json .Names}}'  | fzf --bind "enter:execute(echo {1} | cut -d '\"' -f 2 )+abort")
+	if [[ ! -z $ID ]]; then
+		docker inspect $ID | jq .
+	fi
+
+}
+docker_logs() {
+	ID=$(docker ps --format '{{json  .ID}} {{json .Image}} {{json .Names}}'  | fzf --bind "enter:execute(echo {1} | cut -d '\"' -f 2 )+abort")
+	if [[ ! -z $ID ]]; then
+		docker logs $ID
+	fi
+
 }
 docker_env() {
 	docker inspect $* | jq '.[0].Config.Env'
@@ -148,7 +159,7 @@ myip() {
 
 dshell() {
 	ID=$(docker ps --format "{{.ID}}\t{{.Names}}\t{{.Image }}" | fzf --height=40% --bind "enter:execute(echo {1})+abort")
-	docker exec -it $ID /bin/zsh
+	docker exec -it $ID /bin/bash
 	exit_code=$?
 	if [ ! $exit_code -eq 0 ]; then
 		important_msg "bash not found, using sh"
