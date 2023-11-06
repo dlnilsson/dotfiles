@@ -215,45 +215,6 @@ ff() {
 	find . -type f -name $1
 }
 
-# https://junegunn.kr/2015/04/browsing-chrome-history-with-fzf/
-chistory() {
-	local cols sep
-	cols=$(( COLUMNS / 3 ))
-	sep='{::}'
-	local historyDB
-	local openCMD
-	case $( uname -s ) in
-	  Darwin) historyDB=~/Library/Application\ Support/Google/Chrome/Default/History openCMD=open;;
-	  *) historyDB=$HOME/.config/google-chrome/Default/History openCMD=xdg-open;;
-	esac
-	cp -f $historyDB /tmp/h
-
-	sqlite3 -separator $sep /tmp/h \
-	"select substr(title, 1, $cols), url
-	from urls order by last_visit_time desc" |
-	awk -F $sep '{printf "%-'$cols's  \x1b[36m%s\x1b[m\n", $1, $2}' |
-	fzf --ansi --multi | sed 's#.*\(https*://\)#\1#' | xargs $openCMD 2> /dev/null
-}
-goland() {
-	/usr/local/bin/goland .
-}
-kill_dnsmasq() {
-	docker stop $(docker ps  --filter name=dnsmasq -qa)
-	docker rm $(docker ps  --filter name=dnsmasq -qa)
-}
-run_dnsmasq() {
-	docker run \
-	--name dnsmasq \
-	-d \
-	-p 53:53/udp \
-	-p 5380:8080 \
-	-v $HOME/scripts/dnsmasq.conf:/etc/dnsmasq.conf \
-	--log-opt "max-size=100m" \
-	-e "HTTP_USER=foo" \
-	-e "HTTP_PASS=bar" \
-	--restart always \
-	jpillora/dnsmasq
-}
 ping_sound() {
 	paplay /usr/share/sounds/freedesktop/stereo/complete.oga &> /dev/null
 }
