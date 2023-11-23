@@ -1,7 +1,7 @@
 configuration {
 	modi: "drun,window,ssh";
 	lines: 10;
-	font: "sans-serif 12";
+	font: "sans-serif 14";
 	bw: 0;
 	padding: 0;
 	show-icons: false;
@@ -11,6 +11,8 @@ configuration {
 	line-padding: 10;
 	separator-style: "none";
 	hide-scrollbar: true;
+	sort: true;
+	sorting-method: "fzf";
 }
 
 @theme "themes/custom-nord.rasi"

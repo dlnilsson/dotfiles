@@ -20,7 +20,7 @@ configuration {
     lightbg:                     rgba ( 238, 232, 213, 100 % );
     selected-active-foreground:  @background;
     alternate-active-background: @lightbg;
-    background:                  rgba ( 20, 20, 20, 87 % );
+    background:                  rgba ( 20, 20, 20, 30 % );
     alternate-normal-foreground: @foreground;
     normal-background:           rgba ( 50, 50, 50, 0 % );
     lightfg:                     rgba ( 60, 86, 90, 100 % );
@@ -35,7 +35,8 @@ configuration {
     alternate-active-foreground: @blue;
     active-background:           @background;
     selected-active-background:  @blue;
-    font: "Noto Sans 14" ;
+    font: "Noto Sans 22" ;
+    text-color: rgba ( 245, 245, 245, 100 % );
 }
 window {
     background-color: @background;

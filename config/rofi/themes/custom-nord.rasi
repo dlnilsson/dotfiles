@@ -47,6 +47,10 @@
     border-color: @separatorcolor;
     background-color: @backgroundcoloralternate;
 }
+element-icon {
+  margin: 0 20px 0 0;
+}
+
 
 #element.selected.normal {
     background-color: @selectioncolor;
