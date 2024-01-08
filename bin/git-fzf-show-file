@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Check for a single argument
+if [ $# -ne 1 ]; then
+    echo "Usage: git-fzf-show-file.sh <file>"
+    exit 1
+fi
+
+file="$1"
+
+
+
+# # Use git log and fzf to select a commit
+commit=$(git log --oneline -- "$file" \
+| fzf --ansi \
+--color "hl:-1:underline,hl+:-1:underline:reverse" \
+--preview-window 'up,85%,border-bottom,+{2}+3/3,~3' \
+--bind "enter:execute(echo {1})+abort" \
+--preview "git show --color=always {1}:$file | batcat --plain --color=always"
+)
+
+# # Check if a commit was selected
+if [ -n "$commit" ]; then
+    echo "$commit:$file"
+fi
