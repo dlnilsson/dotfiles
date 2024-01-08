@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+file=$(mktemp)
+echo '"Title","Body"' > "$file"
+dunstctl history | jq -r '.data[][] | {"title": .summary.data, "body": .body.data} | [.title,.body] | @csv' >> "$file"
+
+
+width=$(kitty +kitten icat --print-window-size | awk -F x '{print $1}')
+
+gum table --file "$file" -w 8,"$width"
