@@ -46,6 +46,7 @@
 	pager = delta
 
 [alias]
+	undo = reset HEAD~1 --mixed
 	# https://gist.github.com/nh2/66e1cd83a86da7fe43b1
 	# Usage: git signoff-rebase [base-commit]
 	signoff-rebase = "!EDITOR='sed -i -re s/^pick/e/' sh -c 'git rebase -i $1 && while test -f .git/rebase-merge/interactive; do git commit --amend --signoff --no-edit && git rebase --continue; done' -"
@@ -81,6 +82,10 @@
 
 	# This produces output that can be displayed using dotty, for example: git graphviz HEAD~100..HEAD~60 | dotty /dev/stdin
 	graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
+
+	# work merge strat
+	mgd = "!git merge $1 --no-ff --no-commit && git branch -d $1; #"
+
 [rerere]
 	enabled = true
 
