@@ -152,3 +152,5 @@ home = ~/dev/github-gists
 	defaultBranch = main
 [gpg "ssh"]
 	allowedSignersFile = /home/dln/.config/git/allowed_signers
+[diff "sopsdiffer"]
+	textconv = sops -d --config /dev/null
