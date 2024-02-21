@@ -47,8 +47,9 @@ exec --no-startup-id volumeicon
 #exec --no-startup-id pa-applet
 bindsym $mod+Ctrl+m exec pavucontrol
 
-exec --no-startup-id picom --experimental-backends -b
-exec --no-startup-id /home/daniel/dev/xborder/xborders --config /home/daniel/dev/xborder/example_config.json &
+exec --no-startup-id picom -b
+exec_always --no-startup-id /home/dln/dev/xborder/xborders --disable-version-warning --smart-hide-border
+
 ################################################################################################
 
 # Screen brightness controls
@@ -63,10 +64,17 @@ bindsym $mod+F2 exec firefox
 # bindsym $mod+Shift+F3 exec gksu pcmanfm
 # bindsym $mod+F5 exec spotify
 bindsym $mod+t exec --no-startup-id pkill picom
-bindsym $mod+Ctrl+t exec --no-startup-id picom --experimental-backends -b
-bindsym Print exec --no-startup-id teiler --quickcopy fullscreen
-bindsym $mod+Print --release exec --no-startup-id teiler --screenshot
-bindsym $mod+Shift+Print --release exec --no-startup-id teiler --quickcopy area
+bindsym $mod+Ctrl+t exec --no-startup-id picom -b
+
+# bindsym Print exec --no-startup-id teiler --quickcopy fullscreen
+# bindsym $mod+Print --release exec --no-startup-id teiler --screenshot
+# bindsym $mod+Shift+Print --release exec --no-startup-id teiler --quickcopy area
+
+bindsym Print exec --no-startup-id maim "/home/$USER/Pictures/$(date).png"
+bindsym $mod+Print exec --no-startup-id maim --window $(xdotool getactivewindow) "/home/$USER/Pictures/$(date).png"
+bindsym Shift+Print exec --no-startup-id maim -s | xclip -selection clipboard -t image/png
+
+
 # bindsym $mod+Shift+h exec xdg-open /usr/share/doc/manjaro/i3_help.pdf
 bindsym $mod+Ctrl+x --release exec --no-startup-id xkill
 
@@ -206,6 +214,7 @@ assign [class="Google-chrome"] $ws1
 
 # Open specific applications in floating mode
 #for_window [class=".*"] split toggle
+for_window [all] title_window_icon on
 for_window [class=".*"] title_format "  %title"
 for_window [title="Microsoft Teams Notification"] floating enable
 for_window [title="alsamixer"] floating enable border pixel 1
@@ -216,6 +225,7 @@ for_window [class="kgpg"] floating enable border normal
 for_window [class="floating-kitty"] floating enable border pixel 0
 for_window [class="Clipgrab"] floating enable
 for_window [class="vlc"] floating enable sticky
+for_window [class="Gnome-calculator"] floating enable sticky
 for_window [class="viewnior"] floating enable sticky
 for_window [class="Viewnior"] floating enable sticky
 for_window [title="File Transfer*"] floating enable
@@ -260,6 +270,7 @@ bindsym $mod+Shift+c reload
 
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
+bindsym $mod+Shift+t exec autorandr --change
 
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
@@ -318,10 +329,12 @@ exec --no-startup-id "feh --recursive --randomize --bg-fill ~/Wallpapers"
 # exec --no-startup-id nm-applet
 exec --no-startup-id xfce4-power-manager
 exec --no-startup-id pamac-tray
-# exec --no-startup-id /home/daniel/.dotfiles/bin/alternating_layouts
-exec_always --no-startup-id /home/daniel/.cargo/bin/i3-auto-layout
+# exec --no-startup-id /home/dln/.dotfiles/bin/alternating_layouts
+exec_always --no-startup-id i3-auto-layout
+
 exec --no-startup-id betterlockscreen -w dim
 exec --no-startup-id copyq
+exec --no-startup-id xbindkeys
 
 # exec --no-startup-id blueman-applet
 # exec_always --no-startup-id sbxkb
@@ -397,6 +410,9 @@ client.placeholder	    $nord-grey1  $nord-grey1  $nord-white1  $nord-pink    $no
 client.background	    $nord-grey1
 
 
+
+
+
 #############################
 ### settings for i3-gaps: ###
 #############################
@@ -412,7 +428,7 @@ gaps outer 6
 # gaps outer all plus 5
 
 # Smart gaps (gaps used if only more than one container on the workspace)
-# smart_gaps on
+smart_gaps inverse_outer
 
 
 # Smart borders (draw borders around container only if it is not the only container on this workspace)
@@ -456,8 +472,8 @@ mode "$mode_gaps_outer" {
         bindsym Escape mode "default"
 }
 
-
+bindsym $mod+Pause exec --no-startup-id "/home/dln/.dotfiles/bin/rofi-giphy"
 #bindsym $mod+d exec --no-startup-id "rofi -dpi 192 -show drun -show-icons -font \\"Ubuntu Condensed 12\\" -display-drun  -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
-bindsym $mod+d exec --no-startup-id "rofi -show drun -show-icons -font \\"Ubuntu Condensed 12\\" -display-drun  -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
+bindsym $mod+d exec --no-startup-id "rofi -show drun -show-icons  -display-drun  -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
 bindsym $mod+Shift+d exec --no-startup-id  "rofi -lines 0 -dmenu -p \\"\\" | xargs -I{} xdg-open https://www.google.se/search\?q\=\{\}"
-bindsym $mod+Shift+v exec --no-startup-id "/home/daniel/.dotfiles/bin/rofi-copyq"
+bindsym $mod+Shift+v exec --no-startup-id "/home/dln/.dotfiles/bin/rofi-copyq"
