@@ -19,3 +19,6 @@ temp_creds.json
 *.code-workspace
 .editorconfig
 temp_config/*
+skaffold.env
+**/*.tmp.[extension]
+**/**/.decrypted~**yaml
