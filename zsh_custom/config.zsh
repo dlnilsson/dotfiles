@@ -318,3 +318,31 @@ bindkey '^[[1;5H' root
 jwt() {
 	jq -R 'split(".") | .[1] | @base64d | fromjson' <<< "$1"
 }
+
+kslogs() {
+	res=$(ks get pods | awk 'NR>1 { print $1}' | fzf)
+	TERM_TITLE="$res" ks logs $res -f
+}
+
+rgd() {
+	 rg --json -C 5 $1 | delta
+}
+
+ars() {
+	answer=$(gum choose $(autorandr --list) --selected=$(autorandr --current))
+	if [ ! $? -eq 0 ]; then
+		return
+	fi
+	info_msg "loading in $answer"
+	autorandr --load "$answer"
+	i3-msg restart
+	feh --recursive --randomize --bg-fill ~/Wallpapers &> /dev/null
+	betterlockscreen -u /home/dln/Wallpapers
+}
+
+
+alias jqd="jq 'with_entries(.value |= @base64d)'"
+
+qrcode() {
+	echo $1 | qr | xargs kitty icat --clear -- 2> /dev/null
+}
