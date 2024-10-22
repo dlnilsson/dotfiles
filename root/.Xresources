@@ -1,13 +1,16 @@
-##### THIS FILE IS BEING CURRENTLY MANAGED BY URXVTCONFIG #####
-##### CHANGES DONE TO THIS FILE MANUALLY MAY AFFECT THE FUNCTIONALITY ######
-##### PROCEED WITH CAUTION! #####
-! Copyright (c) 2016-present Arctic Ice Studio <development@arcticicestudio.com>
-! Copyright (c) 2016-present Sven Greb <code@svengreb.de>
+! Copyright (c) 2016-present Sven Greb <development@svengreb.de>
+! This source code is licensed under the MIT license found in the license file.
 
-! Project:    Nord XResources
-! Version:    0.1.0
-! Repository: https://github.com/arcticicestudio/nord-xresources
-! License:    MIT
+
+! Fonts {{{
+Xft.antialias: true
+Xft.hinting:   true
+Xft.rgba:      rgb
+Xft.hintstyle: hintfull
+! }}}
+
+Xft.dpi: 100
+
 
 #define nord0 #2E3440
 #define nord1 #3B4252
@@ -48,12 +51,3 @@
 *.color13: nord15
 *.color14: nord7
 *.color15: nord6
-
-URxvt*scrollBar:         false
-URxvt*scrollBar_right:   false
-
-URxvt*transparent:       false
-
-URxvt.font: xft:Bitstream Vera Sans:pixelsize=12
-# Xft.dpi: 120
-Xft.dpi: 96
