@@ -21,7 +21,8 @@ locker="$HOME/.dotfiles/bin/lock"
 if [[ $chosen = "Lock" ]]; then
 	$locker
 elif [[ $chosen = "Logout" ]]; then
-	exit
+	i3-msg exit
+	# loginctl kill-user 1000
 elif [[ $chosen = "Shutdown" ]]; then
 	systemctl poweroff
 elif [[ $chosen = "Reboot" ]]; then
