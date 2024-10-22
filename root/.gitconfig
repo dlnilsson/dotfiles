@@ -46,6 +46,8 @@
 	pager = delta
 
 [alias]
+	# git fixup, but fuzzy find commit
+	fuzzup = !git commit --fixup $(git log --no-merges --oneline origin/main..HEAD | fzf --height 40% | cut -d' ' -f1)
 	undo = reset HEAD~1 --mixed
 	# https://gist.github.com/nh2/66e1cd83a86da7fe43b1
 	# Usage: git signoff-rebase [base-commit]
