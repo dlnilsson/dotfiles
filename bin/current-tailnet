@@ -1,0 +1,10 @@
+#!/bin/bash
+
+
+tn=$(tailscale status --json | jq -r .CurrentTailnet.Name)
+if [[ "$tn" =~ "daniel" ]]; then
+    echo -e '\uf192  home'
+else
+    echo -e '\uf10c  work'
+fi
+
