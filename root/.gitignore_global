@@ -14,11 +14,15 @@ coverage.out
 .mypy_cache/*
 .mypy_cache/
 venv/*
+.venv/*
 temp_creds.json
 .pytest_cache
 *.code-workspace
-.editorconfig
 temp_config/*
 skaffold.env
 **/*.tmp.[extension]
 **/**/.decrypted~**yaml
+.editorconfig
+openapitools.json
+.run
+.direnv/*
