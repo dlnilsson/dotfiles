@@ -7,4 +7,4 @@ dunstctl history | jq -r '.data[][] | {"title": .summary.data, "body": .body.dat
 
 width=$(kitty +kitten icat --print-window-size | awk -F x '{print $1}')
 
-gum table --file "$file" -w 8,"$width"
+gum table --height=25 --file "$file" -w 8,"$width"
