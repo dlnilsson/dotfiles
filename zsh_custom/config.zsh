@@ -4,8 +4,9 @@ export PATH=$GOPATH/bin:$PATH
 export PATH=$HOME/.dotfiles/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 export PATH=$HOME/.npm-global/bin:$PATH
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
 export EDITOR=nano
-export GLAB_PAGER=cat
+export GLAB_PAGER=delta
 export LANG=en_US.UTF-8
 #export BROWSER=google-chrome-stable
 export BROWSER=firefox
@@ -20,12 +21,14 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
 	--bind page-up:preview-up,page-down:preview-down'
 
 # export TERMINAL=termite
-
+alias ks="kubectl --context minikube --namespace srenity"
+alias gitadd="git add"
 alias yat="bat --language=yaml -p"
 alias pacmane="pacman"
 alias cgs="clear; git status"
 alias las="ls"
 alias ls="lsd"
+alias fd="fdfind"
 alias tf="terraform"
 alias bat="batcat"
 alias cat="bat -pp"
@@ -90,16 +93,20 @@ open() {
 }
 
 giphymd() {
-	info_msg "search giphy for $1"
 	items=()
 	for img in $(giphy search $1); do
-		kitty +kitten icat --align left --silent $img
-		items+=("![]($img)")
+		items+=("$img")
 	done
 
-	res=$(printf "%s\n" "${items[@]}" | fzf --layout=reverse --ansi --height 20% \
-	--bind 'ctrl-y:execute-silent(echo {})+abort')
-	echo $res | xsel --clipboard --input
+	res=$(printf '%s\n' "${items[@]}" | jq -R . \
+	| jq -s . \
+	| jq -r '.[]' \
+	| fzf --preview-window 'up,85%,border-bottom,+{2}+3/3,~3' \
+	--bind 'ctrl-y:execute-silent(echo {})+abort' \
+	--preview='kitty icat --clear --transfer-mode=memory \
+	--stdin=no --place=${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES}@0x0 {}
+	')
+	echo "![]($res)"| xsel --clipboard --input
 	clear
 }
 
@@ -304,7 +311,6 @@ root() {
 		fi
 		dir=$(dirname "$dir")
 	done
-
 	warning_msg "No .git directory found in any parent directory." >&2
 	kitty @ send-text "\n"
 }
@@ -312,8 +318,8 @@ root() {
 
 zle -N root
 # showkey -a
+#bindkey '^[[H' rootdwqd
 bindkey '^[[1;5H' root
-
 
 jwt() {
 	jq -R 'split(".") | .[1] | @base64d | fromjson' <<< "$1"
@@ -335,14 +341,12 @@ ars() {
 	fi
 	info_msg "loading in $answer"
 	autorandr --load "$answer"
-	i3-msg restart
 	feh --recursive --randomize --bg-fill ~/Wallpapers &> /dev/null
-	betterlockscreen -u /home/dln/Wallpapers
 }
 
 
 alias jqd="jq 'with_entries(.value |= @base64d)'"
 
 qrcode() {
-	echo $1 | qr | xargs kitty icat --clear -- 2> /dev/null
+	echo $1 | qr
 }
