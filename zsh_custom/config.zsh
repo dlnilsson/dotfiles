@@ -290,6 +290,9 @@ kctx() {
 		kubectl config use-context $answer
 	fi
 }
+delta-toggle() {
+    eval "export DELTA_FEATURES='$(-delta-features-toggle $1 | tee /dev/stderr)'"
+}
 
 gshow() {
 	git log --oneline | \

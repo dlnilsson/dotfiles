@@ -49,6 +49,7 @@
 	# git fixup, but fuzzy find commit
 	fuzzup = !git commit --fixup $(git log --no-merges --oneline origin/main..HEAD | fzf --height 40% | cut -d' ' -f1)
 	undo = reset HEAD~1 --mixed
+	dif = diff
 	# https://gist.github.com/nh2/66e1cd83a86da7fe43b1
 	# Usage: git signoff-rebase [base-commit]
 	signoff-rebase = "!EDITOR='sed -i -re s/^pick/e/' sh -c 'git rebase -i $1 && while test -f .git/rebase-merge/interactive; do git commit --amend --signoff --no-edit && git rebase --continue; done' -"
@@ -97,7 +98,7 @@
     diffFilter = delta --color-only
 
 [delta]
-    features = side-by-side
+    # features = side-by-side
     plus-style = syntax "#012800"
     minus-style = normal "#340001"
     syntax-theme = Monokai Extended
@@ -105,13 +106,24 @@
 	line-numbers-right-format = "│ "
 	#inspect-raw-lines = false
 
+[delta "line-numbers"]
+	line-numbers = true
+
+[delta "unobtrusive-line-numbers"]
+    line-numbers = true
+    line-numbers-minus-style = "#444444"
+    line-numbers-zero-style = "#444444"
+    line-numbers-plus-style = "#444444"
+    line-numbers-left-format = "{nm:>4}┊"
+    line-numbers-right-format = "{np:>4}│"
+    line-numbers-left-style = blue
+    line-numbers-right-style = blue
 
 [delta "no-side"]
 	side-by-side = false
 
 [delta "side-by-side"]
 	side-by-side = true
-
 
 [diff]
     colorMoved = default

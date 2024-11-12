@@ -1,0 +1,40 @@
+#!/usr/bin/python3
+"""
+To toggle delta features such as `side-by-side` on and off, one solution is to use a shell function like:
+
+delta-toggle () {
+        eval "export DELTA_FEATURES=$(-delta-features-toggle $1 | tee /dev/stderr)"
+}
+
+where `-delta-features-toggle` is this Python script.
+"""
+
+import os
+import sys
+
+
+def print_toggled_features(prefix: str):
+    toggleable = {"line-numbers", "side-by-side"}
+    features = [opt for opt in toggleable if opt.startswith(prefix)]
+    if len(features) > 1:
+        print(f"Multiple matching features: {features}", file=sys.stderr)
+        exit(1)
+    [feature] = features
+    features = os.getenv("DELTA_FEATURES") or "+"
+    assert features and features.startswith("+")
+    features = set(filter(bool, features[1:].split(" ")))
+    if feature in features:
+        features.remove(feature)
+    else:
+        features.add(feature)
+    print("+" + " ".join(sorted(features)))
+
+
+if __name__ == "__main__":
+    try:
+        [prefix] = sys.argv[1:]
+    except ValueError:
+        print(os.getenv("DELTA_FEATURES"))
+        exit(0)
+    else:
+        print_toggled_features(prefix)
