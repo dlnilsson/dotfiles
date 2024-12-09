@@ -475,5 +475,6 @@ mode "$mode_gaps_outer" {
 bindsym $mod+Pause exec --no-startup-id "/home/dln/.dotfiles/bin/rofi-giphy"
 #bindsym $mod+d exec --no-startup-id "rofi -dpi 192 -show drun -show-icons -font \\"Ubuntu Condensed 12\\" -display-drun  -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
 bindsym $mod+d exec --no-startup-id "rofi -show drun -show-icons  -display-drun  -run-shell-command '{terminal} -e \\" {cmd}; read -n 1 -s\\"'"
+bindsym $mod+o exec --no-startup-id "/home/dln/.dotfiles/bin/rofi-ykman"
 bindsym $mod+Shift+d exec --no-startup-id  "rofi -lines 0 -dmenu -p \\"\\" | xargs -I{} xdg-open https://www.google.se/search\?q\=\{\}"
 bindsym $mod+Shift+v exec --no-startup-id "/home/dln/.dotfiles/bin/rofi-copyq"
