@@ -22,6 +22,7 @@ temp_config/*
 skaffold.env
 **/*.tmp.[extension]
 **/**/.decrypted~**yaml
+.decrypted*.enc.yaml
 .editorconfig
 openapitools.json
 .run
