@@ -1,0 +1,2 @@
+i3ipc
+git+http://github.com/bcbnz/python-rofi.git
