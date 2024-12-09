@@ -1,0 +1,5 @@
+#!/bin/bash
+# shellcheck source=/dev/null
+source /home/dln/.dotfiles/rofi/custom/venv/bin/activate
+
+python3 /home/dln/.dotfiles/rofi/custom/rofi-ykman.py "$@"
