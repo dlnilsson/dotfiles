@@ -160,6 +160,7 @@ set $ws5 5
 set $ws6 6
 set $ws7 7
 set $ws8 8
+set $ws9 9
 
 # switch to workspace
 bindsym $mod+1 workspace $ws1
@@ -170,6 +171,7 @@ bindsym $mod+5 workspace $ws5
 bindsym $mod+6 workspace $ws6
 bindsym $mod+7 workspace $ws7
 bindsym $mod+8 workspace $ws8
+bindsym $mod+9 workspace $ws9
 
 #Media keys
 
@@ -194,6 +196,7 @@ bindsym $mod+Ctrl+5 move container to workspace $ws5
 bindsym $mod+Ctrl+6 move container to workspace $ws6
 bindsym $mod+Ctrl+7 move container to workspace $ws7
 bindsym $mod+Ctrl+8 move container to workspace $ws8
+bindsym $mod+Ctrl+9 move container to workspace $ws9
 
 # Move to workspace with focused container
 bindsym $mod+Shift+1 move container to workspace $ws1; workspace $ws1
@@ -204,13 +207,14 @@ bindsym $mod+Shift+5 move container to workspace $ws5; workspace $ws5
 bindsym $mod+Shift+6 move container to workspace $ws6; workspace $ws6
 bindsym $mod+Shift+7 move container to workspace $ws7; workspace $ws7
 bindsym $mod+Shift+8 move container to workspace $ws8; workspace $ws8
+bindsym $mod+Shift+9 move container to workspace $ws9; workspace $ws9
 
 # Open applications on specific workspaces
 assign [class="Spotify"] $ws5
 assign [class="firefox"] $ws1
-assign [class="google-chrome-stable"] $ws1
-assign [class="Google-chrome-stable"] $ws1
-assign [class="Google-chrome"] $ws1
+# assign [class="google-chrome-stable"] $ws1
+# assign [class="Google-chrome-stable"] $ws1
+# assign [class="Google-chrome"] $ws1
 
 # Open specific applications in floating mode
 #for_window [class=".*"] split toggle
@@ -225,6 +229,8 @@ for_window [class="kgpg"] floating enable border normal
 for_window [class="floating-kitty"] floating enable border pixel 0
 for_window [class="Clipgrab"] floating enable
 for_window [class="vlc"] floating enable sticky
+for_window [class="authenticator"] floating enable sticky
+for_window [class="Authenticator"] floating enable sticky
 for_window [class="Gnome-calculator"] floating enable sticky
 for_window [class="viewnior"] floating enable sticky
 for_window [class="Viewnior"] floating enable sticky
@@ -261,7 +267,7 @@ for_window [title="Twilio Authy"] border pixel 0
 for_window [title="^Slack$"] move absolute position 100px 50px
 for_window [class="zenity"] floating enable border none
 for_window [class="zoom"] floating enable border none
-
+for_window [class="obsidian"] , move scratchpad
 # switch to workspace with urgent window automatically
 for_window [urgent=latest] focus
 
@@ -339,7 +345,7 @@ exec --no-startup-id xbindkeys
 # exec --no-startup-id blueman-applet
 # exec_always --no-startup-id sbxkb
 # exec --no-startup-id birdtray
-exec_always --no-startup-id xautolock -time 3 -locker "$HOME/.dotfiles/bin/lock" &
+exec_always --no-startup-id xautolock -detectsleep -time 3 -locker "$HOME/.dotfiles/bin/lock" &
 # exec_always --no-startup-id fix_xcursor
 exec_always --no-startup-id $HOME/.config/polybar/launch.sh
 
