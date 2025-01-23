@@ -15,6 +15,9 @@ indent_style = space
 [*.zsh]
 indent_style = tab
 
+[*.result]
+indent_style = tab
+
 [*.{py,rst,txt}]
 indent_style = space
 trim_trailing_whitespace = true
