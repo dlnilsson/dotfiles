@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Get user input using Rofi
+input=$(rofi -dmenu -p "Enter something:")
+
+# Check if the input is not empty
+if [ -n "$input" ]; then
+    # Replace 'your_program' with the actual program you want to run
+    # You can also specify your preferred terminal emulator (e.g., 'gnome-terminal', 'xterm', 'konsole', etc.)
+    # Add any other parameters you need for your program
+    # kitty --detach "/home/dln/.dotfiles/bin/giphymd $input"
+    kitty --detach /home/dln/.dotfiles/bin/giphymd "$input"
+fi
+
+read -p "Press Enter to exit..."

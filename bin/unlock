@@ -1,0 +1,9 @@
+#!/bin/bash
+
+
+read -s -p "Enter your passphrase: " passphrase
+echo
+
+
+echo "$passphrase" | keychain $HOME/.ssh/work
+echo "$passphrase" | keychain $HOME/.ssh/id_ed25519

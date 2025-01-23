@@ -2,6 +2,9 @@
 # xdotool key XF86AudioMute &&
 # betterlockscreen -l dim &> /dev/null
 
+bw lock &> /dev/null &
+
+
 BLANK='#00000000'
 CLEAR='#ffffff22'
 DEFAULT='#e5e9f0'

@@ -1,0 +1,5 @@
+#!/bin/bash
+temp=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits)
+
+
+echo -e "$temp \U2103"
