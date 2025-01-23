@@ -27,3 +27,4 @@ skaffold.env
 openapitools.json
 .run
 .direnv/*
+node_modules
