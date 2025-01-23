@@ -14,3 +14,8 @@ fi
 if [ -d "$HOME/lib/azure-cli" ]; then
     source $HOME/lib/azure-cli/az.completion
 fi
+
+
+eval "$(direnv hook zsh)"
+
+bindkey -r "^[[Z"

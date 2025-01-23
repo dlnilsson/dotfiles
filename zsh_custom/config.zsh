@@ -94,6 +94,7 @@ open() {
 
 giphymd() {
 	items=()
+	# https://github.com/peterhellberg/giphy
 	for img in $(giphy search $1); do
 		items+=("$img")
 	done
@@ -134,9 +135,10 @@ flushdns() {
 	info_msg "DNS Flushed!"
 }
 docker_inspect() {
-	ID=$(docker ps --format '{{json  .ID}} {{json .Image}} {{json .Names}}'  | fzf --bind "enter:execute(echo {1} | cut -d '\"' -f 2 )+abort")
+	ID=$(docker ps --format '{{json  .ID}} {{json .Image}} {{json .Names}}'  | fzf --height=40% | awk '{print $1}')
+
 	if [[ ! -z $ID ]]; then
-		docker inspect $ID | jq .
+		echo docker inspect $ID
 	fi
 
 }
@@ -165,7 +167,7 @@ myip() {
 }
 
 dshell() {
-	ID=$(docker ps --format "{{.ID}}\t{{.Names}}\t{{.Image }}" | fzf --height=40% --bind "enter:execute(echo {1})+abort")
+	ID=$(docker ps --format "{{.ID}}\t{{.Names}}\t{{.Image }}" | fzf --height=40% | awk -F'\t' '{print $1}')
 	docker exec -it $ID /bin/bash
 	exit_code=$?
 	if [ ! $exit_code -eq 0 ]; then
@@ -229,8 +231,9 @@ imgcat() {
 	if [ ! -z $KITTY_WINDOW_ID ]; then
 		kitty +kitten icat $1
 	else
-		warning_msg "cant view image in this terminal."
-		xdg-open $1
+		timg -pk $1
+		# warning_msg "cant view image in this terminal."
+		# xdg-open $1
 	fi
 }
 pretty_diff() {
@@ -324,9 +327,6 @@ zle -N root
 #bindkey '^[[H' rootdwqd
 bindkey '^[[1;5H' root
 
-jwt() {
-	jq -R 'split(".") | .[1] | @base64d | fromjson' <<< "$1"
-}
 
 kslogs() {
 	res=$(ks get pods | awk 'NR>1 { print $1}' | fzf)
