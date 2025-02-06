@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+BIN=$(which slack)
+nohup "$BIN" "$@" > /dev/null 2>&1 &
+
+sleep 2
+
+pid=$(pgrep -f "slack --no-sandbox" | head -n1)
+for id in $(xdotool search --pid "$pid"); do
+    /home/dln/dev/xseticon/xseticon -id "$id" /home/dln/.local/share/icons/slack.png
+done

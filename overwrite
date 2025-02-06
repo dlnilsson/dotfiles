@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+DESKTOP_FILE="/var/lib/snapd/desktop/applications/slack_slack.desktop"
+NEW_EXEC="/home/dln/.dotfiles/bin/slack-start"
+
+if [ ! -w "$DESKTOP_FILE" ]; then
+    echo "Error: You don't have write permission for $DESKTOP_FILE."
+    echo "Try running this script as root or with sudo."
+    exit 1
+fi
+
+cp "$DESKTOP_FILE" "${DESKTOP_FILE}.bak"
+echo "Backup created at ${DESKTOP_FILE}.bak"
+sed -i "s|^Exec=.*|Exec=${NEW_EXEC}|" "$DESKTOP_FILE"
+
+echo "Updated $DESKTOP_FILE:"
+grep '^Exec=' "$DESKTOP_FILE"
