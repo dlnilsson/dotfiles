@@ -87,13 +87,15 @@ ZSH_CUSTOM="$HOME/.dotfiles/zsh_custom"
 zstyle :omz:plugins:keychain agents gpg,ssh
 zstyle :omz:plugins:keychain options --quiet
 
-plugins=(git z zsh-autosuggestions fzf git-open docker docker-compose gpg-agent keychain)
+plugins=(git zoxide zsh-autosuggestions fzf git-open docker docker-compose gpg-agent keychain)
+## plugins=(git z zsh-autosuggestions fzf git-open docker docker-compose gpg-agent keychain)
 
 # TODO?
 # zstyle :omz:plugins:keychain agents gpg,ssh
 
-
+# alias alias="true"
 source $ZSH/oh-my-zsh.sh
+# unalias "alias"
 
 # User configuration
 
