@@ -30,7 +30,7 @@ alias las="ls"
 alias ls="lsd"
 alias fd="fdfind"
 alias tf="terraform"
-alias bat="batcat"
+# alias bat="batcat"
 alias cat="bat -pp"
 alias cls="clear"
 # alias tree="lsd -tree"
@@ -93,22 +93,23 @@ open() {
 }
 
 giphymd() {
-	items=()
-	# https://github.com/peterhellberg/giphy
-	for img in $(giphy search $1); do
-		items+=("$img")
-	done
+  local query="$*"
+  if [[ -z "$query" ]]; then
+    echo "Usage: giphymd <search-term>"
+    return 1
+  fi
 
-	res=$(printf '%s\n' "${items[@]}" | jq -R . \
-	| jq -s . \
-	| jq -r '.[]' \
-	| fzf --preview-window 'up,85%,border-bottom,+{2}+3/3,~3' \
-	--bind 'ctrl-y:execute-silent(echo {})+abort' \
-	--preview='kitty icat --clear --transfer-mode=memory \
-	--stdin=no --place=${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES}@0x0 {}
-	')
-	echo "![]($res)"| xsel --clipboard --input
-	clear
+  local -a items=("${(@f)$(giphy search "$query")}")
+
+  local res
+  res=$(printf '%s\n' "${items[@]}" | fzf \
+    --preview-window 'up,85%,border-bottom,+{2}+3/3,~3' \
+    --bind 'ctrl-y:execute-silent(echo {})+abort' \
+    --preview="kitty icat --clear --transfer-mode=memory --stdin=no \
+	--place=\${FZF_PREVIEW_COLUMNS}x\${FZF_PREVIEW_LINES}@0x0 {}")
+
+  echo "![]($res)" | xsel --clipboard --input
+  clear
 }
 
 drc() {
