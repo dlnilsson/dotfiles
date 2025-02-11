@@ -16,7 +16,7 @@ from icon_resolver import IconResolver
 MAX_LENGTH = 85
 #: Base 1 index of the font that should be used for icons
 ICON_FONT = 3
-OUTPUT = 'eDP-1'
+OUTPUT = 'DP-1-1'
 
 def screens():
     output = [l for l in subprocess.check_output(
@@ -29,7 +29,7 @@ USER = getpass.getuser()
 
 ICONS = [
     ('name=mutt', '\uf199'),
-    ('name=thunderbird', '\uf199'),
+    ('name=thunderbird', '\uf199ec'),
     ('class=thunderbird', '\uf199'),
     ('name=youtube', '\uf167'),
     ('title=lazylocker', '\uf308'),
@@ -38,9 +38,9 @@ ICONS = [
     ('title=steam', '\uf9d2'),
     ('class=atom', '\ue764'),
     ('class=chrome', '\uf268'),
-    ('class=code-oss', '\ue70c'),
-    ('class=code', '\ue70c'),
-    ('class=discord', '\ufb6e'),
+    ('class=code-oss', '\uf121'),
+    ('class=code', '\uf121'),
+    ('class=discord', '\uf392'),
     ('class=firefox', '\uf269'),
     ('class=Google-chrome', '\uf268'),
     ('class=kitty', '\uf120'),
@@ -92,14 +92,14 @@ def render_apps(i3):
             tree = i3.get_tree()
             focused = tree.find_focused()
             if focused is None:
+                print("None focused")
                 return
-
-            if w.output == OUTPUT:
+            # if w.output == OUTPUT:
                 # [for screen in SCREENS if screen == OUTPUT]
-                for screen in SCREENS:
-                    if screen == OUTPUT:
-                        print(format_entry(focused), flush=True)
-                        return
+            for screen in SCREENS:
+                if screen == OUTPUT:
+                    print(format_entry(focused), flush=True)
+                    return
 
 
 def format_entry(app):
@@ -158,14 +158,11 @@ def main():
     i3.on('window::focus', on_change)
     i3.on('window', on_change)
 
-    loop = asyncio.get_event_loop()
-    # asyncio.run()
-    loop.run_in_executor(None, i3.main)
+    asyncio.run(run_i3_loop(i3))
 
+async def run_i3_loop(i3):
+    await asyncio.to_thread(i3.main)
     render_apps(i3)
-
-    loop.run_forever()
-
 
 if __name__ == '__main__':
     try:
