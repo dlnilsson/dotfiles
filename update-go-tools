@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+DIR="$GOPATH/bin"
+L=$(find "$DIR" -type f)
+for package in $L; do
+    go version -m "$package" | grep -m1 path | grep -v command-line-arguments | awk '{print $2}' >> go_tools
+done
