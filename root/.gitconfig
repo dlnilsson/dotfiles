@@ -7,6 +7,15 @@
 [includeIf "gitdir:~/dev/"]
 	path = ~/dev/.config/work/.gituser-work
 
+[column]
+	ui = auto
+[branch]
+	sort = -committerdate
+[tag]
+	sort = version:refname
+[help]
+	autocorrect = prompt
+
 [color]
 	diff = auto
 	status = auto
@@ -98,10 +107,10 @@
     diffFilter = delta --color-only
 
 [delta]
-    # features = side-by-side
-    plus-style = syntax "#012800"
-    minus-style = normal "#340001"
-    syntax-theme = Monokai Extended
+	features = side-by-side
+	plus-style = syntax "#012800"
+	minus-style = normal "#340001"
+	syntax-theme = Monokai Extended
 	line-numbers-left-format = ""
 	line-numbers-right-format = "│ "
 	#inspect-raw-lines = false
@@ -110,14 +119,14 @@
 	line-numbers = true
 
 [delta "unobtrusive-line-numbers"]
-    line-numbers = true
-    line-numbers-minus-style = "#444444"
-    line-numbers-zero-style = "#444444"
-    line-numbers-plus-style = "#444444"
-    line-numbers-left-format = "{nm:>4}┊"
-    line-numbers-right-format = "{np:>4}│"
-    line-numbers-left-style = blue
-    line-numbers-right-style = blue
+	line-numbers = true
+	line-numbers-minus-style = "#444444"
+	line-numbers-zero-style = "#444444"
+	line-numbers-plus-style = "#444444"
+	line-numbers-left-format = "{nm:>4}┊"
+	line-numbers-right-format = "{np:>4}│"
+	line-numbers-left-style = blue
+	line-numbers-right-style = blue
 
 [delta "no-side"]
 	side-by-side = false
@@ -126,7 +135,8 @@
 	side-by-side = true
 
 [diff]
-    colorMoved = default
+	colorMoved = default
+	renames = true
 
 [push]
 	default = simple
@@ -141,8 +151,11 @@
 	smudge = git-lfs smudge -- %f
 	required = true
 	process = git-lfs filter-process
+
 [commit]
 	gpgsign = true
+	verbose = true
+
 [gpg]
 	; program = gpg
 	format = ssh
