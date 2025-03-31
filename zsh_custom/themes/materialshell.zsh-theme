@@ -24,11 +24,11 @@ function _user_host() {
   echo "%{$red%}%n%{$reset_color%} %{$white%}in "
 }
 _kubectl_ctx() {
-  local VAL
-  VAL=$(kubectl config current-context)
-  if [[ ! -z $VAL ]]; then
-      echo "$ZSH_THEME_DOCKER_PROMPT_SHA_BEFORE$VAL$ZSH_THEME_DOCKER_PROMPT_SHA_AFTER"
-  fi
+  echo ""
+  # VAL=$(kubectl config current-context 2> /dev/null)
+  # if [[ ! -z $VAL ]]; then
+  #     echo "$ZSH_THEME_DOCKER_PROMPT_SHA_BEFORE$VAL$ZSH_THEME_DOCKER_PROMPT_SHA_AFTER"
+  # fi
 }
 _docker_info() {
     local VAL
@@ -81,4 +81,5 @@ ZSH_THEME_GIT_PROMPT_SHA_AFTER="%{$reset_color%}]"
 # LS colors, made with http://geoff.greer.fm/lscolors/
 export LSCOLORS="exfxcxdxbxegedabagacad"
 export LS_COLORS='di=34;40:ln=35;40:so=32;40:pi=33;40:ex=31;40:bd=34;46:cd=34;43:su=0;41:sg=0;46:tw=0;42:ow=0;43:'
-export GREP_COLOR='1;33'
+#  GREP_COLOR='1;33'
+export GREP_COLORS='mt=1;33'
