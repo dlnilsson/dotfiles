@@ -85,7 +85,7 @@ pbcopy() {
 	if [ -z "$KITTY_WINDOW_ID" ] | [ -z "$DISPLAY" ]; then
 		kitty +kitten clipboard
 	else
-		xsel --clipboard --input
+		xsel --clipboard --input --trim
 	fi
 }
 
