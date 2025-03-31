@@ -21,6 +21,7 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
 	--bind page-up:preview-up,page-down:preview-down'
 
 # export TERMINAL=termite
+alias tally='sort | uniq -c | sort'
 alias ks="kubectl --context minikube --namespace srenity"
 alias gitadd="git add"
 alias yat="bat --language=yaml -p"
