@@ -355,3 +355,31 @@ alias jqd="jq 'with_entries(.value |= @base64d)'"
 qrcode() {
 	echo $1 | qr
 }
+
+# See: https://bluz71.github.io/2018/11/26/fuzzy-finding-in-bash-with-fzf
+fzf_git_reflog() {
+	local selection=$(
+	git reflog --color=always "$@" |
+		fzf --no-multi --ansi --no-sort --no-height \
+		--preview "git show --color=always {1}"
+	)
+	if [[ -n $selection ]]; then
+		git show $(echo $selection | awk '{print $1}')
+	fi
+}
+# See: # See https://bluz71.github.io/2018/11/26/fuzzy-finding-in-bash-with-fzf
+fzf_git_log_pickaxe() {
+	if [[ $# == 0 ]]; then
+		echo 'Error: search term was not provided.'
+		return
+	fi
+	local selection=$(
+		git log --oneline --color=always -S "$@" |
+		fzf --no-multi --ansi --no-sort --no-height \
+		--preview "git show --color=always {1}"
+	)
+	if [[ -n $selection ]]; then
+		local commit=$(echo "$selection" | awk '{print $1}' | tr -d '\n')
+		git show $commit
+	fi
+ }
