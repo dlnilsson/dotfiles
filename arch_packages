@@ -39,3 +39,10 @@ keychain
 parallel
 kgpg
 nano-syntax-highlighting
+tailscale
+zoxide
+lsd
+jq
+direnv
+bat
+git-delta
