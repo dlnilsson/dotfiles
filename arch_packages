@@ -46,3 +46,6 @@ jq
 direnv
 bat
 git-delta
+wl-clipboard
+hyprlock
+hypridle
