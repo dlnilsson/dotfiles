@@ -12,3 +12,5 @@ shellcheck-static
 ccat
 rofi-emoji
 git-delta
+hyprsysteminfo
+iwgtk
