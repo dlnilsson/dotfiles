@@ -1,6 +1,6 @@
 [user]
 	name = Daniel Nilsson
-	email = daniel.nilsson1989@gmail.com
+	email = git@dlnilsson.se
 	; signingkey = F9282329DBF9544827B99D6FF23E000A2F0D0C55
 	signingkey = ~/.ssh/id_ed25519
 
