@@ -31,11 +31,13 @@ if __name__ == '__main__':
         items.append(text)
 
     title = 'Clipboard'
-    wofi = f'wofi -dmenu'.split()
+    wofi = f'wofi -dmenu -i'.split()
     wofi_input = '\n'.join(x for x in items)
     # print(items)
     p = sp.run(wofi, input=wofi_input, encoding='utf-8', stdout=sp.PIPE, stderr=sp.PIPE)
     if p.returncode == 0:
         num = p.stdout.strip()
-        sp.run(f'copyq select({num});'.split(),
-               encoding='utf-8', stdout=sp.PIPE, stderr=sp.PIPE)
+        # print(num)
+        sp.run(f'wl-copy --trim-newline {num}'.split(), encoding='utf-8', stdout=sp.PIPE, stderr=sp.PIPE)
+        # sp.run(f'copyq select({num});'.split(),
+        #        encoding='utf-8', stdout=sp.PIPE, stderr=sp.PIPE)
