@@ -64,7 +64,8 @@
         "format": "{}",
         "icon": true,
         "rewrite": {
-            "(.*) — Zen Browser": "🌎 $1"
+            "(.*) — Zen Browser": "🌎 $1",
+            "(.*) — Code - OSS": "$1"
         },
         "separate-outputs": true
     },

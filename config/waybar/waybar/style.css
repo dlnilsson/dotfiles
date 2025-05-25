@@ -93,16 +93,19 @@ button:hover {
 #workspaces button.focused {
     background-color: @nord-grey4;
     box-shadow: inset 0 -3px #ffffff;
+    border-bottom: @nord-orange;
 }
 
 #workspaces button.urgent {
     background-color: @nord-orange;
 }
 #workspaces button.active {
-    background-color: @nord-orange;
+    background-color: @nord-white1;
+    border-bottom: @nord-orange;
 }
 #workspaces button.visible {
-    background-color: @nord-grey4;
+    background-color: @nord-grey1;
+    box-shadow: inset 0 -3px @nord-orange;
 }
 #workspaces button.empty {
     background-color: @nord-grey1;
