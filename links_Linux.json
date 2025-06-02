@@ -9,10 +9,6 @@
             "to": ".config/"
         },
         {
-            "from": "atom",
-            "to": ".atom/"
-        },
-        {
             "from": "local",
             "to": ".local/"
         }
