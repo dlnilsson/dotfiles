@@ -75,10 +75,10 @@ warning_msg() {
 # private enviornment variables
 SECRET_ENV=$HOME/.secrets
 
-if [[ ! -a $SECRET_ENV ]] then
-	warning_msg $SECRET_ENV "not found."
+if [[ ! -f $SECRET_ENV ]]; then
+    warning_msg "$SECRET_ENV" "not found."
 else
-	source $SECRET_ENV
+    source "$SECRET_ENV"
 fi
 
 pbcopy() {
