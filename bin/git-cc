@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -e
+
+prefix=$(printf "%s\n" \
+  "feat:     A new feature" \
+  "fix:      A bug fix" \
+  "docs:     Documentation only" \
+  "style:    Code style (no logic)" \
+  "refactor: Code restructuring" \
+  "test:     Add or fix tests" \
+  "chore:    Maintenance task" \
+  "perf:     Performance improvement" \
+  | fzf --prompt="Select commit type: " --height=10 --reverse)
+
+type=$(echo "$prefix" | cut -d: -f1)
+
+read -p "Optional scope (e.g. auth, db): " scope
+read -p "Short summary: " summary
+
+if [[ -n "$scope" ]]; then
+  header="$type($scope): $summary"
+else
+  header="$type: $summary"
+fi
+
+tmpfile=$(mktemp)
+echo "$header" > "$tmpfile"
+
+# Use editor + verbose + signed commit
+GIT_EDITOR="${EDITOR:-nano}" git commit --verbose -F "$tmpfile"
+
+rm "$tmpfile"
