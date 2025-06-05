@@ -5,32 +5,84 @@
     // Archived modules
     // "custom/gpu", "bluetooth",  "custom/weather", "temperature", "sway/window"
     // Choose the order of the modules
-    "modules-left": [  "hyprland/window", "hyprland/mode", "idle_inhibitor"],
-    "modules-center": ["clock"],
-    "modules-right": [ "hyprland/workspaces", "pulseaudio", "bluetooth", "network", "tray"],
+    // , "idle_inhibitor"
+            // "custom/hyprWindowMode",
+    "modules-left": [
+        "hyprland/window"
+    ],
+    "modules-center": [
+        "clock"
+    ],
+    //  "pulseaudio", "bluetooth", "network",
+    "modules-right": [
+        "hyprland/workspaces",
+        "tray",
+        "hyprland/language",
+        "custom/wlogout"
+    ],
     // Modules configuration
     "hyprland/workspaces": {
         "format": "{name}",
-        "on-click": "activate",
         "format-icons": {
             "1": "1",
             "2": "2",
             "3": "3",
             "4": "4",
             "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
             "urgent": "",
             "active": "",
             "default": ""
         },
-        "sort-by-number": true
+        "all-outputs": false,
+        "sort-by-number": true,
+        "persistent-workspaces": {
+                "1": [],
+                "2": [],
+                "3": [],
+                "4": [],
+                "5": [],
+                "6": [],
+                "7": [],
+                "8": [],
+                "9": []
+        }
     },
-    "hyprland/mode": {
+    "hyprland/submap": {
         "format": "<span style=\"italic\">{}</span>"
+    },
+    "wlr/taskbar": {
+        "all-outputs": true,
+        "format": "{icon}   {title:.25}",
+        "markup": true,
+        "icon-size": 20,
+        "on-click": "activate",
     },
     "hyprland/window": {
         "format": "{}",
-        "max-length": 50, 
-        "tooltip": false
+        "icon": true,
+        "rewrite": {
+            "(.*) — Zen Browser": "$1",
+            "(.*) — Code - OSS": "$1",
+            "(.*) - Visual Studio Code": "$1",
+            "(.*) - Slack": "$1",
+            "(.*) - Discord": "$1"
+        },
+        "separate-outputs": true
+    },
+    "custom/hyprWindowMode": {
+        "exec": "/home/dln/.dotfiles/bin/hypr-window-mode",
+        "return-type": "json",
+        "format": "{}",
+        "on-click": "/home/dln/.dotfiles/bin/hypr-window-mode toggle",
+        "tooltip": true
+    },
+    "custom/wlogout": {
+        "format": " ⏻ ",
+        "tooltip": false,
+        "on-click": "wlogout --protocol layer-shell"
     },
     "bluetooth": {
         "interval": 30,
@@ -41,11 +93,11 @@
             "disabled": ""
         },
         "on-click": "blueberry"
-    },    
+    },
     "hyprland/language": {
-        "format": "<big></big> {}",
-        "max-length": 5,
-        "min-length": 5,        
+        "format": " {}",
+        "max-length": 20,
+        "min-length": 15
     },
     "idle_inhibitor": {
         "format": "{icon}",
