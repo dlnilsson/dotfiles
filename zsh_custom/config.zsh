@@ -110,7 +110,7 @@ giphymd() {
     --preview="kitty icat --clear --transfer-mode=memory --stdin=no \
 	--place=\${FZF_PREVIEW_COLUMNS}x\${FZF_PREVIEW_LINES}@0x0 {}")
 
-  echo "![]($res)" | xsel --clipboard --input
+  echo "![]($res)" | wl-copy --trim-newline
   clear
 }
 
