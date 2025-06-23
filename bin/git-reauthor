@@ -1,0 +1,21 @@
+#!/bin/bash
+# Usage: git reauthor <N>
+# Rewrites last N commits with current git config user.name/email
+
+N=${1:-1}
+name=$(git config user.name)
+email=$(git config user.email)
+
+if [ -z "$name" ] || [ -z "$email" ]; then
+  echo "Missing user.name or user.email"
+  exit 1
+fi
+
+git rebase -i HEAD~$N
+
+for ((i=0; i<N; i++)); do
+  git commit --amend --author="$name <$email>" --no-edit
+  git rebase --continue || break
+done
+
+echo "Rewrote last $N commits with author: $name <$email>"
