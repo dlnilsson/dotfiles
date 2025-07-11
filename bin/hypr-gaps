@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+
+# Configurable gaps
+GAPS_OUT=10
+GAPS_IN=5
+
+# Excluded class names
+EXCLUDE_CLASSES=("wofi" "flameshot" "slurp" "wf-recorder")
+
+function is_excluded {
+  local class="$1"
+  for excluded in "${EXCLUDE_CLASSES[@]}"; do
+    if [[ "$class" == "$excluded" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+function update_gaps {
+  active_workspace=$(hyprctl activeworkspace -j | jq '.id')
+  clients=$(hyprctl clients -j)
+
+  visible_count=0
+
+  # Iterate through clients and count only non-excluded visible windows
+  while IFS= read -r row; do
+    workspace_id=$(echo "$row" | jq '.workspace.id')
+    class_name=$(echo "$row" | jq -r '.class')
+
+    if [[ "$workspace_id" == "$active_workspace" ]]; then
+      if ! is_excluded "$class_name"; then
+        ((visible_count++))
+      fi
+    fi
+  done < <(echo "$clients" | jq -c '.[]')
+
+  if (( visible_count <= 1 )); then
+    hyprctl keyword general:gaps_out 0
+    hyprctl keyword general:gaps_in 0
+  else
+    hyprctl keyword general:gaps_out "$GAPS_OUT"
+    hyprctl keyword general:gaps_in "$GAPS_IN"
+  fi
+}
+
+# Initial update
+update_gaps
+
+# Listen for events
+socat - "UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock" | \
+while read -r line; do
+  if [[ "$line" == *"openwindow"* ]] || [[ "$line" == *"closewindow"* ]] || [[ "$line" == *"movewindow"* ]] || [[ "$line" == *"activewindow"* ]]; then
+    update_gaps
+  fi
+done
