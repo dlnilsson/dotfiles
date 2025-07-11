@@ -1,3 +1,17 @@
 #!/usr/bin/env bash
 # See: https://github.com/cjbassi/rofi-copyq/issues/7
-copyq eval -- "for(i=0; i<size(); ++i) print(str(read(i)).replace(/\n/g, ' ')+'\n')" | rofi -dmenu -lines 15 -p clipboard -format i| xargs -I {} sh -c 'copyq select {}'
+# copyq eval -- "for(i=0; i<size(); ++i) print(str(read(i)).replace(/\n/g, ' ')+'\n')" | rofi -dmenu -lines 15 -p clipboard -format i| xargs -I {} sh -c 'copyq select {}'
+copyq eval -- '
+var result = [];
+for (var i = 0; i < size(); ++i) {
+    var obj = {};
+    obj.row = i;
+    obj.text = str(read(i)).replace(/\n/g, " ");
+    result.push(obj);
+}
+JSON.stringify(result);
+' | jq -r '.[] | "\(.row): \(.text)"' \
+  | rofi -dmenu -lines 15 -p clipboard -format i \
+  | cut -d: -f1 \
+  | xargs -r copyq select
+
