@@ -6,15 +6,19 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync/atomic"
 	"syscall"
+	"time"
 
 	"github.com/thiagokokada/hyprland-go"
 	"github.com/thiagokokada/hyprland-go/event"
 )
 
 const (
-	gapsOut = 10
-	gapsIn  = 5
+	gapsOut    = 10
+	gapsIn     = 5
+	rounding   = 10
+	borderSize = 2
 )
 
 var (
@@ -24,13 +28,14 @@ var (
 		"slurp":       true,
 		"wf-recorder": true,
 	}
-	lastVisibleCount = -1
+	lastVisibleCount int32 = -1
+	updateChan             = make(chan struct{}, 1)
 )
 
 func updateGaps(client *hyprland.RequestClient) error {
-	activeWindow, err := client.ActiveWindow()
+	ws, err := client.ActiveWorkspace()
 	if err != nil {
-		return fmt.Errorf("failed to get active window: %v", err)
+		return fmt.Errorf("failed to get active workspace: %v", err)
 	}
 
 	clients, err := client.Clients()
@@ -40,20 +45,18 @@ func updateGaps(client *hyprland.RequestClient) error {
 
 	visibleCount := 0
 	for _, c := range clients {
-		if c.Workspace.Id == activeWindow.Workspace.Id && !c.Floating && c.Mapped && !c.Hidden {
-			if !excludeClasses[c.Class] {
-				visibleCount++
-			}
+		if c.Workspace.Id == ws.Id && !c.Floating && c.Mapped && !c.Hidden && !excludeClasses[c.Class] {
+			visibleCount++
 		}
 	}
 
-	if visibleCount == lastVisibleCount {
+	if int32(visibleCount) == atomic.LoadInt32(&lastVisibleCount) {
 		log.Printf("Visible window count unchanged (%d), skipping update", visibleCount)
 		return nil
 	}
-	lastVisibleCount = visibleCount
+	atomic.StoreInt32(&lastVisibleCount, int32(visibleCount))
 
-	log.Printf("Updating gaps: visible windows in workspace %d: %d", activeWindow.Workspace.Id, visibleCount)
+	log.Printf("Updating gaps: visible windows in workspace %d: %d", ws.Id, visibleCount)
 
 	var cmds []string
 	if visibleCount <= 1 {
@@ -67,16 +70,32 @@ func updateGaps(client *hyprland.RequestClient) error {
 		cmds = []string{
 			fmt.Sprintf("general:gaps_out %d", gapsOut),
 			fmt.Sprintf("general:gaps_in %d", gapsIn),
-			fmt.Sprintf("decoration:rounding %d", 10),
-			fmt.Sprintf("general:border_size %d", 2),
+			fmt.Sprintf("decoration:rounding %d", rounding),
+			fmt.Sprintf("general:border_size %d", borderSize),
 		}
 	}
 
 	if _, err := client.Keyword(cmds...); err != nil {
-		return fmt.Errorf("failed to dispatch batch keyword: %v", err)
+		return fmt.Errorf("failed to dispatch keyword batch: %v", err)
 	}
 
 	return nil
+}
+
+func scheduleUpdate() {
+	select {
+	case updateChan <- struct{}{}:
+	default:
+	}
+}
+
+func updateLoop(client *hyprland.RequestClient) {
+	for range updateChan {
+		time.Sleep(10 * time.Millisecond)
+		if err := updateGaps(client); err != nil {
+			log.Printf("Failed to update gaps: %v", err)
+		}
+	}
 }
 
 type ev struct {
@@ -85,23 +104,18 @@ type ev struct {
 }
 
 func (e *ev) Workspace(w event.WorkspaceName) {
-	if err := updateGaps(e.client); err != nil {
-		log.Printf("Failed to update gaps: %v", err)
-	}
+	scheduleUpdate()
 }
 
 func (e *ev) ActiveWindow(w event.ActiveWindow) {
-	if err := updateGaps(e.client); err != nil {
-		log.Printf("Failed to update gaps: %v", err)
-	}
+	scheduleUpdate()
 }
 
 func main() {
 	client := hyprland.MustClient()
+	go updateLoop(client)
 
-	if err := updateGaps(client); err != nil {
-		log.Printf("Failed to update gaps: %v", err)
-	}
+	scheduleUpdate()
 
 	ec := event.MustClient()
 	defer ec.Close()
