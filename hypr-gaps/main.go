@@ -14,13 +14,6 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-const (
-	gapsOut    = 10
-	gapsIn     = 5
-	rounding   = 10
-	borderSize = 2
-)
-
 var (
 	excludeClasses = map[string]bool{
 		"wofi":        true,
@@ -30,6 +23,12 @@ var (
 	}
 	lastVisibleCount int32 = -1
 	updateChan             = make(chan struct{}, 1)
+
+	defaultGapsOut       = hyprland.Option{Custom: "10 10 10 10"}
+	defaultGapsIn        = hyprland.Option{Custom: "5 5 5 5"}
+	defaultRounding      = hyprland.Option{Int: 10}
+	defaultBorderSize    = hyprland.Option{Int: 2}
+	defaultShadowEnabled = hyprland.Option{Int: 1}
 )
 
 func updateKeywords(client *hyprland.RequestClient) error {
@@ -57,12 +56,12 @@ func updateKeywords(client *hyprland.RequestClient) error {
 	atomic.StoreInt32(&lastVisibleCount, int32(visibleCount))
 
 	// log.Printf("Updating gaps: visible windows in workspace %d: %d", ws.Id, visibleCount)
-
 	cmds := []string{
-		fmt.Sprintf("general:gaps_out %d", gapsOut),
-		fmt.Sprintf("general:gaps_in %d", gapsIn),
-		fmt.Sprintf("decoration:rounding %d", rounding),
-		fmt.Sprintf("general:border_size %d", borderSize),
+		fmt.Sprintf("general:gaps_out %s", defaultGapsOut.String()),
+		fmt.Sprintf("general:gaps_in %s", defaultGapsIn.String()),
+		fmt.Sprintf("decoration:rounding %s", defaultRounding.String()),
+		fmt.Sprintf("general:border_size %s", defaultBorderSize.String()),
+		fmt.Sprintf("decoration:shadow:enabled %s", defaultShadowEnabled.String()),
 	}
 	if visibleCount <= 1 {
 		cmds = []string{
@@ -70,6 +69,7 @@ func updateKeywords(client *hyprland.RequestClient) error {
 			"general:gaps_in 0",
 			"decoration:rounding 0",
 			"general:border_size 0",
+			"decoration:shadow:enabled 0",
 		}
 	}
 
@@ -98,7 +98,6 @@ func update(client *hyprland.RequestClient) {
 
 type ev struct {
 	event.DefaultEventHandler
-	client *hyprland.RequestClient
 }
 
 func (e *ev) Workspace(w event.WorkspaceName) {
@@ -114,11 +113,18 @@ func lock(file string) (*os.File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to open lock file: %v", err)
 	}
-	err = unix.Flock(int(f.Fd()), unix.LOCK_EX|unix.LOCK_NB)
-	if err != nil {
+	if err = unix.Flock(int(f.Fd()), unix.LOCK_EX|unix.LOCK_NB); err != nil {
 		return nil, fmt.Errorf("another instance is already running")
 	}
 	return f, nil
+}
+
+func opt(client *hyprland.RequestClient, key string, fallback hyprland.Option) hyprland.Option {
+	opt, err := client.GetOption(key)
+	if err != nil {
+		return fallback
+	}
+	return opt
 }
 
 func main() {
@@ -134,6 +140,13 @@ func main() {
 	defer f.Close()
 
 	client := hyprland.MustClient()
+
+	defaultGapsOut = opt(client, "general:gaps_out", defaultGapsOut)
+	defaultGapsIn = opt(client, "general:gaps_in", defaultGapsIn)
+	defaultRounding = opt(client, "decoration:rounding", defaultRounding)
+	defaultBorderSize = opt(client, "general:border_size", defaultBorderSize)
+	defaultShadowEnabled = opt(client, "decoration:shadow:enabled", defaultShadowEnabled)
+
 	go update(client)
 
 	schedule()
@@ -153,7 +166,7 @@ func main() {
 		cancel()
 	}()
 
-	if err := ec.Subscribe(ctx, &ev{client: client}, event.EventWorkspace, event.EventActiveWindow); err != nil {
+	if err := ec.Subscribe(ctx, &ev{}, event.EventWorkspace, event.EventActiveWindow); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to subscribe to events: %v\n", err)
 	}
 }
