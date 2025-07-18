@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -24,11 +25,11 @@ var (
 	lastVisibleCount int32 = -1
 	updateChan             = make(chan struct{}, 1)
 
-	defaultGapsOut       = hyprland.Option{Custom: "10 10 10 10"}
-	defaultGapsIn        = hyprland.Option{Custom: "5 5 5 5"}
-	defaultRounding      = hyprland.Option{Int: 10}
-	defaultBorderSize    = hyprland.Option{Int: 2}
-	defaultShadowEnabled = hyprland.Option{Int: 1}
+	defaultGapsOut       = hyprland.Option{Custom: "10 10 10 10", Set: true}
+	defaultGapsIn        = hyprland.Option{Custom: "5 5 5 5", Set: true}
+	defaultRounding      = hyprland.Option{Int: 10, Set: true}
+	defaultBorderSize    = hyprland.Option{Int: 2, Set: true}
+	defaultShadowEnabled = hyprland.Option{Int: 1, Set: true}
 )
 
 func updateKeywords(client *hyprland.RequestClient) error {
@@ -56,21 +57,9 @@ func updateKeywords(client *hyprland.RequestClient) error {
 	atomic.StoreInt32(&lastVisibleCount, int32(visibleCount))
 
 	// log.Printf("Updating gaps: visible windows in workspace %d: %d", ws.Id, visibleCount)
-	cmds := []string{
-		fmt.Sprintf("general:gaps_out %s", defaultGapsOut.String()),
-		fmt.Sprintf("general:gaps_in %s", defaultGapsIn.String()),
-		fmt.Sprintf("decoration:rounding %s", defaultRounding.String()),
-		fmt.Sprintf("general:border_size %s", defaultBorderSize.String()),
-		fmt.Sprintf("decoration:shadow:enabled %s", defaultShadowEnabled.String()),
-	}
+	cmds := defaultKeywords()
 	if visibleCount <= 1 {
-		cmds = []string{
-			"general:gaps_out 0",
-			"general:gaps_in 0",
-			"decoration:rounding 0",
-			"general:border_size 0",
-			"decoration:shadow:enabled 0",
-		}
+		cmds = noGaps()
 	}
 
 	if _, err := client.Keyword(cmds...); err != nil {
@@ -78,6 +67,25 @@ func updateKeywords(client *hyprland.RequestClient) error {
 	}
 
 	return nil
+}
+
+func noGaps() []string {
+	return []string{
+		"general:gaps_out 0",
+		"general:gaps_in 0",
+		"decoration:rounding 0",
+		"general:border_size 0",
+		"decoration:shadow:enabled 0",
+	}
+}
+func defaultKeywords() []string {
+	return []string{
+		fmt.Sprintf("general:gaps_out %s", defaultGapsOut.String()),
+		fmt.Sprintf("general:gaps_in %s", defaultGapsIn.String()),
+		fmt.Sprintf("decoration:rounding %s", defaultRounding.String()),
+		fmt.Sprintf("general:border_size %s", defaultBorderSize.String()),
+		fmt.Sprintf("decoration:shadow:enabled %s", defaultShadowEnabled.String()),
+	}
 }
 
 func schedule() {
@@ -100,13 +108,14 @@ type ev struct {
 	event.DefaultEventHandler
 }
 
-func (e *ev) Workspace(w event.WorkspaceName) {
-	schedule()
-}
+func (e *ev) Workspace(w event.WorkspaceName)   { schedule() }
+func (e *ev) ActiveWindow(w event.ActiveWindow) { schedule() }
 
-func (e *ev) ActiveWindow(w event.ActiveWindow) {
-	schedule()
-}
+func (e *ev) MoveWorkspace(w event.MoveWorkspace)    { schedule() }
+func (e *ev) CreateWorkspace(w event.WorkspaceName)  { schedule() }
+func (e *ev) DestroyWorkspace(w event.WorkspaceName) { schedule() }
+func (e *ev) CloseWindow(w event.CloseWindow)        { schedule() }
+func (e *ev) MoveWindow(w event.MoveWindow)          { schedule() }
 
 func lock(file string) (*os.File, error) {
 	f, err := os.OpenFile(file, os.O_CREATE|os.O_RDWR, 0600)
@@ -132,15 +141,33 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Do not run this program as root or with sudo")
 		os.Exit(1)
 	}
+
+	client := hyprland.MustClient()
+
+	reset := flag.Bool("reset", false, "reset to default values")
+	noG := flag.Bool("no-gaps", false, "reset to default values")
+	flag.Parse()
+	if reset != nil && *reset {
+		if _, err := client.Keyword(defaultKeywords()...); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to reset gaps: %v\n", err)
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+	if noG != nil && *noG {
+		if _, err := client.Keyword(noGaps()...); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to set no-gaps: %v\n", err)
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+
 	f, err := lock("/tmp/hypr-gap-manager.lock")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 	defer f.Close()
-
-	client := hyprland.MustClient()
-
 	defaultGapsOut = opt(client, "general:gaps_out", defaultGapsOut)
 	defaultGapsIn = opt(client, "general:gaps_in", defaultGapsIn)
 	defaultRounding = opt(client, "decoration:rounding", defaultRounding)
