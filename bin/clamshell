@@ -1,9 +1,13 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
 # See: https://bobbys.zone/guides/hyprland-clamshell
 
-if [[ "$(hyprctl monitors)" =~ "\sDP-[0-9]+" ]]; then
+
+external=$(hyprctl monitors -j | jq -r '.[] | select(.name | test("^DP-[0-9]+"))')
+
+if [[ -n "$external" ]]; then
   if [[ $1 == "open" ]]; then
-    hyprctl keyword monitor "eDP-1,1920x1200@60,0x0,1"
+    best_mode=$(echo "$external" | jq -r '.availableModes[0]')
+    hyprctl keyword monitor "eDP-1,${best_mode},0x0,1"
   else
     hyprctl keyword monitor "eDP-1,disable"
   fi
