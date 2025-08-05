@@ -9,4 +9,4 @@ require (
 
 // replace github.com/thiagokokada/hyprland-go => /home/dln/private/hyprland-go
 
-replace github.com/thiagokokada/hyprland-go => github.com/dlnilsson/hyprland-go v0.0.0-20250715091535-8095a75f142c
+replace github.com/thiagokokada/hyprland-go => github.com/dlnilsson/hyprland-go v0.0.0-20250805142704-f8acd29fd377

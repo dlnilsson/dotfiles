@@ -80,6 +80,8 @@ func noGaps() []string {
 }
 func defaultKeywords() []string {
 	return []string{
+		fmt.Sprintf("animations:enabled %d", 1),
+		fmt.Sprintf("decoration:blur:enabled %d", 1),
 		fmt.Sprintf("general:gaps_out %s", defaultGapsOut.String()),
 		fmt.Sprintf("general:gaps_in %s", defaultGapsIn.String()),
 		fmt.Sprintf("decoration:rounding %s", defaultRounding.String()),
@@ -87,7 +89,17 @@ func defaultKeywords() []string {
 		fmt.Sprintf("decoration:shadow:enabled %s", defaultShadowEnabled.String()),
 	}
 }
+func gameModeKeywords() []string {
+	return []string{
+		"animations:enabled 0",
+		"decoration:blur:enabled 0",
+		"general:gaps_in 0",
+		"general:gaps_out 0",
+		"general:border_size 1",
+		"decoration:rounding 0",
+	}
 
+}
 func schedule() {
 	select {
 	case updateChan <- struct{}{}:
@@ -116,6 +128,9 @@ func (e *ev) CreateWorkspace(w event.WorkspaceName)  { schedule() }
 func (e *ev) DestroyWorkspace(w event.WorkspaceName) { schedule() }
 func (e *ev) CloseWindow(w event.CloseWindow)        { schedule() }
 func (e *ev) MoveWindow(w event.MoveWindow)          { schedule() }
+func (e *ev) ToggleGroup(w event.ToggleGroup)        { schedule() }
+func (e *ev) MoveOutofGroup(w event.MoveOutofGroup)  { schedule() }
+func (e *ev) MoveIntogroup(w event.MoveIntogroup)    { schedule() }
 
 func lock(file string) (*os.File, error) {
 	f, err := os.OpenFile(file, os.O_CREATE|os.O_RDWR, 0600)
@@ -142,10 +157,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	client := hyprland.MustClient()
+	var (
+		client   = hyprland.MustClient()
+		reset    = flag.Bool("reset", false, "reset to default values")
+		noG      = flag.Bool("no-gaps", false, "set no gaps")
+		gameMode = flag.Bool("game-mode", false, "set game mode")
+	)
 
-	reset := flag.Bool("reset", false, "reset to default values")
-	noG := flag.Bool("no-gaps", false, "reset to default values")
 	flag.Parse()
 	if reset != nil && *reset {
 		if _, err := client.Keyword(defaultKeywords()...); err != nil {
@@ -157,6 +175,13 @@ func main() {
 	if noG != nil && *noG {
 		if _, err := client.Keyword(noGaps()...); err != nil {
 			fmt.Fprintf(os.Stderr, "failed to set no-gaps: %v\n", err)
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+	if gameMode != nil && *gameMode {
+		if _, err := client.Keyword(gameModeKeywords()...); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to set game mode: %v\n", err)
 			os.Exit(1)
 		}
 		os.Exit(0)
@@ -192,8 +217,19 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Received signal: %v\n", sig)
 		cancel()
 	}()
-
-	if err := ec.Subscribe(ctx, &ev{}, event.EventWorkspace, event.EventActiveWindow); err != nil {
+	subscribe := []event.EventType{
+		event.EventWorkspace,
+		event.EventActiveWindow,
+		event.EventMoveWorkspace,
+		event.EventCreateWorkspace,
+		event.EventDestroyWorkspace,
+		event.EventCloseWindow,
+		event.EventMoveWindow,
+		event.EventToggleGroup,
+		event.EventMoveIntogroup,
+		event.EventMoveOutofGroup,
+	}
+	if err := ec.Subscribe(ctx, &ev{}, subscribe...); err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to subscribe to events: %v\n", err)
 	}
 }
