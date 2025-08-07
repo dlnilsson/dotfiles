@@ -114,6 +114,13 @@ giphymd() {
   clear
 }
 
+screen_record() {
+	local f=$(echo $HOME/Videos/$(date +"%Y-%m-%d_%H_%M").mp4)
+	wl-screenrec -g "$(slurp)" --filename $f
+	wl-copy -t text/uri-list file:///$f
+	notify-send "Screen recording saved to $f" -a "Screen Recorder"
+}
+
 drc() {
 	notice_msg "\nRemoving docker containers - $emoji[whale] \n";
 	for i in $(docker ps -aq); do docker rm -f $i; done
