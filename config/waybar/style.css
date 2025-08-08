@@ -30,8 +30,9 @@
 
 
 window#waybar {
-    background-color: @nord-grey4;
-    border-radius: 25px;
+    /* background-color: @nord-grey4; */
+    background-color: transparent;
+    border-radius: 1px;
     border-bottom: @nord-grey4;
     color: @nord-white1;
     transition-property: background-color;
@@ -76,8 +77,27 @@ button:hover {
 }
 
 /* you can set a style on hover for any module like this */
+#pulseaudio-slider slider {
+    min-height: 0px;
+    min-width: 0px;
+    opacity: 0;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+#pulseaudio-slider trough {
+    min-height: 10px;
+    min-width: 80px;
+    border-radius: 5px;
+    background-color: @nord-grey4;
+}
+#pulseaudio-slider highlight {
+    min-width: 10px;
+    border-radius: 5px;
+    background-color: @nord-green;
+}
 #pulseaudio:hover {
-    background-color: #a37800;
+    background-color: @nord-orange;
 }
 
 #workspaces button {
@@ -155,17 +175,24 @@ button:hover {
 }
 
 #clock {
-    background-color: @nord-grey4;
+    /* background-color: @nord-grey4; */
+    background-color: transparent;
 }
 
 #battery {
-    background-color: #ffffff;
-    color: #000000;
+    /* background-color: @nord-grey4; */
+    background-color: transparent;
+    color: @nord-white1;
 }
-
+#battery.critical, #battery.warning {
+    background-color: @nord-red;
+}
+#battery.charging {
+    background-color:@nord-frost4;
+}
 #battery.charging, #battery.plugged {
     color: #ffffff;
-    background-color: #26A65B;
+    /* background-color: #26A65B; */
 }
 
 @keyframes blink {
@@ -364,4 +391,19 @@ label:focus {
 
 #privacy-item.audio-out {
     background-color: #0069d4;
+}
+
+/* Recording indicator */
+#custom-recording {
+  color: #ff0000;
+  font-size: 16px;
+  margin-right: 8px;
+  animation: blink 1s linear infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 1; }
+  51% { opacity: 0; }
+  100% { opacity: 0; }
 }

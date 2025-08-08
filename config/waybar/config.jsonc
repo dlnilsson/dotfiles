@@ -13,13 +13,39 @@
     "modules-center": [
         "clock"
     ],
-    //  "pulseaudio", "bluetooth", "network",
+    //  "pulseaudio", "bluetooth", "network","hyprland/language",
     "modules-right": [
+        "custom/recording",
         "hyprland/workspaces",
         "tray",
-        "hyprland/language",
+        "battery",
+        "custom/pipewire",
+        "pulseaudio/slider",
         "custom/wlogout"
     ],
+    "pulseaudio/slider": {
+        "min": 0,
+        "max": 100,
+        "orientation": "horizontal"
+    },
+    "custom/pipewire": {
+        "exec": "pw-volume status",
+        "return-type": "json",
+        "interval": "2",
+        "signal": 8,
+        "format": "{icon} {percentage}",
+        "format-icons": {
+            "mute": "muted",
+            "default": ["󰕿", "󰖀", "󰕾"]
+            }
+    },
+    "custom/recording": {
+        "exec": "pgrep -x wl-screenrec > /dev/null && echo '●' || echo ''",
+        "interval": 1,
+        "format": "{}",
+        "tooltip": false,
+        "on-click": "/home/dln/.dotfiles/bin/screen-recorder"
+    },
     // Modules configuration
     "hyprland/workspaces": {
         "format": "{name}",
@@ -52,6 +78,16 @@
     },
     "hyprland/submap": {
         "format": "<span style=\"italic\">{}</span>"
+    },
+    "battery": {
+        "interval": 60,
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{capacity}% {icon}",
+        "format-icons": ["", "", "", "", ""],
+        "max-length": 25
     },
     "wlr/taskbar": {
         "all-outputs": true,
@@ -112,7 +148,9 @@
         "spacing": 5
     },
     "clock": {
-        "format": "  {:%H:%M   %e %b}",
+        //"format": "  {:%H:%M   %e %b}",
+	//"format": "{%Y-%M-%d :%H:%M}",
+	"format": "{:%Y-%m-%d %H:%M}",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
         "today-format": "<b>{}</b>",
         "on-click": "gnome-calendar"
