@@ -72,8 +72,8 @@ if pgrep -x wl-screenrec >/dev/null; then
   # fi
 
   # Signal waybar to update
-  pkill -RTMIN+8 waybar 2>/dev/null || true
-
+  # pkill -RTMIN+8 waybar 2>/dev/null || true
+  pkill -SIGUSR2 waybar 2> /dev/null | true
   exit 0
 fi
 
@@ -98,4 +98,5 @@ else
 fi
 
 # Signal waybar to update
-pkill -RTMIN+8 waybar 2>/dev/null || true
+# pkill -RTMIN+8 waybar 2>/dev/null || true
+pkill -SIGUSR2 waybar
