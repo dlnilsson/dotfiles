@@ -116,7 +116,7 @@ giphymd() {
 
 screen_record() {
 	local f=$(echo $HOME/Videos/$(date +"%Y-%m-%d_%H_%M").mp4)
-	wl-screenrec -g "$(slurp)" --filename $f
+	wl-screenrec -g "$(slurp)" --low-power=off --filename $f
 	wl-copy -t text/uri-list file:///$f
 	notify-send "Screen recording saved to $f" -a "Screen Recorder"
 }
