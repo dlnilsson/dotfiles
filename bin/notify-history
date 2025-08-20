@@ -1,10 +1,132 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
+import argparse
+import csv
+import io
+import json
+import shutil
+import subprocess
+import sys
+from datetime import datetime, timezone
 
-file=$(mktemp)
-echo '"Title","Body"' > "$file"
-dunstctl history | jq -r '.data[][] | {"title": .summary.data, "body": .body.data} | [.title,.body] | @csv' >> "$file"
+
+def get_uptime() -> float:
+    with open("/proc/uptime", "r", encoding="utf-8") as f:
+        return float(f.readline().split()[0])
+
+# https://github.com/dunst-project/dunst/issues/1019#issuecomment-1806484582
+def dunst_ts_to_datetime(ts_microseconds: int, use_utc: bool = False) -> datetime:
+    dunst_seconds = ts_microseconds / 1_000_000.0
+    now_unix = datetime.now(timezone.utc).timestamp()
+    unix_ts = now_unix - get_uptime() + dunst_seconds
+    tz = timezone.utc if use_utc else None
+    return datetime.fromtimestamp(unix_ts, tz=tz)
 
 
-width=$(kitty +kitten icat --print-window-size | awk -F x '{print $1}')
+def run_cmd(args: list[str]) -> str:
+    try:
+        out = subprocess.check_output(args, stderr=subprocess.DEVNULL)
+        return out.decode("utf-8", errors="replace")
+    except FileNotFoundError:
+        print(f"error: command not found: {args[0]}", file=sys.stderr)
+        sys.exit(127)
+    except subprocess.CalledProcessError as e:
+        print(f"error: {' '.join(args)} failed with code {e.returncode}", file=sys.stderr)
+        sys.exit(e.returncode)
 
-gum table --height=25 --file "$file" -w 8,"$width"
+
+def detect_terminal_width() -> int:
+    return shutil.get_terminal_size(fallback=(100, 30)).columns
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    p = argparse.ArgumentParser(
+        description="Show dunst history using gum table (CSV piped via stdin)."
+    )
+    p.add_argument("--height", type=int, default=25, help="gum table height. Default: 25")
+    p.add_argument(
+        "--col1", type=int, default=35, help="Title column width (first column). Default: 35"
+    )
+    p.add_argument(
+        "--width",
+        type=int,
+        default=0,
+        help="Total table width for gum (-w). Default: auto-detect terminal columns",
+    )
+    p.add_argument("--utc", action="store_true", help="Use UTC for timestamps.")
+    p.add_argument("--limit", type=int, default=0, help="Limit number of rows (0 = no limit).")
+    return p.parse_args(argv)
+
+
+def extract_notifications(history_json: dict) -> list[dict]:
+    items = []
+    for group in history_json.get("data", []):
+        if isinstance(group, list):
+            for n in group:
+                if isinstance(n, dict):
+                    items.append(n)
+    return items
+
+
+def build_csv(notifs: list[dict], use_utc: bool, row_limit: int) -> str:
+    buf = io.StringIO()
+    writer = csv.writer(buf, quoting=csv.QUOTE_ALL)
+    writer.writerow(["Title", "Body"])
+
+    rows_written = 0
+    for n in notifs:
+        summary = (n.get("summary") or {}).get("data") or ""
+        body = (n.get("body") or {}).get("data") or ""
+        ts_us = (n.get("timestamp") or {}).get("data")
+
+        prefix = ""
+        if isinstance(ts_us, (int, float)):
+            try:
+                dt = dunst_ts_to_datetime(int(ts_us), use_utc=use_utc)
+                prefix = f"[{dt.strftime('%H:%M')}] "
+            except Exception:
+                pass
+
+        title = f"{prefix}{summary}".strip()
+        writer.writerow([title, body])
+
+        rows_written += 1
+        if row_limit and rows_written >= row_limit:
+            break
+
+    return buf.getvalue()
+
+
+def main(argv: list[str]) -> int:
+    args = parse_args(argv)
+    raw = run_cmd(["dunstctl", "history", "--json"])
+    try:
+        hist = json.loads(raw)
+    except json.JSONDecodeError:
+        print("error: failed to parse JSON from `dunstctl history --json`", file=sys.stderr)
+        return 1
+
+    notifs = extract_notifications(hist)
+    csv_data = build_csv(notifs, use_utc=args.utc, row_limit=args.limit)
+
+    total_width = args.width if args.width > 0 else detect_terminal_width()
+    widths_arg = f"{args.col1},{total_width}"
+
+    try:
+        subprocess.run(
+            ["gum", "table", "--height", str(args.height), "-w", widths_arg],
+            input=csv_data,
+            text=True,
+            check=True,
+        )
+    except FileNotFoundError:
+        print("error: gum not found. Install gum: https://github.com/charmbracelet/gum", file=sys.stderr)
+        return 127
+    except subprocess.CalledProcessError as e:
+        return e.returncode
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
+
