@@ -67,6 +67,22 @@ def extract_notifications(history_json: dict) -> list[dict]:
     return items
 
 
+def format_emoji_text(text: str) -> str:
+    if not text.strip():
+        return text
+    try:
+        result = subprocess.run(
+            ["gum", "format", "-t", "emoji"],
+            input=text,
+            text=True,
+            capture_output=True,
+            check=True,
+        )
+        return result.stdout.strip()
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return text
+
+
 def build_csv(notifs: list[dict], use_utc: bool, row_limit: int) -> str:
     buf = io.StringIO()
     writer = csv.writer(buf, quoting=csv.QUOTE_ALL)
@@ -87,7 +103,11 @@ def build_csv(notifs: list[dict], use_utc: bool, row_limit: int) -> str:
                 pass
 
         title = f"{prefix}{summary}".strip()
-        writer.writerow([title, body])
+
+        formatted_title = format_emoji_text(title)
+        formatted_body = format_emoji_text(body)
+
+        writer.writerow([formatted_title, formatted_body])
 
         rows_written += 1
         if row_limit and rows_written >= row_limit:
