@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Hyprpicker (Copy to Clipboard)
+Comment=Pick a color on screen and copy it to the clipboard
+Path=/home/dln/.dotfiles/bin/
+Exec=/home/dln/.dotfiles/bin/hyprpicker-copy
+Terminal=false
+Categories=Graphics;Utility;
+Keywords=color;picker;eyedropper;hypr;wayland;
+Icon=color-select

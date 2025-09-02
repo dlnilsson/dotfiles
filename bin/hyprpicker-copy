@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+command -v hyprpicker >/dev/null 2>&1 || { echo "hyprpicker not found in PATH"; exit 1; }
+command -v wl-copy     >/dev/null 2>&1 || { echo "wl-copy (wl-clipboard) not found in PATH"; exit 1; }
+
+raw="$(hyprpicker "$@" 2>&1 || true)"
+color="$(printf '%s\n' "$raw" | grep -Eo '#[0-9A-Fa-f]{6,8}' | head -n1 || true)"
+
+if [[ -z "${color:-}" ]]; then
+  exit 0
+fi
+
+printf "%s" "$color" | wl-copy
+printf "%s\n" "$color"
