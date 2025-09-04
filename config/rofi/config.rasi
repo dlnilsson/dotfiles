@@ -1,18 +1,18 @@
 configuration {
 	// modi: "drun,window,ssh";
-	modi: "run,drun,window,ssh";
+	modi: "drun,calc";
 	lines: 10;
-	font: "sans-serif 14";
+	font: "sans-serif 12";
 	bw: 0;
 	padding: 0;
-	show-icons: false;
+	show-icons: true;
 	terminal: "kitty";
 	matching: "fuzzy";
 	line-margin: 0;
 	line-padding: 10;
 	separator-style: "none";
 	hide-scrollbar: true;
-	sort: true;
+	// sort: true;
 	sorting-method: "fzf";
 }
 

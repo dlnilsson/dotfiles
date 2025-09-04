@@ -1,3 +1,5 @@
+/* ROUNDED THEME FOR ROFI */
+/* Author: Newman Sanchez (https://github.com/newmanls) */
 
 * {
     font:   "Roboto 12";
@@ -8,14 +10,6 @@
     margin:     0px;
     padding:    0px;
     spacing:    0px;
-    bg0:    rgba(46, 52, 64, 0.6);
-    bg1:   rgba(46, 52, 64, 0.6);
-    bg2:    rgba(76, 86, 106, 0.5);
-    bg3:    rgba(136, 192, 208, 0.95);
-    fg0:    rgba(216, 222, 233, 1);
-    fg1:    rgba(236, 239, 244, 1);
-    fg2:    rgba(216, 222, 233, 1);
-    fg3:    #4C566A;
 }
 
 window {
@@ -69,7 +63,7 @@ listview {
     margin:     12px 0 0;
     lines:      8;
     columns:    1;
-    dynamic: true;
+
     fixed-height: false;
 }
 
@@ -98,9 +92,4 @@ element-icon {
 
 element-text {
     text-color: inherit;
-}
-
-
-element selected {
-    text-color: @bg1;
 }
