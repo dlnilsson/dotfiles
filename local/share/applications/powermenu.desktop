@@ -20,7 +20,8 @@ Exec=/home/dln/.dotfiles/bin/power_menu
 
 
 # The name of the icon that will be used to display this entry
-Icon=/usr/share/icons/Yaru/48x48/actions/system-shutdown.png
+#Icon=/usr/share/icons/Yaru/48x48/actions/system-shutdown.png
+Icon=/usr/share/icons/HighContrast/48x48/actions/system-shutdown.png
 
 # Describes whether this application needs to be run in a terminal or not
 Terminal=false
