@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+BAT="/org/freedesktop/UPower/devices/battery_BAT0"
+info="$(upower -i "$BAT")"
+
+percent=$(grep -Po 'percentage:\s+\K[0-9]+' <<<"$info")
+state=$(grep -Po 'state:\s+\K.*' <<<"$info")
+icon_name=$(grep -Po "icon-name:\s+'*\K[^']+" <<<"$info")
+
+case "$icon_name" in
+  *full-charged*|*full*)    glyph="" ;;
+  *good*|*80*)              glyph="" ;;
+  *60*)                     glyph="" ;;
+  *40*)                     glyph="" ;;
+  *caution*|*20*|*low*)     glyph="" ;;
+  *charging*)               glyph="" ;;
+  *)                        glyph="" ;;
+esac
+
+color="#D8DEE9"
+if [[ "$state" == "charging" ]]; then
+  color="#88C0D0"
+elif (( percent <= 20 )); then
+  color="#D08770"
+fi
+
+echo "<span foreground='$color'>$glyph $percent% ($state)</span>"
