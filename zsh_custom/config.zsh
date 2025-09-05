@@ -234,7 +234,7 @@ vacuum() {
 	# find . -type f -name "*.py[co]" -delete -or -type d -name "__pycache__" -delete
 }
 ff() {
-	find . -type f -name $1
+	find -L . -type f -name $1
 }
 
 ping_sound() {
