@@ -2,6 +2,7 @@ export GOPATH=$HOME/go
 export PATH=$PATH:/usr/local/go/bin
 export PATH=$GOPATH/bin:$PATH
 export PATH=$HOME/.dotfiles/bin:$PATH
+export PATH=$HOME/.cargo/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 export PATH=$HOME/.npm-global/bin:$PATH
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
@@ -19,8 +20,10 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
     --color=info:#eacb8a,prompt:#bf6069,pointer:#b48dac
     --color=marker:#a3be8b,spinner:#b48dac,header:#a3be8b
 	--bind page-up:preview-up,page-down:preview-down'
-
+export HUSKY=0
+export MICRO_TRUECOLOR=1
 # export TERMINAL=termite
+alias nano=micro
 alias tally='sort | uniq -c | sort'
 alias ks="kubectl --context minikube --namespace srenity"
 alias gitadd="git add"
