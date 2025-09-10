@@ -60,9 +60,100 @@ unichr() {
   echo -n "$REPLY$s"
 }
 
+echo
+echo "=== Test harness unichr ==="
 ## test harness
 for (( i=0x2500; i<0x2600; i++ )); do
   unichr $i
 done
+echo
+echo "=============================="
+echo
+
 
 echo
+echo "=== Test custom terminal text size ==="
+echo "Test terminal text size"
+echo "should be double"
+printf "\e]66;s=2;Double sized text\a\n\n"
+echo "should be tripple"
+printf "\e]66;s=3;Triple sized text\a\n\n\n"
+echo "should be half size"
+printf "\e]66;n=1:d=2;Half sized text\a\n"
+echo "=============================="
+echo
+
+# Font Awesome Unicode codepoints (v6 free set: solid + brands)
+declare -A icons=(
+  # Brands
+  ["fa-github"]="\uf09b"
+  ["fa-docker"]="\uf395"
+  ["fa-linux"]="\uf17c"
+  ["fa-apple"]="\uf179"
+  ["fa-windows"]="\uf17a"
+  ["fa-twitter"]="\uf099"
+  ["fa-facebook"]="\uf09a"
+  ["fa-youtube"]="\uf167"
+  ["fa-discord"]="\uf392"
+  ["fa-gitlab"]="\uf296"
+
+  # UI / Actions
+  ["fa-user"]="\uf007"
+  ["fa-users"]="\uf0c0"
+  ["fa-user-plus"]="\uf234"
+  ["fa-lock"]="\uf023"
+  ["fa-unlock"]="\uf09c"
+  ["fa-cog"]="\uf013"
+  ["fa-search"]="\uf002"
+  ["fa-download"]="\uf019"
+  ["fa-upload"]="\uf093"
+  ["fa-trash"]="\uf1f8"
+  ["fa-edit"]="\uf044"
+  ["fa-check"]="\uf00c"
+  ["fa-times"]="\uf00d"
+  ["fa-plus"]="\uf067"
+  ["fa-minus"]="\uf068"
+
+  # System / Files
+  ["fa-home"]="\uf015"
+  ["fa-folder"]="\uf07b"
+  ["fa-folder-open"]="\uf07c"
+  ["fa-file"]="\uf15b"
+  ["fa-file-alt"]="\uf15c"
+  ["fa-save"]="\uf0c7"
+  ["fa-print"]="\uf02f"
+
+  # Media
+  ["fa-play"]="\uf04b"
+  ["fa-pause"]="\uf04c"
+  ["fa-stop"]="\uf04d"
+  ["fa-forward"]="\uf04e"
+  ["fa-backward"]="\uf04a"
+  ["fa-volume-up"]="\uf028"
+  ["fa-volume-mute"]="\uf6a9"
+  ["fa-camera"]="\uf030"
+  ["fa-image"]="\uf03e"
+  ["fa-video"]="\uf03d"
+
+  # Misc
+  ["fa-heart"]="\uf004"
+  ["fa-star"]="\uf005"
+  ["fa-bell"]="\uf0f3"
+  ["fa-calendar"]="\uf133"
+  ["fa-envelope"]="\uf0e0"
+  ["fa-globe"]="\uf0ac"
+  ["fa-shopping-cart"]="\uf07a"
+)
+
+echo "=== Font Awesome Icon Test ==="
+for name in "${!icons[@]}"; do
+  icon=$(printf "%b" "${icons[$name]}")
+  # Detect missing glyphs (tofu box, ?, or empty)
+  if [[ "$icon" == "□" || "$icon" == "?" || -z "$icon" ]]; then
+    printf "%-18s %s [MISSING]\n" "$name" "$icon"
+  else
+    printf "%-18s %s\n" "$name" "$icon"
+  fi
+done | sort
+echo "=============================="
+
