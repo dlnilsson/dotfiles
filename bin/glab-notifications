@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# deps: glab, jq, fzf, base64  (bat optional for pretty markdown preview)
+
+TMP_DIR="${TMPDIR:-/tmp}/glab-todo"
+mkdir -p "$TMP_DIR"
+DONE_FILE="$TMP_DIR/done.ids"
+touch "$DONE_FILE"
+
+SELF="${BASH_SOURCE[0]:-$0}"
+
+
+print_todos() {
+  # TSV: 1=id 2=project 3=reference 4=title 5=body 6=desc_one_line 7=desc_base64 8=target_url
+  local jq_prog='
+    .[] |
+    [
+      (.id|tostring),
+      (.project.name_with_namespace // "" | gsub("\r|\n|\t"; " ")),
+      (.target.reference // ""),
+      (.target.title // ""         | gsub("\r|\n|\t"; " ")),
+      (.body // ""                 | gsub("\r|\n|\t"; " ")),
+      ((.target.description // "" )| gsub("\r|\n|\t"; " ")),
+      ((.target.description // "" )| @base64),
+      (.target_url // "")
+    ] | @tsv
+  '
+  mapfile -t rows < <(glab api /todos | jq -r "$jq_prog")
+
+  if [[ -s "$DONE_FILE" ]]; then
+    declare -A done=()
+    while IFS= read -r id; do [[ -n "$id" ]] && done["$id"]=1; done < "$DONE_FILE"
+    for line in "${rows[@]}"; do
+      local id="${line%%$'\t'*}"
+      [[ -z "${done[$id]:-}" ]] && printf '%s\n' "$line"
+    done
+  else
+    printf '%s\n' "${rows[@]}"
+  fi
+}
+
+preview_md() {
+  # arg: base64 markdown (col 7)
+  local b64="${1:-}" txt=""
+  if ! txt="$(printf %s "$b64" | base64 -d 2>/dev/null)"; then
+    txt="$(printf %s "$b64" | base64 -D 2>/dev/null || printf '')"
+  fi
+  if command -v bat >/dev/null 2>&1; then
+    printf "%s\n" "$txt" | bat -l markdown --paging=never --style=plain --color=always
+  else
+    printf "%s\n" "$txt"
+  fi
+}
+
+open_url() {
+  local url="${1:-}"
+  [[ -z "$url" ]] && return 0
+  if command -v xdg-open >/dev/null 2>&1; then
+    nohup xdg-open "$url" >/dev/null 2>&1 &
+  elif command -v open >/dev/null 2>&1; then
+    nohup open "$url" >/dev/null 2>&1 &
+  else
+    printf '%s\n' "$url"
+  fi
+}
+
+mark_done() {
+  local id="${1:-}"
+  [[ -z "$id" ]] && return 0
+  glab api "/todos/$id/mark_as_done" -X POST >/dev/null 2>&1 || true
+  echo "$id" >> "$DONE_FILE"
+}
+
+
+case "${1-}" in
+  __print)   print_todos; exit 0 ;;
+  __preview) shift; preview_md "${1-}"; exit 0 ;;
+  __open)    shift; open_url  "${1-}"; exit 0 ;;
+  __done)    shift; mark_done "${1-}"; exit 0 ;;
+esac
+
+
+while true; do
+  if [[ -z "$(print_todos | head -n1 || true)" ]]; then
+    echo "No To-Dos!"
+    exit 0
+  fi
+
+  # Use --expect to capture key + row; preview is markdown from col 7
+  mapfile -d '' -t sel < <(
+    print_todos | fzf \
+      --ansi \
+      --no-multi \
+      --delimiter=$'\t' \
+      --with-nth=2,3,4,5 \
+      --no-sort --tiebreak=index \
+      --header='Enter: open | Ctrl-D: mark done | Ctrl-R: refresh | Esc: quit' \
+      --preview "$SELF __preview {7}" \
+      --preview-window=wrap \
+      --expect=enter,ctrl-d,ctrl-r \
+      --print0
+  ) || exit 0  # Esc/EOF quits
+
+  key="${sel[0]:-}"
+  line="${sel[1]:-}"
+
+  case "$key" in
+    enter)
+      url="$(printf '%s' "$line" | cut -f8)"
+      open_url "$url"
+      ;;
+    ctrl-d)
+      id="$(printf '%s' "$line" | cut -f1)"
+      mark_done "$id"
+      ;;
+    ctrl-r)
+      : # just loop to refresh
+      ;;
+    *)
+      exit 0
+      ;;
+  esac
+done
