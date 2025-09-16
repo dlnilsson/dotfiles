@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+TARGET="$HOME/.dotfiles"
+
+pacman -Qem | awk '{print $1}' | sort > $TARGET/aur_packages
+pacman -Qen | awk '{print $1}' | sort > $TARGET/arch_packages
