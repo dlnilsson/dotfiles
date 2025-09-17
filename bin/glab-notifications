@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# deps: glab, jq, fzf, base64  (bat optional for pretty markdown preview)
+# deps: glab, jq, fzf, base64  (optional: gum or bat for pretty markdown preview)
 
 TMP_DIR="${TMPDIR:-/tmp}/glab-todo"
 mkdir -p "$TMP_DIR"
@@ -10,20 +10,29 @@ touch "$DONE_FILE"
 
 SELF="${BASH_SOURCE[0]:-$0}"
 
-
 print_todos() {
-  # TSV: 1=id 2=project 3=reference 4=title 5=body 6=desc_one_line 7=desc_base64 8=target_url
+  # TSV columns:
+  # 1=id 2=project 3=reference 4=title 5=body 6=desc_one_line 7=desc_base64 8=target_url 9=author
   local jq_prog='
     .[] |
     [
       (.id|tostring),
-      (.project.name_with_namespace // "" | gsub("\r|\n|\t"; " ")),
+      (.project.name_with_namespace // "" | gsub("
+|
+|	"; " ")),
       (.target.reference // ""),
-      (.target.title // ""         | gsub("\r|\n|\t"; " ")),
-      (.body // ""                 | gsub("\r|\n|\t"; " ")),
-      ((.target.description // "" )| gsub("\r|\n|\t"; " ")),
+      (.target.title // ""         | gsub("
+|
+|	"; " ")),
+      (.body // ""                 | gsub("
+|
+|	"; " ")),
+      ((.target.description // "" )| gsub("
+|
+|	"; " ")),
       ((.target.description // "" )| @base64),
-      (.target_url // "")
+      (.target.web_url // ""),
+      (.target.author.name // "")
     ] | @tsv
   '
   mapfile -t rows < <(glab api /todos | jq -r "$jq_prog")
@@ -32,24 +41,37 @@ print_todos() {
     declare -A done=()
     while IFS= read -r id; do [[ -n "$id" ]] && done["$id"]=1; done < "$DONE_FILE"
     for line in "${rows[@]}"; do
-      local id="${line%%$'\t'*}"
-      [[ -z "${done[$id]:-}" ]] && printf '%s\n' "$line"
+      local id="${line%%$'	'*}"
+      [[ -z "${done[$id]:-}" ]] && printf '%s
+' "$line"
     done
   else
-    printf '%s\n' "${rows[@]}"
+    printf '%s
+' "${rows[@]}"
   fi
 }
 
 preview_md() {
-  # arg: base64 markdown (col 7)
-  local b64="${1:-}" txt=""
+  # args: title (col 4), author (col 9), base64 markdown (col 7)
+  local title="${1:-}" author="${2:-}" b64="${3:-}" txt=""
+  # decode base64 (Linux -d, macOS -D)
   if ! txt="$(printf %s "$b64" | base64 -d 2>/dev/null)"; then
     txt="$(printf %s "$b64" | base64 -D 2>/dev/null || printf '')"
   fi
-  if command -v bat >/dev/null 2>&1; then
-    printf "%s\n" "$txt" | bat -l markdown --paging=never --style=plain --color=always
+  # Header as Markdown
+  local header="# ${title}
+
+**Author:** ${author}
+"
+  if command -v gum >/dev/null 2>&1; then
+    { printf "%b" "$header"; printf "%s
+" "$txt"; } | gum format
+  elif command -v bat >/dev/null 2>&1; then
+    { printf "%b" "$header"; printf "%s
+" "$txt"; } | bat -l markdown --paging=never --style=plain --color=always
   else
-    printf "%s\n" "$txt"
+    printf "%b%s
+" "$header" "$txt"
   fi
 }
 
@@ -61,7 +83,8 @@ open_url() {
   elif command -v open >/dev/null 2>&1; then
     nohup open "$url" >/dev/null 2>&1 &
   else
-    printf '%s\n' "$url"
+    printf '%s
+' "$url"
   fi
 }
 
@@ -72,14 +95,12 @@ mark_done() {
   echo "$id" >> "$DONE_FILE"
 }
 
-
 case "${1-}" in
   __print)   print_todos; exit 0 ;;
-  __preview) shift; preview_md "${1-}"; exit 0 ;;
+  __preview) shift; preview_md "$@"; exit 0 ;;
   __open)    shift; open_url  "${1-}"; exit 0 ;;
   __done)    shift; mark_done "${1-}"; exit 0 ;;
 esac
-
 
 while true; do
   if [[ -z "$(print_todos | head -n1 || true)" ]]; then
@@ -87,16 +108,16 @@ while true; do
     exit 0
   fi
 
-  # Use --expect to capture key + row; preview is markdown from col 7
+  # Use --expect to capture key + row; preview shows Title + Author + Markdown body
   mapfile -d '' -t sel < <(
     print_todos | fzf \
       --ansi \
       --no-multi \
-      --delimiter=$'\t' \
+      --delimiter=$'	' \
       --with-nth=2,3,4,5 \
       --no-sort --tiebreak=index \
       --header='Enter: open | Ctrl-D: mark done | Ctrl-R: refresh | Esc: quit' \
-      --preview "$SELF __preview {7}" \
+      --preview "$SELF __preview {4} {9} {7}" \
       --preview-window=wrap \
       --expect=enter,ctrl-d,ctrl-r \
       --print0
@@ -121,4 +142,5 @@ while true; do
       exit 0
       ;;
   esac
+
 done
