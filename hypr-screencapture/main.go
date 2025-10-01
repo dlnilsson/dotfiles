@@ -1,3 +1,14 @@
+// hypr-screencapture: monitor Hyprland screencast events and write status to file
+// combine with waybar custom script module to show screencast status in bar
+// example:
+//
+//	"custom/recording": {
+//	    "exec": "cat $XDG_RUNTIME_DIR/hypr/screencast.status",
+//	    "interval": 3,
+//	    "format": "{}",
+//	    "tooltip": false,
+//	    "on-click": "/home/dln/.dotfiles/bin/screen-recorder"
+//	},
 package main
 
 import (
@@ -260,7 +271,7 @@ func isZombie(pid string) bool {
 
 func onOff(b bool) string {
 	if b {
-		return "ON"
+		return "●"
 	}
-	return "OFF"
+	return "" // empty for "off" , will be used in waybar
 }
