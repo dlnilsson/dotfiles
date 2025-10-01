@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+if fuser /dev/video* >/dev/null 2>&1; then
+	echo " 📸 "
+else
+	echo ""
+fi

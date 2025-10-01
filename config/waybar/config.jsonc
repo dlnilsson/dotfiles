@@ -9,7 +9,14 @@
             // "custom/hyprWindowMode",
     "modules-left": ["hyprland/window"],
     "modules-center": ["clock"],
-    "modules-right": ["custom/recording","hyprland/workspaces", "tray", "battery",  "custom/wlogout"],
+    "modules-right": [
+        "custom/camera",
+        "custom/recording",
+        "hyprland/workspaces",
+        "tray",
+        "battery",
+        "custom/wlogout"
+    ],
     //  "pulseaudio", "bluetooth", "network","hyprland/language",
     // "modules-right": [
     //     "custom/wlogout"
@@ -20,6 +27,12 @@
         "format": "{}",
         "tooltip": false,
         "on-click": "/home/dln/.dotfiles/bin/screen-recorder"
+    },
+    "custom/camera": {
+        "exec": "/home/dln/.dotfiles/bin/check-camera",
+        "interval": 3,
+        "format": "{}",
+        "tooltip": false
     },
     // Modules configuration
     "hyprland/workspaces": {
