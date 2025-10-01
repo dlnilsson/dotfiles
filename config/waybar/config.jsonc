@@ -7,41 +7,16 @@
     // Choose the order of the modules
     // , "idle_inhibitor"
             // "custom/hyprWindowMode",
-    "modules-left": [
-        "hyprland/window"
-    ],
-    "modules-center": [
-        "clock"
-    ],
+    "modules-left": ["hyprland/window"],
+    "modules-center": ["clock"],
+    "modules-right": ["custom/recording","hyprland/workspaces", "tray", "battery",  "custom/wlogout"],
     //  "pulseaudio", "bluetooth", "network","hyprland/language",
-    "modules-right": [
-        "custom/recording",
-        "hyprland/workspaces",
-        "tray",
-        "battery",
-        "custom/pipewire",
-        "pulseaudio/slider",
-        "custom/wlogout"
-    ],
-    "pulseaudio/slider": {
-        "min": 0,
-        "max": 100,
-        "orientation": "horizontal"
-    },
-    "custom/pipewire": {
-        "exec": "pw-volume status",
-        "return-type": "json",
-        "interval": "2",
-        "signal": 8,
-        "format": "{icon} {percentage}",
-        "format-icons": {
-            "mute": "muted",
-            "default": ["󰕿", "󰖀", "󰕾"]
-            }
-    },
+    // "modules-right": [
+    //     "custom/wlogout"
+    // ],
     "custom/recording": {
-        "exec": "pgrep -x wl-screenrec > /dev/null && echo '●' || echo ''",
-        "interval": 1,
+        "exec": "cat $XDG_RUNTIME_DIR/hypr/screencast.status",
+        "interval": 3,
         "format": "{}",
         "tooltip": false,
         "on-click": "/home/dln/.dotfiles/bin/screen-recorder"
@@ -94,7 +69,7 @@
         "format": "{icon}   {title:.25}",
         "markup": true,
         "icon-size": 20,
-        "on-click": "activate",
+        "on-click": "activate"
     },
     "hyprland/window": {
         "format": "{}",
@@ -104,7 +79,10 @@
             "(.*) — Code - OSS": "$1",
             "(.*) - Visual Studio Code": "$1",
             "(.*) - Slack": "$1",
-            "(.*) - Discord": "$1"
+            "(.*) - Discord": "$1",
+            "(.*) - Cursor": "$1",
+            "(.*) - Chromium": "$1",
+            "(.*) - Free Version": "$1"
         },
         "separate-outputs": true
     },
@@ -145,7 +123,8 @@
     },
     "tray": {
         //"icon-size": 11,
-        "spacing": 5
+        "spacing": 5,
+        "icon-theme": "Nordzy"
     },
     "clock": {
         //"format": "  {:%H:%M   %e %b}",
@@ -165,27 +144,5 @@
         "family": "ipv4",
         "tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\n {bandwidthUpBits}  {bandwidthDownBits}",
         "tooltip-format-ethernet": " {ifname}\nIP: {ipaddr}\n {bandwidthUpBits}  {bandwidthDownBits}"
-    },
-    "pulseaudio": {
-        "scroll-step": 3, // %, can be a float
-        "format": "{icon} {volume}% {format_source}",
-        "format-bluetooth": "{volume}% {icon} {format_source}",
-        "format-bluetooth-muted": " {icon} {format_source}",
-        "format-muted": " {format_source}",
-        //"format-source": "{volume}% ",
-        //"format-source-muted": "",
-        "format-source": "",
-        "format-source-muted": "",
-        "format-icons": {
-            "headphone": "",
-            "hands-free": "",
-            "headset": "",
-            "phone": "",
-            "portable": "",
-            "car": "",
-            "default": ["", "", ""]
-        },
-        "on-click": "pavucontrol",
-        "on-click-right": "pactl set-source-mute @DEFAULT_SOURCE@ toggle"
     }
 }
