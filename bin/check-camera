@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
+c="$HOME/.cache/camera-on"
 if fuser /dev/video* >/dev/null 2>&1; then
 	echo " 📸 "
+	if [[ ! -e "$c" ]]; then
+		touch "$c"
+		notify-send --wait "📸 Camera on"
+	fi
 else
+	rm -f "$c"
 	echo ""
 fi
