@@ -17,12 +17,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"slices"
 	"strings"
 	"syscall"
 	"time"
+
+	_ "embed"
 
 	"github.com/thiagokokada/hyprland-go/event"
 )
@@ -32,8 +35,46 @@ var (
 	procNames  = []string{
 		"wl-screenrec",
 	}
-	pollEvery = 2 * time.Second
+	pollEvery         = 2 * time.Second
+	notificationCount = 0
 )
+
+//go:embed camera.png
+var icon []byte
+
+func sendNotification(title, message string, iconBytes []byte) error {
+	cmd, err := exec.LookPath("notify-send")
+	if err != nil {
+		return err
+	}
+
+	tmp, err := bytesToFilename(iconBytes)
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmp)
+
+	args := []string{title, message, "-a", "hypr-screencapture", "-i", tmp, "-t", "3000", "-u", "normal"}
+	c := exec.Command(cmd, args...)
+	return c.Run()
+}
+
+func bytesToFilename(data []byte) (string, error) {
+	var out string
+
+	tmp, err := os.CreateTemp(os.TempDir(), "hypr-screencapture*.png")
+	if err != nil {
+		return out, err
+	}
+	defer tmp.Close()
+
+	if _, err = tmp.Write(data); err != nil {
+		return out, err
+	}
+
+	out = tmp.Name()
+	return out, nil
+}
 
 type msgKind int
 
@@ -198,8 +239,25 @@ func watchUntilGone(ctx context.Context, names []string, every time.Duration, on
 	}
 }
 
-// writeStatus writes exactly "ON" or "OFF" + newline.
+const (
+	messageOn  = "screencast on"
+	messageOff = "screencast off"
+)
+
 func writeStatus(on bool) {
+	message := messageOff
+	if on {
+		message = messageOn
+	}
+
+	// Only send notification if it's not the initial "off" state
+	if !(message == messageOff && notificationCount == 0) {
+		if err := sendNotification("Screencast", message, icon); err != nil {
+			fmt.Fprintf(os.Stderr, "could not send notification: %v", err)
+		}
+	}
+	notificationCount++
+
 	tmp := statusFile + ".tmp"
 	if err := os.WriteFile(tmp, []byte(onOff(on)+""), 0o644); err != nil {
 		fmt.Fprintf(os.Stderr, "could not write status file: %v", err)
