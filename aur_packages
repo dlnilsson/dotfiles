@@ -10,6 +10,7 @@ gromit-mpx
 hackernews_tui
 hyprsysteminfo
 iwgtk
+localsend-bin
 logiops-git
 mycli
 nerd-fonts-complete-mono-glyphs
@@ -17,12 +18,15 @@ ngrok
 nordic-standard-buttons-theme
 nordic-theme
 notify-send.sh
+opera
 ox-bin
 postman-bin
 proton-mail-bin
 pwvucontrol
+signal-desktop-beta-bin
 slack-desktop
 stripe-cli
+swayosd-git
 swhkd-bin
 termsyn-font
 tilix
@@ -32,7 +36,7 @@ wlogout
 wl-screenrec
 wpgtk
 xf86-video-vmware
+xwaylandvideobridge-git
 yay
-yay-debug
 yin-yang
 zen-browser-bin

@@ -44,6 +44,7 @@ font-manager
 fprintd
 fuse2
 fzf
+gdb
 gedit
 ghostty
 git
@@ -66,6 +67,7 @@ hyprlock
 hyprpaper
 hyprpicker
 hyprpolkitagent
+hyprsunset
 imagemagick
 imwheel
 intel-media-driver
@@ -74,6 +76,7 @@ iwd
 jdk-openjdk
 jq
 keychain
+keyd
 kgpg
 kitty
 less
@@ -101,6 +104,7 @@ nodejs-lts-iron
 noto-fonts-cjk
 noto-fonts-emoji
 npm
+nvm
 nwg-displays
 nwg-look
 openssh
@@ -137,6 +141,7 @@ speech-dispatcher
 spotify-player
 sqlfluff
 strace
+swaylock
 tailscale
 texlive-binextra
 the_silver_searcher
@@ -147,6 +152,7 @@ typst
 unzip
 usbutils
 vim
+vivaldi
 vlc
 vlc-plugins-all
 vulkan-headers
@@ -156,6 +162,7 @@ vulkan-radeon
 vulkan-tools
 watchexec
 waybar
+wev
 wget
 whois
 wireless_tools
@@ -163,9 +170,7 @@ wl-clipboard
 woff2-font-awesome
 wofi
 wpa_supplicant
-xdg-desktop-portal-gtk
 xdg-desktop-portal-hyprland
-xdg-desktop-portal-wlr
 xdg-utils
 xf86-video-amdgpu
 xf86-video-ati
