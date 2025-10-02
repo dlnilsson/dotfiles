@@ -35,8 +35,11 @@ var (
 	procNames  = []string{
 		"wl-screenrec",
 	}
-	pollEvery         = 2 * time.Second
-	notificationCount = 0
+	pollEvery            = 2 * time.Second
+	notificationCount    = 0
+	lastMessage          = ""
+	lastNotification     = time.Time{}
+	notificationCooldown = 3 * time.Second
 )
 
 //go:embed camera.png
@@ -251,10 +254,17 @@ func writeStatus(on bool) {
 	}
 
 	// Only send notification if it's not the initial "off" state
-	if !(message == messageOff && notificationCount == 0) {
+	// and avoid duplicate notifications in short succession
+	now := time.Now()
+	shouldNotify := !(message == messageOff && notificationCount == 0) &&
+		(message != lastMessage || now.Sub(lastNotification) >= notificationCooldown)
+
+	if shouldNotify {
 		if err := sendNotification("Screencast", message, icon); err != nil {
 			fmt.Fprintf(os.Stderr, "could not send notification: %v", err)
 		}
+		lastMessage = message
+		lastNotification = now
 	}
 	notificationCount++
 
