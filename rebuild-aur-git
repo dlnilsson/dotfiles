@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+ yay -Qq | grep -E '(.+?-git)$' | yay -S --rebuild --noconfirm - 
