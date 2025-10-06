@@ -1,41 +1,32 @@
 #!/usr/bin/env sh
 # xdotool key XF86AudioMute &&
 # betterlockscreen -l dim &> /dev/null
+set -uo pipefail
 
 bw lock &> /dev/null &
 
+HYPRLOCK_BIN="${HYPRLOCK_BIN:-hyprlock}"
+SWAYLOCK_BIN="${SWAYLOCK_BIN:-swaylock}"
 
-BLANK='#00000000'
-CLEAR='#ffffff22'
-DEFAULT='#e5e9f0'
-TEXT='#5e81ac'
-WRONG='#880000bb'
-VERIFYING='#5e81ac'
+run_cmd() {
+  local cmd="$1"; shift
+  if command -v "$cmd" >/dev/null 2>&1; then
+    "$cmd" "$@"
+    return $?
+  else
+    # command not found is considered failure to allow fallback
+    return 127
+  fi
+}
 
-i3lock \
---insidever-color=$CLEAR     \
---ringver-color=$VERIFYING   \
-\
---insidewrong-color=$CLEAR   \
---ringwrong-color=$WRONG     \
-\
---inside-color=$BLANK        \
---ring-color=$DEFAULT        \
---line-color=$BLANK          \
---separator-color=$DEFAULT   \
-\
---verif-color=$TEXT          \
---wrong-color=$TEXT          \
---time-color=$TEXT           \
---date-color=$TEXT           \
---layout-color=$TEXT         \
---keyhl-color=$WRONG         \
---bshl-color=$WRONG          \
-\
---screen 1                   \
---blur 5                     \
---clock                      \
---indicator                  \
---time-str="%H:%M:%S"        \
---date-str="%A, %Y-%m-%d"       \
---keylayout 1                \
+if run_cmd "$HYPRLOCK_BIN" "$@"; then
+  exit 0
+fi
+
+
+if run_cmd "$SWAYLOCK_BIN" "$@"; then
+  exit 0
+fi
+
+echo "Error: neither '$HYPRLOCK_BIN' nor '$SWAYLOCK_BIN' succeeded." >&2
+exit 1
