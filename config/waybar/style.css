@@ -30,8 +30,8 @@
 
 
 window#waybar {
-    /* background-color: @nord-grey4; */
-    background-color: transparent;
+    background-color: @nord-grey1;
+    /* background-color: transparent; */
     border-radius: 1px;
     border-bottom: @nord-grey4;
     color: @nord-white1;
@@ -44,10 +44,14 @@ window#waybar.hidden {
     opacity: 0.2;
 }
 
-
+/*
 window#waybar.empty {
     background-color: transparent;
 }
+
+*/
+
+
 window#waybar.solo {
     padding-left: 2px;
 }
@@ -407,4 +411,9 @@ label:focus {
   50% { opacity: 1; }
   51% { opacity: 0; }
   100% { opacity: 0; }
+}
+
+#custom-swaync {
+    background-color: transparent;
+    color: @nord-white1;
 }
