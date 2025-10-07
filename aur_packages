@@ -3,12 +3,12 @@ adwaita-dark
 amdgpu_top-tui-bin
 beekeeper-studio-bin
 brillo
+bun-bin
 ccat
 drm_info
 gnu-netcat
 gromit-mpx
 hackernews_tui
-hyprsysteminfo
 iwgtk
 localsend-bin
 logiops-git
@@ -32,6 +32,7 @@ termsyn-font
 tilix
 ttf-times-new-roman
 visual-studio-code-bin
+walker-bin
 wlogout
 wl-screenrec
 wpgtk

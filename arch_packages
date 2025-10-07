@@ -43,6 +43,7 @@ flameshot
 font-manager
 fprintd
 fuse2
+fuzzel
 fzf
 gdb
 gedit
@@ -123,6 +124,7 @@ qt6ct
 qt6-wayland
 radeontop
 reflector
+rio
 rofi
 rofi-calc
 rofi-emoji
@@ -142,6 +144,7 @@ spotify-player
 sqlfluff
 strace
 swaylock
+swaync
 tailscale
 texlive-binextra
 the_silver_searcher
