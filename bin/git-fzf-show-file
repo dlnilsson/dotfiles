@@ -1,25 +1,44 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Check for a single argument
-if [ $# -ne 1 ]; then
-    echo "Usage: git-fzf-show-file.sh <file>"
-    exit 1
+# Usage check
+if [[ $# -ne 1 ]]; then
+  echo "Usage: $(basename "$0") <path/to/file>"
+  exit 1
 fi
 
-file="$1"
+file=$1
 
+# Ensure we're in a git repo and the file exists in history
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+  echo "Not inside a git repository." >&2
+  exit 1
+}
 
-
-# # Use git log and fzf to select a commit
-commit=$(git log --oneline -- "$file" \
-| fzf --ansi \
---color "hl:-1:underline,hl+:-1:underline:reverse" \
---preview-window 'up,85%,border-bottom,+{2}+3/3,~3' \
---bind "enter:execute(echo {1})+abort" \
---preview "git show --color=always {1}:$file | batcat --plain --color=always"
+# Let git log produce ANSI colors, fzf will pass them through with --ansi.
+# We print: <hash> <date> <subject> (<author>)
+# NOTE: We rely on the first space-delimited field being the short hash `{1}`.
+commit=$(
+  git --no-pager log \
+    --date=short \
+    --color=always \
+    --pretty=format:'%C(auto)%h %C(8)%ad%Creset %s %C(blue dim)(%an)' -- "$file" \
+  | fzf --ansi \
+        --prompt="commits> " \
+        --header="Select a commit touching $file (Enter to choose)" \
+        --color="hl:-1:underline,hl+:-1:underline:reverse" \
+        --preview-window='up,80%,border-bottom,+{2}+3/3,~3' \
+        --bind "enter:execute-silent(echo {1})+abort" \
+        --preview '
+          # Show the file at the selected commit with syntax highlighting.
+          # --textconv respects .gitattributes filters (useful for things like LFS or generated files).
+          # We pipe to bat via stdin and tell it the filename so it can pick the correct lexer.
+          git --no-pager show --textconv {1}:"'"$file"'" \
+            | bat --plain --color=always --file-name "'"$file"'" -
+        '
 )
 
-# # Check if a commit was selected
-if [ -n "$commit" ]; then
-    echo "$commit:$file"
+# If a commit was selected, print "<hash>:<file>"
+if [[ -n "${commit:-}" ]]; then
+  echo "$commit:$file"
 fi
