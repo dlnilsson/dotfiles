@@ -252,6 +252,13 @@ func writeStatus(on bool) {
 	if on {
 		message = messageOn
 	}
+	defer func() {
+		go func() {
+			if err := toggleNotificationInhibitor(on); err != nil {
+				fmt.Fprintf(os.Stderr, "could not toggle notification inhibitor: %v", err)
+			}
+		}()
+	}()
 
 	// Only send notification if it's not the initial "off" state
 	// and avoid duplicate notifications in short succession
@@ -335,6 +342,13 @@ func isZombie(pid string) bool {
 		}
 	}
 	return false
+}
+
+func toggleNotificationInhibitor(add bool) error {
+	if add {
+		return exec.Command("swaync-client", "--inhibitor-add", "xdg-desktop-portal-hyprland").Run()
+	}
+	return exec.Command("swaync-client", "--inhibitor-remove", "xdg-desktop-portal-hyprland").Run()
 }
 
 func onOff(b bool) string {
