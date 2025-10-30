@@ -56,6 +56,7 @@ gnome-calculator
 gnome-keyring
 gnome-themes-extra
 go
+go-yq
 graphviz
 grim
 gum
@@ -107,6 +108,7 @@ npm
 nvm
 nwg-displays
 nwg-look
+obsidian
 openssh
 papirus-icon-theme
 parallel

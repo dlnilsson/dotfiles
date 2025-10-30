@@ -5,6 +5,7 @@ beekeeper-studio-bin
 brillo
 bun-bin
 ccat
+cursor-bin
 drm_info
 gnu-netcat
 gromit-mpx
@@ -12,6 +13,7 @@ hackernews_tui
 iwgtk
 localsend-bin
 logiops-git
+mullvad-browser-bin
 mycli
 nerd-fonts-complete-mono-glyphs
 ngrok
@@ -37,6 +39,7 @@ wl-screenrec
 wpgtk
 xf86-video-vmware
 xwaylandvideobridge-git
+yaak-bin
 yay
 yin-yang
 zen-browser-bin
