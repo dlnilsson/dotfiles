@@ -98,6 +98,9 @@
 	# work merge strat
 	mgd = "!git merge $1 --no-ff --no-commit && git branch -d $1; #"
 
+	# show diff of merge commit
+	showmerge = "!f() { rev=${1:-HEAD}; git show -p \"$rev^1..$rev\"; }; f"
+
 [rerere]
 	enabled = true
 
