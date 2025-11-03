@@ -151,35 +151,175 @@ func isSmallWindow(size []int) bool {
 	return (size[0] <= 620 && size[1] <= 64) || (size[0] <= 64 && size[1] <= 620)
 }
 
+type pinConfig struct {
+	initialDelay  time.Duration
+	maxRetries    int
+	retryDelay    time.Duration
+	maxRetryDelay time.Duration
+	pollInterval  time.Duration
+	maxPollTime   time.Duration
+}
+
+var defaultPinConfig = pinConfig{
+	initialDelay:  2 * time.Second,
+	maxRetries:    3,
+	retryDelay:    500 * time.Millisecond,
+	maxRetryDelay: 2 * time.Second,
+	pollInterval:  500 * time.Millisecond,
+	maxPollTime:   10 * time.Second,
+}
+
 func pinWindow(ctx context.Context, ch <-chan msg) {
 	client := hyprland.MustClient()
+	config := defaultPinConfig
+
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case m := <-ch:
 			if m.kind == msgScOn {
-				log.Printf("DEBUG: looking for windows to pin")
-				// wait for the pop-up
-				time.Sleep(5 * time.Second)
-				clients, err := client.Clients()
-				if err != nil {
-					continue
-				}
-				for _, c := range clients {
-					log.Printf("DEBUG: checking client %s - %s - Floating: %v - Size:%v",
-						c.Address, c.Title, c.Floating, c.Size)
-					if c.Floating && isSmallWindow(c.Size) {
-						addr := c.Address
-						if _, err := client.Dispatch(fmt.Sprintf("pin address:%s", addr)); err != nil {
-							log.Printf("ERROR: could not pin window %s: %v", addr, err)
-						}
-						log.Printf("DEBUG: Pinned window %s - %s", addr, c.Title)
-					}
-				}
+				log.Printf("DEBUG: screencast started, looking for windows to pin")
+				go pinWindowsWithRetry(ctx, client, config)
 			}
 		}
 	}
+}
+
+func pinWindowsWithRetry(ctx context.Context, client *hyprland.RequestClient, config pinConfig) {
+	time.Sleep(config.initialDelay)
+
+	pollCtx, cancel := context.WithTimeout(ctx, config.maxPollTime)
+	defer cancel()
+
+	ticker := time.NewTicker(config.pollInterval)
+	defer ticker.Stop()
+
+	pinnedWindows := make(map[string]bool)
+
+	for {
+		select {
+		case <-pollCtx.Done():
+			if len(pinnedWindows) == 0 {
+				log.Printf("DEBUG: timeout reached, no suitable windows found to pin")
+			}
+			return
+		case <-ticker.C:
+			clients, err := client.Clients()
+			if err != nil {
+				log.Printf("ERROR: failed to get clients: %v", err)
+				continue
+			}
+
+			candidates := findPinCandidates(clients, pinnedWindows)
+			if len(candidates) == 0 {
+				continue
+			}
+
+			log.Printf("DEBUG: found %d new candidate windows to pin", len(candidates))
+
+			for _, candidate := range candidates {
+				if tryPinWindow(client, candidate, config) {
+					pinnedWindows[candidate.Address] = true
+					log.Printf("DEBUG: successfully pinned window %s - %s", candidate.Address, candidate.Title)
+				}
+			}
+
+			if len(pinnedWindows) > 0 {
+				log.Printf("DEBUG: pinned %d windows total, stopping search", len(pinnedWindows))
+				return
+			}
+		}
+	}
+}
+
+func findPinCandidates(clients []hyprland.Client, alreadyPinned map[string]bool) []hyprland.Client {
+	var candidates []hyprland.Client
+
+	for _, c := range clients {
+		if alreadyPinned[c.Address] {
+			continue
+		}
+
+		if !c.Floating {
+			continue
+		}
+
+		if !isSmallWindow(c.Size) {
+			continue
+		}
+
+		if isLikelyScreencastWindow(c) {
+			log.Printf("DEBUG: found candidate window %s - %s - Size:%v",
+				c.Address, c.Title, c.Size)
+			candidates = append(candidates, c)
+		}
+	}
+
+	return candidates
+}
+
+func isLikelyScreencastWindow(c hyprland.Client) bool {
+	title := strings.ToLower(c.Title)
+	class := strings.ToLower(c.Class)
+
+	screencastKeywords := []string{
+		"sharing", "screen", "recording", "capture", "cast",
+		"obs", "streamlabs", "discord", "zoom", "teams", "meet",
+		"chrome", "firefox", "browser", "portal", "slack", "zen-browser",
+	}
+
+	for _, keyword := range screencastKeywords {
+		if strings.Contains(title, keyword) || strings.Contains(class, keyword) {
+			return true
+		}
+	}
+
+	return c.Size[0] > 0 && c.Size[1] > 0
+}
+
+func tryPinWindow(client *hyprland.RequestClient, window hyprland.Client, config pinConfig) bool {
+	addr := window.Address
+
+	for attempt := 0; attempt < config.maxRetries; attempt++ {
+		if attempt > 0 {
+			delay := min(time.Duration(attempt)*config.retryDelay, config.maxRetryDelay)
+			log.Printf("DEBUG: retrying pin operation for %s (attempt %d/%d) after %v",
+				addr, attempt+1, config.maxRetries, delay)
+			time.Sleep(delay)
+		}
+
+		if _, err := client.Dispatch(fmt.Sprintf("pin address:%s", addr)); err != nil {
+			log.Printf("ERROR: attempt %d failed to pin window %s: %v", attempt+1, addr, err)
+			continue
+		}
+
+		if verifyWindowPinned(client, addr) {
+			return true
+		}
+
+		log.Printf("DEBUG: pin command succeeded but window %s doesn't appear to be pinned", addr)
+	}
+
+	log.Printf("ERROR: failed to pin window %s after %d attempts", addr, config.maxRetries)
+	return false
+}
+
+func verifyWindowPinned(client *hyprland.RequestClient, address string) bool {
+	clients, err := client.Clients()
+	if err != nil {
+		log.Printf("DEBUG: could not verify pin status: %v", err)
+		return false
+	}
+
+	for _, c := range clients {
+		if c.Address == address {
+			return c.Pinned
+		}
+	}
+
+	log.Printf("DEBUG: window %s not found during verification", address)
+	return false
 }
 
 func manager(ctx context.Context, ch <-chan msg) {
