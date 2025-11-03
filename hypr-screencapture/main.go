@@ -27,6 +27,7 @@ import (
 
 	_ "embed"
 
+	"github.com/thiagokokada/hyprland-go"
 	"github.com/thiagokokada/hyprland-go/event"
 )
 
@@ -136,10 +137,49 @@ func main() {
 
 	// Manager owns the state machine and file writes
 	go manager(ctx, ch)
+	go pinWindow(ctx, ch)
 
 	<-ctx.Done()
 	// allow final rename to flush
 	time.Sleep(50 * time.Millisecond)
+}
+
+func isSmallWindow(size []int) bool {
+	if len(size) < 2 {
+		return false
+	}
+	return (size[0] <= 620 && size[1] <= 64) || (size[0] <= 64 && size[1] <= 620)
+}
+
+func pinWindow(ctx context.Context, ch <-chan msg) {
+	client := hyprland.MustClient()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case m := <-ch:
+			if m.kind == msgScOn {
+				log.Printf("DEBUG: looking for windows to pin")
+				// wait for the pop-up
+				time.Sleep(5 * time.Second)
+				clients, err := client.Clients()
+				if err != nil {
+					continue
+				}
+				for _, c := range clients {
+					log.Printf("DEBUG: checking client %s - %s - Floating: %v - Size:%v",
+						c.Address, c.Title, c.Floating, c.Size)
+					if c.Floating && isSmallWindow(c.Size) {
+						addr := c.Address
+						if _, err := client.Dispatch(fmt.Sprintf("pin address:%s", addr)); err != nil {
+							log.Printf("ERROR: could not pin window %s: %v", addr, err)
+						}
+						log.Printf("DEBUG: Pinned window %s - %s", addr, c.Title)
+					}
+				}
+			}
+		}
+	}
 }
 
 func manager(ctx context.Context, ch <-chan msg) {
