@@ -127,7 +127,7 @@ func main() {
 	cli := event.MustClient()
 	defer cli.Close()
 
-	ch := make(chan msg, 16)
+	ch := make(chan msg, 8)
 	go func() {
 		if err := cli.Subscribe(ctx, &screencastHandler{ch: ch}, event.EventScreencast); err != nil && ctx.Err() == nil {
 			fmt.Fprintf(os.Stderr, "Subscribe exited with error: %v", err)
@@ -135,9 +135,50 @@ func main() {
 		}
 	}()
 
+	log.Printf("XDG_RUNTIME_DIR=%q HYPRLAND_INSTANCE_SIGNATURE=%q", os.Getenv("XDG_RUNTIME_DIR"), os.Getenv("HYPRLAND_INSTANCE_SIGNATURE"))
+	if c, err := hyprland.MustClient().Clients(); err != nil {
+		log.Printf("IPC check: Clients() error: %v", err)
+	} else {
+		log.Printf("IPC check: saw %d clients at start", len(c))
+	}
+
+	// Create separate channels for manager and pinWindow
+	managerCh := make(chan msg, 4)
+	pinWindowCh := make(chan msg, 4)
+
+	// Fan out messages to both channels
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case m := <-ch:
+				log.Printf("DEBUG: Fan-out received message: %+v", m)
+				// Send to manager (non-blocking)
+				select {
+				case managerCh <- m:
+					log.Printf("DEBUG: Fan-out sent message to manager")
+				case <-ctx.Done():
+					return
+				default:
+					log.Printf("DEBUG: Fan-out failed to send to manager (channel full)")
+				}
+				// Send to pinWindow (non-blocking)
+				select {
+				case pinWindowCh <- m:
+					log.Printf("DEBUG: Fan-out sent message to pinWindow")
+				case <-ctx.Done():
+					return
+				default:
+					log.Printf("DEBUG: Fan-out failed to send to pinWindow (channel full)")
+				}
+			}
+		}
+	}()
+
 	// Manager owns the state machine and file writes
-	go manager(ctx, ch)
-	go pinWindow(ctx, ch)
+	go manager(ctx, managerCh)
+	go pinWindow(ctx, pinWindowCh)
 
 	<-ctx.Done()
 	// allow final rename to flush
@@ -170,17 +211,25 @@ var defaultPinConfig = pinConfig{
 }
 
 func pinWindow(ctx context.Context, ch <-chan msg) {
-	client := hyprland.MustClient()
-	config := defaultPinConfig
-
+	var (
+		client = hyprland.MustClient()
+		config = defaultPinConfig
+	)
+	log.Printf("DEBUG: pinWindow started with config: %+v", config)
 	for {
 		select {
 		case <-ctx.Done():
+			log.Printf("DEBUG: pinWindow context done")
 			return
 		case m := <-ch:
-			if m.kind == msgScOn {
+			log.Printf("DEBUG: pinWindow received message: %+v", m)
+			log.Printf("DEBUG: pinWindow received message: KIND %+v", m.kind)
+			switch m.kind {
+			case msgScOn:
 				log.Printf("DEBUG: screencast started, looking for windows to pin")
 				go pinWindowsWithRetry(ctx, client, config)
+			case msgScOff:
+				log.Printf("DEBUG: screencast stopped, no action needed for pinWindow")
 			}
 		}
 	}
@@ -264,7 +313,7 @@ func isLikelyScreencastWindow(c hyprland.Client) bool {
 	class := strings.ToLower(c.Class)
 
 	screencastKeywords := []string{
-		"sharing", "screen", "recording", "capture", "cast",
+		"Sharing Indicator", "sharing", "screen", "recording", "capture", "cast",
 		"obs", "streamlabs", "discord", "zoom", "teams", "meet",
 		"chrome", "firefox", "browser", "portal", "slack", "zen-browser",
 	}
@@ -288,10 +337,17 @@ func tryPinWindow(client *hyprland.RequestClient, window hyprland.Client, config
 				addr, attempt+1, config.maxRetries, delay)
 			time.Sleep(delay)
 		}
-
-		if _, err := client.Dispatch(fmt.Sprintf("pin address:%s", addr)); err != nil {
-			log.Printf("ERROR: attempt %d failed to pin window %s: %v", attempt+1, addr, err)
-			continue
+		commands := []string{
+			fmt.Sprintf("pin address:%s", addr),
+			fmt.Sprintf("setprop address:%s decorate 0", addr),
+			fmt.Sprintf("setprop address:%s noborder 1", addr),
+			fmt.Sprintf("movewindowpixel exact 1421 25 %s", addr),
+		}
+		for _, command := range commands {
+			if _, err := client.Dispatch(command); err != nil {
+				log.Printf("ERROR: attempt %d failed to execute command %s: %v", attempt+1, command, err)
+				continue
+			}
 		}
 
 		if verifyWindowPinned(client, addr) {
@@ -367,6 +423,7 @@ func manager(ctx context.Context, ch <-chan msg) {
 			stopWatcher()
 			return
 		case m := <-ch:
+			log.Printf("DEBUG: manager received message: %+v", m)
 			switch m.kind {
 			case msgScOn:
 
