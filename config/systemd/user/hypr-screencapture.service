@@ -1,21 +1,40 @@
+# ~/.config/systemd/user/hypr-screencapture.service
 [Unit]
-Description=Monitor Hyprland screencapture (writes ON|OFF)
+Description=Monitor Hyprland screencapture (writes ON|OFF + pins popup)
 PartOf=graphical-session.target
 Requires=graphical-session.target
 After=graphical-session.target
-# Only start if we're in a Wayland/Hyprland session
-ConditionEnvironment=WAYLAND_DISPLAY
-ConditionEnvironment=HYPRLAND_INSTANCE_SIGNATURE
 
 [Service]
 Type=simple
-# Use your GOPATH bin (adjust if different)
+
+# Ensure the service inherits the session env it needs
+PassEnvironment=WAYLAND_DISPLAY XDG_RUNTIME_DIR HYPRLAND_INSTANCE_SIGNATURE
+
+# (Optional but helpful) a sane PATH in case you shell out to tools
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+
+# Wait for Hyprland’s IPC socket (using the *service’s* env, not the manager’s)
+ExecStartPre=/bin/sh -lc '\
+  sock="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket.sock"; \
+  for i in $(seq 1 50); do \
+    [ -S "$sock" ] && exit 0; \
+    sleep 0.2; \
+  done; \
+  echo "Hypr socket not found: $sock" >&2; exit 1'
+
+# Your binary (adjust path if needed)
 ExecStart=%h/go/bin/hypr-screencapture
-Slice=session.slice
+
+# Restart policy
 Restart=on-failure
 RestartSec=1
-# Ensure the unit sees the session’s IPC env
-PassEnvironment=WAYLAND_DISPLAY XDG_RUNTIME_DIR HYPRLAND_INSTANCE_SIGNATURE
+Slice=session.slice
+
+# Clear, explicit logging to the user journal
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hypr-screencapture
 
 [Install]
 WantedBy=graphical-session.target
