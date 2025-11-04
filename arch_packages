@@ -21,7 +21,9 @@ cmake
 codespell
 copyq
 cpio
+cronie
 cups
+dbeaver
 dconf-editor
 ddcutil
 diff-so-fancy
@@ -32,6 +34,7 @@ docker-buildx
 docker-compose
 dolphin
 dunst
+dysk
 efibootmgr
 emacs
 evtest
@@ -173,6 +176,7 @@ wl-clipboard
 woff2-font-awesome
 wofi
 wpa_supplicant
+xdg-desktop-portal-gtk
 xdg-desktop-portal-hyprland
 xdg-utils
 xf86-video-amdgpu
