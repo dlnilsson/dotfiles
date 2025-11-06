@@ -27,6 +27,8 @@ import (
 
 	_ "embed"
 
+	"github.com/dlnilsson/dotfiles/hypr-screencapture/messages"
+	"github.com/dlnilsson/dotfiles/hypr-screencapture/pipewire"
 	"github.com/thiagokokada/hyprland-go"
 	"github.com/thiagokokada/hyprland-go/event"
 )
@@ -89,14 +91,12 @@ func bytesToFilename(data []byte) (string, error) {
 	return out, nil
 }
 
-type msgKind int
+type msg = messages.Msg
 
 const (
-	msgScOn msgKind = iota
-	msgScOff
+	msgScOn  = messages.ScOn
+	msgScOff = messages.ScOff
 )
-
-type msg struct{ kind msgKind }
 
 type screencastHandler struct {
 	event.DefaultEventHandler
@@ -106,10 +106,10 @@ type screencastHandler struct {
 func (h *screencastHandler) Screencast(w event.Screencast) {
 	log.Printf("Screencast %v --- %v\n", w.Sharing, w.Owner)
 	if w.Sharing {
-		h.ch <- msg{kind: msgScOn}
+		h.ch <- msg{Kind: msgScOn}
 		return
 	}
-	h.ch <- msg{kind: msgScOff}
+	h.ch <- msg{Kind: msgScOff}
 }
 
 func main() {
@@ -132,11 +132,23 @@ func main() {
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	go func() { <-sigCh; cancel() }()
 
+	// Start PipeWire loop
+	defer pipewire.StopPipeWireLoop()
+	go func() {
+		if ret := pipewire.StartPipeWireLoop(); ret != 0 {
+			log.Printf("PipeWire loop exited with code: %d", ret)
+		}
+	}()
+
 	// Subscribe to Hyprland screencast events
 	cli := event.MustClient()
 	defer cli.Close()
 
 	ch := make(chan msg, 8)
+
+	// Set up PipeWire channel to use the same message channel
+	pipewire.SetChannel(ch)
+
 	go func() {
 		if err := cli.Subscribe(ctx, &screencastHandler{ch: ch}, event.EventScreencast); err != nil && ctx.Err() == nil {
 			fmt.Fprintf(os.Stderr, "Subscribe exited with error: %v", err)
@@ -211,7 +223,7 @@ type pinConfig struct {
 }
 
 var defaultPinConfig = pinConfig{
-	initialDelay:  2 * time.Second,
+	initialDelay:  500 * time.Millisecond,
 	maxRetries:    3,
 	retryDelay:    500 * time.Millisecond,
 	maxRetryDelay: 2 * time.Second,
@@ -232,8 +244,8 @@ func pinWindow(ctx context.Context, ch <-chan msg) {
 			return
 		case m := <-ch:
 			log.Printf("DEBUG: pinWindow received message: %+v", m)
-			log.Printf("DEBUG: pinWindow received message: KIND %+v", m.kind)
-			switch m.kind {
+			log.Printf("DEBUG: pinWindow received message: KIND %+v", m.Kind)
+			switch m.Kind {
 			case msgScOn:
 				log.Printf("DEBUG: screencast started, looking for windows to pin")
 				go pinWindowsWithRetry(ctx, client, config)
@@ -433,7 +445,7 @@ func manager(ctx context.Context, ch <-chan msg) {
 			return
 		case m := <-ch:
 			log.Printf("DEBUG: manager received message: %+v", m)
-			switch m.kind {
+			switch m.Kind {
 			case msgScOn:
 
 				alive := isAnyProcessAlive(procNames)
