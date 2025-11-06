@@ -58,7 +58,16 @@ func sendNotification(title, message string, iconBytes []byte) error {
 	}
 	defer os.Remove(tmp)
 
-	args := []string{title, message, "-a", "hypr-screencapture", "-i", tmp, "-t", "3000", "-u", "normal"}
+	args := []string{
+		title,
+		message,
+		"-a",
+		"hypr-screencapture",
+		"-i", tmp,
+		"-t", "3000",
+		"-u", "normal",
+		"--transient",
+	}
 	c := exec.Command(cmd, args...)
 	return c.Run()
 }
