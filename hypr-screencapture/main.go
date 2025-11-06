@@ -222,19 +222,17 @@ type pinConfig struct {
 	maxPollTime   time.Duration
 }
 
-var defaultPinConfig = pinConfig{
-	initialDelay:  500 * time.Millisecond,
-	maxRetries:    3,
-	retryDelay:    500 * time.Millisecond,
-	maxRetryDelay: 2 * time.Second,
-	pollInterval:  500 * time.Millisecond,
-	maxPollTime:   10 * time.Second,
-}
-
 func pinWindow(ctx context.Context, ch <-chan msg) {
 	var (
 		client = hyprland.MustClient()
-		config = defaultPinConfig
+		config = pinConfig{
+			initialDelay:  500 * time.Millisecond,
+			maxRetries:    3,
+			retryDelay:    500 * time.Millisecond,
+			maxRetryDelay: 2 * time.Second,
+			pollInterval:  500 * time.Millisecond,
+			maxPollTime:   10 * time.Second,
+		}
 	)
 	log.Printf("DEBUG: pinWindow started with config: %+v", config)
 	for {
