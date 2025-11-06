@@ -167,15 +167,30 @@ func main() {
 	managerCh := make(chan msg, 4)
 	pinWindowCh := make(chan msg, 4)
 
-	// Fan out messages to both channels
+	// Fan out messages to both channels with rate limiting
 	go func() {
+		var (
+			lastSent          = make(map[messages.Kind]time.Time)
+			rateLimitDuration = time.Second
+		)
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			case m := <-ch:
 				log.Printf("DEBUG: Fan-out received message: %+v", m)
-				// Send to manager (non-blocking)
+
+				// Check rate limit
+				now := time.Now()
+				if lastTime, exists := lastSent[m.Kind]; exists {
+					if now.Sub(lastTime) < rateLimitDuration {
+						log.Printf("DEBUG: Rate limiting message %+v (last sent %v ago)", m, now.Sub(lastTime))
+						continue
+					}
+				}
+
+				lastSent[m.Kind] = now
+
 				select {
 				case managerCh <- m:
 					log.Printf("DEBUG: Fan-out sent message to manager")
@@ -184,7 +199,6 @@ func main() {
 				default:
 					log.Printf("DEBUG: Fan-out failed to send to manager (channel full)")
 				}
-				// Send to pinWindow (non-blocking)
 				select {
 				case pinWindowCh <- m:
 					log.Printf("DEBUG: Fan-out sent message to pinWindow")
