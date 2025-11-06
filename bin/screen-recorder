@@ -30,7 +30,7 @@ if pgrep -x wl-screenrec >/dev/null; then
   pkill -INT wl-screenrec
 
   # Wait up to 3 seconds for graceful shutdown
-  for i in {1..15}; do
+  for _ in {1..15}; do
     pgrep -x wl-screenrec >/dev/null || break
     sleep 0.2
   done
@@ -41,11 +41,11 @@ if pgrep -x wl-screenrec >/dev/null; then
     sleep 0.5
   fi
 
-  LATEST=$(ls -t "$SAVE_DIR"/*.mp4 | head -n1)
+  LATEST=$(find "$SAVE_DIR" -name "*.mp4" -type f -printf '%T@ %p\n' | sort -nr | head -n1 | cut -d' ' -f2-)
 
   # Compress the video if enabled
   if [[ "$COMPRESS" == true ]] && command -v ffmpeg >/dev/null; then
-    notify-send "Compressing video..." "Please wait" --expire-time=2000
+    notify-send --transient "Compressing video..." "Please wait" --expire-time=2000
 
     COMPRESSED="${LATEST%.mp4}_compressed.mp4"
     if ffmpeg -i "$LATEST" -c:v libx264 -crf 23 -preset medium -c:a copy -movflags +faststart "$COMPRESSED" -y 2>/dev/null; then
@@ -56,12 +56,12 @@ if pgrep -x wl-screenrec >/dev/null; then
       # Replace original with compressed version
       mv "$COMPRESSED" "$LATEST"
 
-      notify-send "Recording finished & compressed" "Size: $ORIG_SIZE → $COMP_SIZE" --expire-time=2500
+      notify-send --transient "Recording finished & compressed" "Size: $ORIG_SIZE → $COMP_SIZE" --expire-time=2500
     else
-      notify-send "Recording finished" "Compression failed, keeping original" --expire-time=2500
+      notify-send --transient "Recording finished" "Compression failed, keeping original" --expire-time=2500
     fi
   else
-    notify-send "Recording finished" "Path copied: $(basename "$LATEST")" --expire-time=1500
+    notify-send --transient "Recording finished" "Path copied: $(basename "$LATEST")" --expire-time=1500
   fi
 
   # Copy the file path to clipboard
@@ -88,11 +88,11 @@ if [[ "$SILENT" == false ]]; then
   AUDIO_SRC="$MIC_SRC"
   DESC=$(pactl list sources | awk -v s="$AUDIO_SRC" '$2==s {getline;sub(/^\s*Description: /,"");print;exit}')
 
-  notify-send "Recording… (source: $DESC)" --expire-time=1000
+  notify-send --transient "Recording… (source: $DESC)" --expire-time=1000
 
   wl-screenrec -g "$REGION" --low-power=off --audio --audio-device "$AUDIO_SRC" -f "$FILE" &
 else
-  notify-send "Recording… (silent mode)" --expire-time=1000
+  notify-send --transient "Recording… (silent mode)" --expire-time=1000
 
   wl-screenrec --low-power=off -g "$REGION" -f "$FILE" &
 fi
