@@ -106,10 +106,10 @@ type screencastHandler struct {
 func (h *screencastHandler) Screencast(w event.Screencast) {
 	log.Printf("Screencast %v --- %v\n", w.Sharing, w.Owner)
 	if w.Sharing {
-		h.ch <- msg{Kind: msgScOn}
+		h.ch <- msg{Kind: msgScOn, Source: messages.SourceHyprland}
 		return
 	}
-	h.ch <- msg{Kind: msgScOff}
+	h.ch <- msg{Kind: msgScOff, Source: messages.SourceHyprland}
 }
 
 func main() {
@@ -124,29 +124,35 @@ func main() {
 	}
 	writeStatus(false)
 
-	ctx, cancel := context.WithCancel(context.Background())
+	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+
+	var (
+		// signal channel for SIGINT and SIGTERM
+		sigCh = make(chan os.Signal, 1)
+		// main channel for Hyprland and PipeWire events
+		ch = make(chan msg, 8)
+		// fan-out channel for main manager from main channel
+		managerCh = make(chan msg, 4)
+		// fan-out channel for pinWindow from main channel
+		pinWindowCh = make(chan msg, 4)
+		// Hyprland event client
+		cli         = event.MustClient()
+		ctx, cancel = context.WithCancel(context.Background())
+	)
+	defer cli.Close()
 	defer cancel()
 
-	// Handle SIGINT/SIGTERM
-	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	go func() { <-sigCh; cancel() }()
 
-	// Start PipeWire loop
 	defer pipewire.StopPipeWireLoop()
+
 	go func() {
 		if ret := pipewire.StartPipeWireLoop(); ret != 0 {
 			log.Printf("PipeWire loop exited with code: %d", ret)
 		}
 	}()
 
-	// Subscribe to Hyprland screencast events
-	cli := event.MustClient()
-	defer cli.Close()
-
-	ch := make(chan msg, 8)
-
-	// Set up PipeWire channel to use the same message channel
 	pipewire.SetChannel(ch)
 
 	go func() {
@@ -163,14 +169,11 @@ func main() {
 		log.Printf("IPC check: saw %d clients at start", len(c))
 	}
 
-	// Create separate channels for manager and pinWindow
-	managerCh := make(chan msg, 4)
-	pinWindowCh := make(chan msg, 4)
-
-	// Fan out messages to both channels with rate limiting
+	// Fan out messages to both channels with rate limiting and PipeWire prioritization
 	go func() {
 		var (
 			lastSent          = make(map[messages.Kind]time.Time)
+			lastSource        = make(map[messages.Kind]messages.Source)
 			rateLimitDuration = time.Second
 		)
 		for {
@@ -180,16 +183,29 @@ func main() {
 			case m := <-ch:
 				log.Printf("DEBUG: Fan-out received message: %+v", m)
 
-				// Check rate limit
+				// Check rate limit with PipeWire prioritization
 				now := time.Now()
 				if lastTime, exists := lastSent[m.Kind]; exists {
-					if now.Sub(lastTime) < rateLimitDuration {
-						log.Printf("DEBUG: Rate limiting message %+v (last sent %v ago)", m, now.Sub(lastTime))
-						continue
+					timeSinceLastSent := now.Sub(lastTime)
+					if timeSinceLastSent < rateLimitDuration {
+						// If last message was from Hyprland and this is from PipeWire, allow it through
+						if lastSrc, ok := lastSource[m.Kind]; ok {
+							if lastSrc == messages.SourceHyprland && m.Source == messages.SourcePipeWire {
+								log.Printf("DEBUG: Prioritizing PipeWire message over Hyprland (last sent %v ago)", timeSinceLastSent)
+							} else {
+								log.Printf("DEBUG: Rate limiting message %+v (last sent %v ago)", m, timeSinceLastSent)
+								continue
+							}
+						} else {
+							log.Printf("DEBUG: Rate limiting message %+v (last sent %v ago)", m, timeSinceLastSent)
+							continue
+						}
 					}
 				}
 
+				// Update last sent time and source
 				lastSent[m.Kind] = now
+				lastSource[m.Kind] = m.Source
 
 				select {
 				case managerCh <- m:
@@ -270,14 +286,13 @@ func pinWindow(ctx context.Context, ch <-chan msg) {
 
 func pinWindowsWithRetry(ctx context.Context, client *hyprland.RequestClient, config pinConfig) {
 	time.Sleep(config.initialDelay)
-
-	pollCtx, cancel := context.WithTimeout(ctx, config.maxPollTime)
+	var (
+		pinnedWindows   = make(map[string]bool)
+		ticker          = time.NewTicker(config.pollInterval)
+		pollCtx, cancel = context.WithTimeout(ctx, config.maxPollTime)
+	)
 	defer cancel()
-
-	ticker := time.NewTicker(config.pollInterval)
 	defer ticker.Stop()
-
-	pinnedWindows := make(map[string]bool)
 
 	for {
 		select {
@@ -342,14 +357,15 @@ func findPinCandidates(clients []hyprland.Client, alreadyPinned map[string]bool)
 }
 
 func isLikelyScreencastWindow(c hyprland.Client) bool {
-	title := strings.ToLower(c.Title)
-	class := strings.ToLower(c.Class)
-
-	screencastKeywords := []string{
-		"Sharing Indicator", "sharing", "screen", "recording", "capture", "cast",
-		"obs", "streamlabs", "discord", "zoom", "teams", "meet",
-		"chrome", "firefox", "browser", "portal", "slack", "zen-browser",
-	}
+	var (
+		title              = strings.ToLower(c.Title)
+		class              = strings.ToLower(c.Class)
+		screencastKeywords = []string{
+			"Sharing Indicator", "sharing", "screen", "recording", "capture",
+			"cast", "obs", "streamlabs", "discord", "zoom", "teams", "meet",
+			"chrome", "firefox", "browser", "portal", "slack", "zen-browser",
+		}
+	)
 
 	for _, keyword := range screencastKeywords {
 		if strings.Contains(title, keyword) || strings.Contains(class, keyword) {

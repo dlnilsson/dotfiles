@@ -99,7 +99,10 @@ func onNodeAdd(id uint32, mediaClass, name, desc, app, portalApp string) {
 
 		if msgChannel != nil {
 			select {
-			case msgChannel <- messages.Msg{Kind: messages.ScOn}:
+			case msgChannel <- messages.Msg{
+				Kind:   messages.ScOn,
+				Source: messages.SourcePipeWire,
+			}:
 			default:
 			}
 		} else {
@@ -115,7 +118,7 @@ func onNodeRemove(id uint32) {
 
 		if msgChannel != nil {
 			select {
-			case msgChannel <- messages.Msg{Kind: messages.ScOff}:
+			case msgChannel <- messages.Msg{Kind: messages.ScOff, Source: messages.SourcePipeWire}:
 			default:
 			}
 		} else {

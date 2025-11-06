@@ -7,4 +7,14 @@ const (
 	ScOff
 )
 
-type Msg struct{ Kind Kind }
+type Source int
+
+const (
+	SourceHyprland Source = iota
+	SourcePipeWire
+)
+
+type Msg struct {
+	Kind   Kind
+	Source Source
+}
