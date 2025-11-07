@@ -1,14 +1,34 @@
 #!/usr/bin/env bash
 # See: https://bobbys.zone/guides/hyprland-clamshell
 
+# Reload Hyprland if only the built-in panel is active to re-apply monitor keywords cleanly.
+maybe_reload_single_default() {
+  if hyprctl monitors -j | jq -e '
+    [.[] | select(.disabled != true)] as $enabled
+    | $enabled
+    | select(length == 1)
+    | .[0]
+    | select(.name == "eDP-1")
+  ' >/dev/null; then
+    hyprctl reload
+  fi
+}
+
 
 external=$(hyprctl monitors -j | jq -r '.[] | select(.name | test("^DP-[0-9]+"))')
 
+#pkill -SIGUSR2 waybar
+
 if [[ -n "$external" ]]; then
   if [[ $1 == "open" ]]; then
-    best_mode=$(echo "$external" | jq -r '.availableModes[0]')
-    hyprctl keyword monitor "eDP-1,${best_mode},0x0,1"
+    hyprctl keyword monitor eDP-1,1920x1200@60,0x0,1
+    maybe_reload_single_default
   else
     hyprctl keyword monitor "eDP-1,disable"
   fi
+else
+  # best=$(hyprctl monitors -j | jq -r '.[] | select(.name == "eDP-1")' | jq -r '.availableModes[0]')
+  notify-send --transient "No external monitor detected" "Clamshell mode not activated" --expire-time=6000
+  hyprctl keyword monitor eDP-1,1920x1200@60,0x0,1
+  maybe_reload_single_default
 fi
