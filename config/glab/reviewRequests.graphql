@@ -1,0 +1,131 @@
+query reviewRequests(
+  $state: MergeRequestState = opened,
+  $reviewState: MergeRequestReviewState,
+  $reviewStates: [MergeRequestReviewState!],
+  $mergedAfter: Time,
+  $not: MergeRequestsResolverNegatedParams,
+  $perPage: Int!,
+  $afterCursor: String,
+  $sort: MergeRequestSort = UPDATED_DESC,
+  $or: UnionedMergeRequestFilterInput
+) {
+  currentUser {
+    id
+    mergeRequests: reviewRequestedMergeRequests(
+      state: $state
+      reviewState: $reviewState
+      reviewStates: $reviewStates
+      mergedAfter: $mergedAfter
+      not: $not
+      or: $or
+      first: $perPage
+      after: $afterCursor
+      sort: $sort
+    ) {
+      pageInfo {
+        hasNextPage
+        hasPreviousPage
+        startCursor
+        endCursor
+        __typename
+      }
+      nodes {
+        id
+        reference(full: true)
+        title
+        webUrl
+        draft
+        state
+        author {
+          id
+          avatarUrl
+          name
+          username
+          webUrl
+          webPath
+          __typename
+        }
+        milestone {
+          expired
+          id
+          state
+          title
+          __typename
+        }
+        assignees {
+          nodes {
+            id
+            avatarUrl
+            name
+            username
+            webUrl
+            webPath
+            __typename
+          }
+          __typename
+        }
+        reviewers {
+          nodes {
+            id
+            avatarUrl
+            name
+            username
+            webUrl
+            webPath
+            mergeRequestInteraction {
+              reviewState
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+        headPipeline {
+          id
+          detailedStatus {
+            id
+            icon
+            text
+            detailsPath
+            __typename
+          }
+          __typename
+        }
+        labels {
+          nodes {
+            id
+            title
+            description
+            color
+            textColor
+            __typename
+          }
+          __typename
+        }
+        resolvedDiscussionsCount
+        resolvableDiscussionsCount
+        commitCount
+        sourceBranchExists
+        targetBranchExists
+        conflicts
+        mergedAt
+        createdAt
+        updatedAt
+        mergeabilityChecks {
+          status
+          __typename
+        }
+        approved
+        approvalsRequired
+        approvalsLeft
+        approvedBy {
+          nodes { id __typename }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
