@@ -1,0 +1,153 @@
+query requestingReviewAuthorOrAssignee($state: MergeRequestState = opened, $reviewState: MergeRequestReviewState, $reviewStates: [MergeRequestReviewState!], $reviewerWildcardId: ReviewerWildcardId, $mergedAfter: Time, $not: MergeRequestsResolverNegatedParams, $ignoredReviewerUsername: String, $draft: Boolean, $perPage: Int!, $afterCursor: String, $sort: MergeRequestSort = UPDATED_DESC, $or: UnionedMergeRequestFilterInput) {
+  currentUser {
+    id
+    mergeRequests: authoredMergeRequests(
+      includeAssigned: true
+      state: $state
+      reviewState: $reviewState
+      reviewStates: $reviewStates
+      reviewerWildcardId: $reviewerWildcardId
+      mergedAfter: $mergedAfter
+      not: $not
+      ignoredReviewerUsername: $ignoredReviewerUsername
+      draft: $draft
+      or: $or
+      first: $perPage
+      after: $afterCursor
+      sort: $sort
+    ) {
+      pageInfo {
+        ...PageInfo
+        __typename
+      }
+      nodes {
+        ...MergeRequestDashboardFragment
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment PageInfo on PageInfo {
+  hasNextPage
+  hasPreviousPage
+  startCursor
+  endCursor
+  __typename
+}
+
+fragment MergeRequestDashboardFragment on MergeRequest {
+  id
+  reference(full: true)
+  title
+  webUrl
+  draft
+  state
+  author {
+    ...User
+    __typename
+  }
+  milestone {
+    ...MilestoneFragment
+    __typename
+  }
+  assignees {
+    nodes {
+      ...User
+      __typename
+    }
+    __typename
+  }
+  reviewers {
+    nodes {
+      ...User
+      mergeRequestInteraction {
+        reviewState
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+  headPipeline {
+    id
+    detailedStatus {
+      ...CiIcon
+      __typename
+    }
+    __typename
+  }
+  labels {
+    nodes {
+      ...Label
+      __typename
+    }
+    __typename
+  }
+  resolvedDiscussionsCount
+  resolvableDiscussionsCount
+  commitCount
+  sourceBranchExists
+  targetBranchExists
+  conflicts
+  mergedAt
+  createdAt
+  updatedAt
+  mergeabilityChecks {
+    status
+    __typename
+  }
+  ...MergeRequestApprovalFragment
+  __typename
+}
+
+fragment User on User {
+  id
+  avatarUrl
+  name
+  username
+  webUrl
+  webPath
+  __typename
+}
+
+fragment MilestoneFragment on Milestone {
+  expired
+  id
+  state
+  title
+  __typename
+}
+
+fragment CiIcon on DetailedStatus {
+  id
+  icon
+  text
+  detailsPath
+  __typename
+}
+
+fragment Label on Label {
+  id
+  title
+  description
+  color
+  textColor
+  __typename
+}
+
+fragment MergeRequestApprovalFragment on MergeRequest {
+  approved
+  approvalsRequired
+  approvalsLeft
+  approvedBy {
+    nodes {
+      id
+      __typename
+    }
+    __typename
+  }
+  __typename
+}

@@ -1,0 +1,171 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# deps: glab, jq, notify-send, flock (util-linux), xdg-open/open
+
+
+GQL_DIR="${GQL_DIR:-$HOME/.config/glab/graphql}"
+
+DEFAULT_VARS_FILE="${DEFAULT_VARS_FILE:-$GQL_DIR/defaults.vars.json}"
+
+VARS_OVERRIDE_JSON="${VARS_OVERRIDE_JSON:-}"
+
+APP_NAME="${APP_NAME:-GitLab Reviews}"
+ICON_NAME="${ICON_NAME:-$HOME/.config/glab/gitlab.png}"  # or "dialog-information"
+TIMEOUT_MS="${TIMEOUT_MS:-0}"                             # 0 = persistent
+
+
+STATE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/glab-review-notify"
+STATE_FILE="$STATE_DIR/seen_ids.txt"
+LOCK_FILE="$STATE_DIR/.lock"
+
+mkdir -p "$STATE_DIR" "$GQL_DIR"
+touch "$STATE_FILE"
+
+# export DISPLAY=":0"
+# export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u)/bus"
+# ------------------------------------------------
+
+exec 9>"$LOCK_FILE"
+flock -n 9 || exit 0
+
+has_cmd() { command -v "$1" >/dev/null 2>&1; }
+
+open_url() {
+  local url="$1"
+  if has_cmd xdg-open; then nohup xdg-open "$url" >/dev/null 2>&1 &
+  elif has_cmd open;    then nohup open "$url"     >/dev/null 2>&1 &
+  else printf '%s\n' "$url"; fi
+}
+
+open_ref() {
+  local ref="$1" url="$2"
+  if has_cmd glab; then glab mr view "$ref" -w >/dev/null 2>&1 || open_url "$url"
+  else open_url "$url"
+  fi
+}
+
+notify_review() {
+  # args: REF TITLE AUTHOR URL
+  local ref="$1" title="$2" author="$3" url="$4"
+  local chosen
+  chosen="$(
+    notify-send \
+      -a "$APP_NAME" \
+      -i "$ICON_NAME" \
+      -t "$TIMEOUT_MS" \
+      -A open="Open MR" \
+      -A ignore="Dismiss" \
+      -w \
+      "Review requested: $ref — $title" \
+      "Author: ${author:-Unknown}
+${url}" \
+    || true
+  )"
+  case "$chosen" in
+    open|default) open_ref "$ref" "$url" ;;
+    *) : ;;
+  esac
+}
+
+declare -A SEEN=()
+while IFS= read -r id; do [[ -n "$id" ]] && SEEN["$id"]=1; done < "$STATE_FILE"
+
+build_vars_json() {
+  local base="$1"
+  local parts=()
+
+  if [[ -f "$DEFAULT_VARS_FILE" ]]; then
+    parts+=("$DEFAULT_VARS_FILE")
+  fi
+  local vars_file="${base%.graphql}.vars.json"
+  if [[ -f "$vars_file" ]]; then
+    parts+=("$vars_file")
+  fi
+  local have_override=0
+  if [[ -n "${VARS_OVERRIDE_JSON:-}" ]]; then
+    have_override=1
+  fi
+
+  if ((${#parts[@]} == 0 && have_override == 0)); then
+    printf '{}'
+    return 0
+  fi
+
+  if (( have_override )); then
+    exec 3<<<"$VARS_OVERRIDE_JSON"
+    parts+=("/dev/fd/3")
+  fi
+
+
+  jq -s '
+    def merge_all:
+      reduce .[] as $o ({}; . * ($o // {}));
+    def toInt:
+      if type=="string" then (try tonumber catch .) else . end;
+
+    merge_all
+    | if has("perPage") then .perPage |= toInt else . end
+  ' "${parts[@]}"
+}
+
+
+extract_op_name() {
+  local file="$1"
+  # Grep first 'query NAME(' and print NAME
+  grep -Eo '^[[:space:]]*query[[:space:]]+[A-Za-z0-9_]+[[:space:]]*\(' "$file" \
+    | head -n1 \
+    | sed -E 's/^[[:space:]]*query[[:space:]]+([A-Za-z0-9_]+).*/\1/'
+}
+
+process_graphql_file() {
+  local file="$1"
+  local op vars body resp
+
+  op="$(extract_op_name "$file")"
+  [[ -z "$op" ]] && { echo "Skip: cannot parse operation name in $file" >&2; return 0; }
+
+  vars="$(build_vars_json "$file")"
+
+  body="$(jq -n \
+    --arg op "$op" \
+    --arg q  "$(cat "$file")" \
+    --argjson vars "$vars" \
+    '{operationName:$op, variables:$vars, query:$q}')"
+
+  resp="$(glab api graphql -X POST -H "Content-Type: application/json" --input <(printf %s "$body"))" || return 0
+  [[ "$(jq -r 'has("errors")' <<<"$resp")" == "true" ]] && return 0
+
+  # nodes -> TSV: id, reference, title, author, webUrl (skip if fields missing)
+  mapfile -t rows < <(jq -r '
+    .data.currentUser.mergeRequests.nodes? // [] |
+    .[] |
+    [(.id // ""), (.reference // ""), (.title // ""), (.author.name // ""), (.webUrl // "")]
+    | @tsv
+  ' <<<"$resp")
+
+  local line gid ref title author url
+  for line in "${rows[@]}"; do
+    IFS=$'\t' read -r gid ref title author url <<<"$line"
+    [[ -z "$gid" ]] && continue
+    if [[ -z "${SEEN[$gid]:-}" ]]; then
+      notify_review "$ref" "$title" "$author" "$url"
+      echo "$gid" >> "$STATE_FILE"
+      SEEN["$gid"]=1
+    fi
+  done
+}
+
+shopt -s nullglob
+files=( "$GQL_DIR"/*.graphql )
+shopt -u nullglob
+
+[[ ${#files[@]} -eq 0 ]] && exit 0
+
+for f in "${files[@]}"; do
+  process_graphql_file "$f"
+done
+
+# Cap state growth
+tail -n 1000 "$STATE_FILE" > "$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
+exit 0
