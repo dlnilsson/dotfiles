@@ -104,7 +104,7 @@ type screencastHandler struct {
 }
 
 func (h *screencastHandler) Screencast(w event.Screencast) {
-	log.Printf("Screencast %v --- %v\n", w.Sharing, w.Owner)
+	log.Printf("Screencast %v --- %v", w.Sharing, w.Owner)
 	if w.Sharing {
 		h.ch <- msg{Kind: msgScOn, Source: messages.SourceHyprland}
 		return
@@ -361,7 +361,7 @@ func isLikelyScreencastWindow(c hyprland.Client) bool {
 		title              = strings.ToLower(c.Title)
 		class              = strings.ToLower(c.Class)
 		screencastKeywords = []string{
-			"Sharing Indicator", "sharing", "screen", "recording", "capture",
+			"sharing indicator", "sharing", "screen", "recording", "capture",
 			"cast", "obs", "streamlabs", "discord", "zoom", "teams", "meet",
 			"chrome", "firefox", "browser", "portal", "slack", "zen-browser",
 		}
@@ -435,7 +435,7 @@ func manager(ctx context.Context, ch <-chan msg) {
 
 	writeIfChanged := func(on bool) {
 		if lastWritten == nil || *lastWritten != on {
-			log.Printf("DEBUG: Writing status: %s\n", onOff(on))
+			log.Printf("DEBUG: Writing status: %s", onOff(on))
 			writeStatus(on)
 			v := on
 			lastWritten = &v
