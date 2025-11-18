@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -33,16 +34,45 @@ import (
 	"github.com/thiagokokada/hyprland-go/event"
 )
 
+type notificationState struct {
+	mu               sync.Mutex
+	count            int
+	lastMessageTimes map[string]time.Time
+	cooldown         time.Duration
+}
+
+func (n *notificationState) shouldNotify(message string, isInitialOff bool) bool {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+
+	if n.lastMessageTimes == nil {
+		n.lastMessageTimes = make(map[string]time.Time)
+	}
+
+	if isInitialOff {
+		return false
+	}
+
+	lastTime, exists := n.lastMessageTimes[message]
+	if !exists || time.Since(lastTime) >= n.cooldown {
+		n.lastMessageTimes[message] = time.Now()
+		n.count++
+		return true
+	}
+
+	return false
+}
+
 var (
 	statusFile = filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "hypr", "screencast.status")
 	procNames  = []string{
 		"wl-screenrec",
 	}
-	pollEvery            = 2 * time.Second
-	notificationCount    = 0
-	lastMessage          = ""
-	lastNotification     = time.Time{}
-	notificationCooldown = 3 * time.Second
+	pollEvery = 2 * time.Second
+
+	notifications = &notificationState{
+		cooldown: 10 * time.Second,
+	}
 )
 
 //go:embed camera.png
@@ -100,7 +130,8 @@ const (
 
 type screencastHandler struct {
 	event.DefaultEventHandler
-	ch chan<- msg
+	ch     chan<- msg
+	client *hyprland.RequestClient
 }
 
 func (h *screencastHandler) Screencast(w event.Screencast) {
@@ -110,6 +141,52 @@ func (h *screencastHandler) Screencast(w event.Screencast) {
 		return
 	}
 	h.ch <- msg{Kind: msgScOff, Source: messages.SourceHyprland}
+}
+
+func (h *screencastHandler) OpenWindow(w event.OpenWindow) {
+	// log.Printf("OpenWindow %v --- %v --- %v", w.Address, w.Class, w.Title)
+	// noop
+}
+
+func (h *screencastHandler) ActiveWindow(w event.ActiveWindow) {
+	selector := []string{
+		"Extension: (Bitwarden Password Manager) - Bitwarden — Zen Browser",
+		"Bitwarden",
+	}
+
+	if slices.ContainsFunc(selector, func(match string) bool {
+		return strings.Contains(w.Title, match)
+	}) {
+		tagCommands := []string{
+			"tagwindow -- -browser",
+			"tagwindow -- -browser*",
+			"tagwindow starship",
+		}
+
+		for _, cmd := range tagCommands {
+			if _, err := h.client.Dispatch(cmd); err != nil {
+				log.Printf("ERROR: failed to dispatch tag command '%s': %v", cmd, err)
+			}
+		}
+
+		activeClient, err := h.client.ActiveWindow()
+		if err != nil {
+			return
+		}
+
+		addressSelector := fmt.Sprintf("address:%s", activeClient.Address)
+		windowCommands := []string{
+			fmt.Sprintf("setfloating %s", addressSelector),
+			fmt.Sprintf("resizewindowpixel exact 900 600,%s", addressSelector),
+			fmt.Sprintf("centerwindow %s", addressSelector),
+		}
+
+		for _, cmd := range windowCommands {
+			if _, err := h.client.Dispatch(cmd); err != nil {
+				log.Printf("ERROR: failed to dispatch window command '%s': %v", cmd, err)
+			}
+		}
+	}
 }
 
 func main() {
@@ -138,6 +215,7 @@ func main() {
 		// Hyprland event client
 		cli         = event.MustClient()
 		ctx, cancel = context.WithCancel(context.Background())
+		hc          = hyprland.MustClient()
 	)
 	defer cli.Close()
 	defer cancel()
@@ -156,14 +234,25 @@ func main() {
 	pipewire.SetChannel(ch)
 
 	go func() {
-		if err := cli.Subscribe(ctx, &screencastHandler{ch: ch}, event.EventScreencast); err != nil && ctx.Err() == nil {
+		var (
+			handler = &screencastHandler{
+				ch:     ch,
+				client: hc,
+			}
+			events = []event.EventType{
+				event.EventScreencast,
+				event.EventActiveWindow,
+				event.EventOpenWindow,
+			}
+		)
+		if err := cli.Subscribe(ctx, handler, events...); err != nil && ctx.Err() == nil {
 			fmt.Fprintf(os.Stderr, "Subscribe exited with error: %v", err)
 			cancel()
 		}
 	}()
 
 	log.Printf("XDG_RUNTIME_DIR=%q HYPRLAND_INSTANCE_SIGNATURE=%q", os.Getenv("XDG_RUNTIME_DIR"), os.Getenv("HYPRLAND_INSTANCE_SIGNATURE"))
-	if c, err := hyprland.MustClient().Clients(); err != nil {
+	if c, err := hc.Clients(); err != nil {
 		log.Printf("IPC check: Clients() error: %v", err)
 	} else {
 		log.Printf("IPC check: saw %d clients at start", len(c))
@@ -390,7 +479,8 @@ func tryPinWindow(client *hyprland.RequestClient, window hyprland.Client, config
 			fmt.Sprintf("pin address:%s", addr),
 			fmt.Sprintf("setprop address:%s decorate 0", addr),
 			fmt.Sprintf("setprop address:%s noborder 1", addr),
-			fmt.Sprintf("movewindowpixel exact 1421 25 %s", addr),
+			// fmt.Sprintf("movewindowpixel exact 1421 25 %s", addr),
+			fmt.Sprintf("movewindowpixel exact 74%% 2%%,address:%s", addr),
 		}
 		for _, command := range commands {
 			if _, err := client.Dispatch(command); err != nil {
@@ -535,9 +625,11 @@ const (
 
 func writeStatus(on bool) {
 	message := messageOff
+
 	if on {
 		message = messageOn
 	}
+
 	defer func() {
 		go func() {
 			if err := toggleNotificationInhibitor(on); err != nil {
@@ -546,20 +638,12 @@ func writeStatus(on bool) {
 		}()
 	}()
 
-	// Only send notification if it's not the initial "off" state
-	// and avoid duplicate notifications in short succession
-	now := time.Now()
-	shouldNotify := !(message == messageOff && notificationCount == 0) &&
-		(message != lastMessage || now.Sub(lastNotification) >= notificationCooldown)
-
-	if shouldNotify {
+	isInitialOff := message == messageOff && notifications.count == 0
+	if notifications.shouldNotify(message, isInitialOff) {
 		if err := sendNotification("Screencast", message, icon); err != nil {
 			fmt.Fprintf(os.Stderr, "could not send notification: %v", err)
 		}
-		lastMessage = message
-		lastNotification = now
 	}
-	notificationCount++
 
 	tmp := statusFile + ".tmp"
 	if err := os.WriteFile(tmp, []byte(onOff(on)+""), 0o644); err != nil {
