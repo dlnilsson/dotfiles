@@ -465,8 +465,50 @@ func isLikelyScreencastWindow(c hyprland.Client) bool {
 	return c.Size[0] > 0 && c.Size[1] > 0
 }
 
+func calculateWindowPosition(client *hyprland.RequestClient, window hyprland.Client) (string, error) {
+	monitors, err := client.Monitors()
+	if err != nil {
+		return "", fmt.Errorf("failed to get monitors: %w", err)
+	}
+
+	var monitor *hyprland.Monitor
+	for i := range monitors {
+		if monitors[i].Id == window.Monitor {
+			monitor = &monitors[i]
+			break
+		}
+	}
+
+	if monitor == nil {
+		return "", fmt.Errorf("monitor %d not found", window.Monitor)
+	}
+	var (
+		windowWidth  = window.Size[0]
+		monitorWidth = monitor.Width
+
+		rightPadding = 2
+		xPos         = monitorWidth - windowWidth - rightPadding
+		yPos         = 20
+
+		xPercent = int(float64(xPos) / float64(monitorWidth) * 100)
+		yPercent = int(float64(yPos) / float64(monitor.Height) * 100)
+	)
+
+	if yPercent < 2 {
+		yPercent = 2
+	}
+
+	return fmt.Sprintf("%d%% %d%%", xPercent, yPercent), nil
+}
+
 func tryPinWindow(client *hyprland.RequestClient, window hyprland.Client, config pinConfig) bool {
 	addr := window.Address
+
+	position, err := calculateWindowPosition(client, window)
+	if err != nil {
+		log.Printf("WARN: failed to calculate window position: %v, using default", err)
+		position = "74% 2%"
+	}
 
 	for attempt := 0; attempt < config.maxRetries; attempt++ {
 		if attempt > 0 {
@@ -479,10 +521,12 @@ func tryPinWindow(client *hyprland.RequestClient, window hyprland.Client, config
 			fmt.Sprintf("pin address:%s", addr),
 			fmt.Sprintf("setprop address:%s decorate 0", addr),
 			fmt.Sprintf("setprop address:%s noborder 1", addr),
-			// fmt.Sprintf("movewindowpixel exact 1421 25 %s", addr),
-			fmt.Sprintf("movewindowpixel exact 74%% 2%%,address:%s", addr),
+			fmt.Sprintf("setprop address:%s noshadow 1", addr),
+			fmt.Sprintf("setprop address:%s noblur 1", addr),
+			fmt.Sprintf("movewindowpixel exact %s,address:%s", position, addr),
 		}
 		for _, command := range commands {
+			log.Printf("DEBUG: executing command: %s", command)
 			if _, err := client.Dispatch(command); err != nil {
 				log.Printf("ERROR: attempt %d failed to execute command %s: %v", attempt+1, command, err)
 				continue
@@ -495,7 +539,6 @@ func tryPinWindow(client *hyprland.RequestClient, window hyprland.Client, config
 
 		log.Printf("DEBUG: pin command succeeded but window %s doesn't appear to be pinned", addr)
 	}
-
 	log.Printf("ERROR: failed to pin window %s after %d attempts", addr, config.maxRetries)
 	return false
 }
