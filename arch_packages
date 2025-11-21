@@ -3,6 +3,7 @@ adw-gtk-theme
 age
 amd-ucode
 aws-cli
+bandwhich
 base
 base-devel
 bat
@@ -18,6 +19,7 @@ cava
 chromium
 cliphist
 cmake
+cmatrix
 codespell
 copyq
 cpio
@@ -63,10 +65,12 @@ go-yq
 graphviz
 grim
 gum
+helix
 htop
 hyperfine
 hypridle
 hyprland
+hyprlauncher
 hyprlock
 hyprpaper
 hyprpicker
@@ -118,7 +122,9 @@ parallel
 pavucontrol
 perl-image-exiftool
 pipewire-alsa
+pipewire-docs
 pipewire-pulse
+pipewire-session-manager
 polkit-kde-agent
 polybar
 python-openapi-spec-validator
@@ -143,6 +149,7 @@ socat
 solaar
 sops
 speech-dispatcher
+spotify-launcher
 spotify-player
 sqlfluff
 strace
@@ -186,8 +193,10 @@ xorg-server
 xorg-xinit
 xsel
 yarn
+yubico-pam
 yubikey-manager
 yubikey-touch-detector
+zed
 zip
 zoxide
 zram-generator

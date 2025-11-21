@@ -7,6 +7,7 @@ bun-bin
 ccat
 cursor-bin
 drm_info
+glide-browser-bin
 gnu-netcat
 gromit-mpx
 hackernews_tui
@@ -39,7 +40,6 @@ wl-screenrec
 wpgtk
 xf86-video-vmware
 xwaylandvideobridge-git
-yaak-bin
 yay
 yin-yang
 zen-browser-bin
