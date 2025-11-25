@@ -27,4 +27,15 @@ skaffold.env
 openapitools.json
 .run
 .direnv/*
+*.zip
 node_modules
+.codespell-ignore.txt
+# work specific
+staticcheck.conf
+main
+.env.development
+scripts/sendify-latest-*
+AGENTS.md
+.gocache
+.cursor/rules/dln.mdc
+.zed/*
