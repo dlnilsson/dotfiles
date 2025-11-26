@@ -397,3 +397,27 @@ fzf_git_log_pickaxe() {
 		git show $commit
 	fi
  }
+
+nvm_init() {
+	source /usr/share/nvm/init-nvm.sh
+}
+
+hex_decode() {
+	echo -n $1 | xxd -r -p
+}
+
+cursor() {
+	local source_file="$HOME/.dotfiles/.cursor/rules/dln.mdc"
+	local target_file="$PWD/.cursor/rules/dln.mdc"
+	local target_dir="$PWD/.cursor/rules"
+
+	if [[ ! -d "$target_dir" ]]; then
+		mkdir -p "$target_dir"
+	fi
+
+	if [[ ! -e "$target_file" ]]; then
+		ln -s "$source_file" "$target_file"
+	fi
+
+	/usr/share/cursor/cursor "$@"
+}
