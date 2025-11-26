@@ -151,11 +151,12 @@ func (h *screencastHandler) OpenWindow(w event.OpenWindow) {
 func (h *screencastHandler) ActiveWindow(w event.ActiveWindow) {
 	selector := []string{
 		"Extension: (Bitwarden Password Manager) - Bitwarden — Zen Browser",
+		"Extension: (Bitwarden Password Manager) - Bitwarden — Mozilla Firefox",
 		"Bitwarden",
 	}
 
 	if slices.ContainsFunc(selector, func(match string) bool {
-		return strings.Contains(w.Title, match)
+		return w.Title == match
 	}) {
 		tagCommands := []string{
 			"tagwindow -- -browser",
