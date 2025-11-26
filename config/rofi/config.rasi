@@ -1,6 +1,6 @@
 configuration {
 	// modi: "drun,window,ssh";
-	modi: "drun,calc";
+	modi: "drun,calc,emoji";
 	lines: 10;
 	font: "sans-serif 12";
 	bw: 0;
