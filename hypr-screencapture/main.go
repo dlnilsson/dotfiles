@@ -63,6 +63,11 @@ func (n *notificationState) shouldNotify(message string, isInitialOff bool) bool
 	return false
 }
 
+const (
+	// defaultPosition is used with dispatch movewindowpixel if we can't compute a better position
+	defaultPosition = "74% 2%"
+)
+
 var (
 	statusFile = filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "hypr", "screencast.status")
 	procNames  = []string{
@@ -144,8 +149,54 @@ func (h *screencastHandler) Screencast(w event.Screencast) {
 }
 
 func (h *screencastHandler) OpenWindow(w event.OpenWindow) {
-	// log.Printf("OpenWindow %v --- %v --- %v", w.Address, w.Class, w.Title)
-	// noop
+	if h.isHangoutWindow(w) {
+		time.Sleep(250 * time.Millisecond)
+		// Hyprland IPC events provide addresses without the "0x" prefix,
+		// but commands expect the full hexadecimal format
+		var (
+			address = "0x" + w.Address
+		)
+		commands := []string{
+			fmt.Sprintf("tagwindow +meeting address:%s", address),
+			fmt.Sprintf("pin address:%s", address),
+			fmt.Sprintf("movewindowpixel exact %s,address:%s", h.meetingPosition(address), address),
+			// rounding 1 is key to avoid flickering
+			fmt.Sprintf("setprop address:%s rounding 1", address),
+			fmt.Sprintf("setprop address:%s noanim 1", address),
+			fmt.Sprintf("setprop address:%s nomaxsize 0", address),
+			fmt.Sprintf("setprop address:%s opaque toggle", address),
+			fmt.Sprintf("setprop address:%s immediate unset", address),
+			fmt.Sprintf("setprop address:%s bordersize relative -2", address),
+			fmt.Sprintf("setprop address:%s roundingpower relative 0.1", address),
+		}
+		for _, cmd := range commands {
+			if _, err := h.client.Dispatch(cmd); err != nil {
+				log.Printf("ERROR: failed to dispatch tag command '%s': %v", cmd, err)
+			}
+		}
+
+	}
+}
+
+func (h *screencastHandler) meetingPosition(addr string) string {
+	clients, err := h.client.Clients()
+	if err != nil {
+		return defaultPosition
+	}
+	for _, client := range clients {
+		if client.Address == addr {
+			p, err := calculateWindowPosition(h.client, client)
+			if err != nil {
+				return defaultPosition
+			}
+			return p
+		}
+	}
+	return defaultPosition
+}
+
+func (h *screencastHandler) isHangoutWindow(w event.OpenWindow) bool {
+	return strings.HasPrefix(w.Title, "Meet – ")
 }
 
 func (h *screencastHandler) ActiveWindow(w event.ActiveWindow) {
@@ -502,13 +553,32 @@ func calculateWindowPosition(client *hyprland.RequestClient, window hyprland.Cli
 	return fmt.Sprintf("%d%% %d%%", xPercent, yPercent), nil
 }
 
+func executeWindowCommands(client *hyprland.RequestClient, address, position string) {
+	commands := []string{
+		fmt.Sprintf("pin address:%s", address),
+		fmt.Sprintf("setprop address:%s decorate 0", address),
+		fmt.Sprintf("setprop address:%s noborder 1", address),
+		fmt.Sprintf("setprop address:%s noshadow 1", address),
+		fmt.Sprintf("setprop address:%s opacity 1.0 1.0", address),
+		fmt.Sprintf("setprop address:%s noblur 1", address),
+		fmt.Sprintf("setprop address:%s rounding 0", address),
+		fmt.Sprintf("movewindowpixel exact %s,address:%s", position, address),
+	}
+	for _, command := range commands {
+		log.Printf("DEBUG: executing command: %s", command)
+		if _, err := client.Dispatch(command); err != nil {
+			log.Printf("ERROR: failed to execute command %s: %v", command, err)
+		}
+	}
+}
+
 func tryPinWindow(client *hyprland.RequestClient, window hyprland.Client, config pinConfig) bool {
 	addr := window.Address
 
 	position, err := calculateWindowPosition(client, window)
 	if err != nil {
 		log.Printf("WARN: failed to calculate window position: %v, using default", err)
-		position = "74% 2%"
+		position = defaultPosition
 	}
 
 	for attempt := 0; attempt < config.maxRetries; attempt++ {
@@ -518,21 +588,7 @@ func tryPinWindow(client *hyprland.RequestClient, window hyprland.Client, config
 				addr, attempt+1, config.maxRetries, delay)
 			time.Sleep(delay)
 		}
-		commands := []string{
-			fmt.Sprintf("pin address:%s", addr),
-			fmt.Sprintf("setprop address:%s decorate 0", addr),
-			fmt.Sprintf("setprop address:%s noborder 1", addr),
-			fmt.Sprintf("setprop address:%s noshadow 1", addr),
-			fmt.Sprintf("setprop address:%s noblur 1", addr),
-			fmt.Sprintf("movewindowpixel exact %s,address:%s", position, addr),
-		}
-		for _, command := range commands {
-			log.Printf("DEBUG: executing command: %s", command)
-			if _, err := client.Dispatch(command); err != nil {
-				log.Printf("ERROR: attempt %d failed to execute command %s: %v", attempt+1, command, err)
-				continue
-			}
-		}
+		executeWindowCommands(client, addr, position)
 
 		if verifyWindowPinned(client, addr) {
 			return true
