@@ -1,0 +1,49 @@
+---
+alwaysApply: true
+globs: **/*.go
+---
+
+
+## Code preferences
+
+- Prefer a single `var (...)` block when declaring multiple local variables inside a function instead of repeating `:=`.
+```go
+// before
+foo := "foo"
+bar := "bar"
+
+// after
+var (
+	foo = "foo"
+	bar = "bar"
+)
+```
+
+- In unit tests, acquire contexts via `t.Context()`; avoid `context.Background()` and `context.TODO()`.
+- Use `errors.New()` for static error messages. Only reach for `fmt.Errorf()` when interpolating dynamic data.
+
+
+### Patterns
+
+### Slice Capacity Guidance
+- When you know the target slice size (or have a tight upper bound), initialize with `make([]T, 0, expectedSize)` so Go performs a single allocation.
+- Append into that pre-sized slice to avoid the repeated reallocations and copies that occur whenever `append` forces the capacity to grow.
+- If the exact element count is unknown, provide a conservative high estimate for the capacity; mild over-allocation is almost always cheaper than multiple reallocations.
+
+
+### Interface Boxing Guidance
+- Assigning a concrete value to `interface{}` forces Go to allocate a heap box that stores the value plus its type metadata; avoid this when performance or escape analysis matters.
+- Prefer type parameters (Go 1.18+) so helpers stay concrete and compiled per type, eliminating the boxing step entirely.
+- Keep APIs concrete whenever possible; only widen to `interface{}` when polymorphism is genuinely required.
+
+
+### Closure Capture Guidance
+- Variables captured by returned closures must escape to the heap so the closure can use them after the outer function returns; treat this as a deliberate cost.
+- Avoid allocating a fresh closure inside tight loops if the captured values do not need to persist; prefer passing the loop variable as a parameter to the goroutine or helper to keep it on the stack.
+- Use closures when the shared state is intentional, but default to explicit parameters or structs when the state is incidental and you want to minimize escaping.
+
+
+### Large Temporary Buffers Guidance
+- Avoid repeatedly allocating large temporary slices or byte buffers inside hot paths; a fresh `make([]byte, size)` per call wastes CPU and increases GC pressure.
+- Reuse memory via `sync.Pool` (or package-level scratch buffers guarded by mutexes) when the data is short-lived and safe to recycle between requests.
+- Always return the buffer to the pool (typically with `defer`) and document ownership expectations so future edits do not leak or double-return buffers.
