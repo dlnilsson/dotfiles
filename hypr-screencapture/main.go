@@ -20,6 +20,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"sync"
@@ -148,33 +149,55 @@ func (h *screencastHandler) Screencast(w event.Screencast) {
 	h.ch <- msg{Kind: msgScOff, Source: messages.SourceHyprland}
 }
 
-func (h *screencastHandler) OpenWindow(w event.OpenWindow) {
-	if h.isHangoutWindow(w) {
-		time.Sleep(250 * time.Millisecond)
-		// Hyprland IPC events provide addresses without the "0x" prefix,
-		// but commands expect the full hexadecimal format
-		var (
-			address = "0x" + w.Address
-		)
-		commands := []string{
-			fmt.Sprintf("tagwindow +meeting address:%s", address),
-			fmt.Sprintf("pin address:%s", address),
-			fmt.Sprintf("movewindowpixel exact %s,address:%s", h.meetingPosition(address), address),
-			// rounding 1 is key to avoid flickering
-			fmt.Sprintf("setprop address:%s rounding 1", address),
-			fmt.Sprintf("setprop address:%s noanim 1", address),
-			fmt.Sprintf("setprop address:%s nomaxsize 0", address),
-			fmt.Sprintf("setprop address:%s opaque toggle", address),
-			fmt.Sprintf("setprop address:%s immediate unset", address),
-			fmt.Sprintf("setprop address:%s bordersize relative -2", address),
-			fmt.Sprintf("setprop address:%s roundingpower relative 0.1", address),
+// dispatchCommands executes a slice of commands and logs any errors
+func (h *screencastHandler) dispatchCommands(commands []string) {
+	for _, cmd := range commands {
+		if _, err := h.client.Dispatch(cmd); err != nil {
+			log.Printf("ERROR: failed to dispatch %s command: %v", cmd, err)
 		}
-		for _, cmd := range commands {
-			if _, err := h.client.Dispatch(cmd); err != nil {
-				log.Printf("ERROR: failed to dispatch tag command '%s': %v", cmd, err)
-			}
-		}
+	}
+}
 
+func (h *screencastHandler) handleHangoutWindow(address string) {
+	time.Sleep(100 * time.Millisecond)
+	log.Printf("DEBUG: handling hangout window: %s", address)
+
+	h.dispatchCommands([]string{
+		fmt.Sprintf("tagwindow +meeting address:%s", address),
+		fmt.Sprintf("pin address:%s", address),
+		fmt.Sprintf("movewindowpixel exact %s,address:%s", h.meetingPosition(address), address),
+		// rounding 1 is key to avoid flickering
+		fmt.Sprintf("setprop address:%s rounding 1", address),
+		fmt.Sprintf("setprop address:%s noanim 1", address),
+		fmt.Sprintf("setprop address:%s nomaxsize 0", address),
+		fmt.Sprintf("setprop address:%s opaque toggle", address),
+		fmt.Sprintf("setprop address:%s immediate unset", address),
+		fmt.Sprintf("setprop address:%s bordersize relative -2", address),
+		fmt.Sprintf("setprop address:%s roundingpower relative 0.1", address),
+	})
+}
+
+func (h *screencastHandler) handlePictureInPictureWindow(address string) {
+	time.Sleep(100 * time.Millisecond)
+	log.Printf("DEBUG: handling picture-in-picture window: %s", address)
+
+	h.dispatchCommands([]string{
+		fmt.Sprintf("movewindowpixel exact %s,address:%s", h.meetingPosition(address), address),
+	})
+}
+
+func (h *screencastHandler) OpenWindow(w event.OpenWindow) {
+	// Hyprland IPC events provide addresses without the "0x" prefix,
+	// but commands expect the full hexadecimal format
+	address := "0x" + w.Address
+
+	switch {
+	case h.isHangoutWindow(w):
+		h.handleHangoutWindow(address)
+	case h.isPictureInPictureWindow(w):
+		h.handlePictureInPictureWindow(address)
+	default:
+		// Not a window we care about
 	}
 }
 
@@ -199,6 +222,11 @@ func (h *screencastHandler) isHangoutWindow(w event.OpenWindow) bool {
 	return strings.HasPrefix(w.Title, "Meet – ")
 }
 
+func (h *screencastHandler) isPictureInPictureWindow(w event.OpenWindow) bool {
+	pipRegex := regexp.MustCompile(`(?i)(Picture-in-Picture|Picture in Picture)`)
+	return pipRegex.MatchString(w.Title)
+}
+
 func (h *screencastHandler) ActiveWindow(w event.ActiveWindow) {
 	selector := []string{
 		"Extension: (Bitwarden Password Manager) - Bitwarden — Zen Browser",
@@ -209,17 +237,9 @@ func (h *screencastHandler) ActiveWindow(w event.ActiveWindow) {
 	if slices.ContainsFunc(selector, func(match string) bool {
 		return w.Title == match
 	}) {
-		tagCommands := []string{
-			"tagwindow -- -browser",
-			"tagwindow -- -browser*",
+		h.dispatchCommands([]string{
 			"tagwindow starship",
-		}
-
-		for _, cmd := range tagCommands {
-			if _, err := h.client.Dispatch(cmd); err != nil {
-				log.Printf("ERROR: failed to dispatch tag command '%s': %v", cmd, err)
-			}
-		}
+		})
 
 		activeClient, err := h.client.ActiveWindow()
 		if err != nil {
@@ -227,17 +247,12 @@ func (h *screencastHandler) ActiveWindow(w event.ActiveWindow) {
 		}
 
 		addressSelector := fmt.Sprintf("address:%s", activeClient.Address)
-		windowCommands := []string{
+
+		h.dispatchCommands([]string{
 			fmt.Sprintf("setfloating %s", addressSelector),
 			fmt.Sprintf("resizewindowpixel exact 900 600,%s", addressSelector),
 			fmt.Sprintf("centerwindow %s", addressSelector),
-		}
-
-		for _, cmd := range windowCommands {
-			if _, err := h.client.Dispatch(cmd); err != nil {
-				log.Printf("ERROR: failed to dispatch window command '%s': %v", cmd, err)
-			}
-		}
+		})
 	}
 }
 
