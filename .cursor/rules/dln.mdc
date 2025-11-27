@@ -47,3 +47,10 @@ var (
 - Avoid repeatedly allocating large temporary slices or byte buffers inside hot paths; a fresh `make([]byte, size)` per call wastes CPU and increases GC pressure.
 - Reuse memory via `sync.Pool` (or package-level scratch buffers guarded by mutexes) when the data is short-lived and safe to recycle between requests.
 - Always return the buffer to the pool (typically with `defer`) and document ownership expectations so future edits do not leak or double-return buffers.
+
+
+### String Concatenation Guidance
+- **Solution 1 – strings.Builder:** Default choice; append text and separators via `WriteString`/`WriteByte` instead of `+=` to avoid quadratic copies.
+- **Solution 2 – strings.Builder with `Grow`:** When you can compute the final size (including separators), call `sb.Grow(totalLen)` up front to keep it to one allocation.
+- **Solution 3 – strings.Join:** If you already have a slice of strings and a fixed delimiter, prefer `strings.Join(items, ",")`; it precomputes the size for you.
+- **Solution 4 – bytes.Buffer:** When you need to mix strings with other data types or write binary segments, use `bytes.Buffer` but keep the same preallocation mindset.
