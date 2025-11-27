@@ -37,5 +37,5 @@ main
 scripts/sendify-latest-*
 AGENTS.md
 .gocache
-.cursor/rules/dln.mdc
+**/.cursor/rules/dln.mdc
 .zed/*
