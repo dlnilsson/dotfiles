@@ -416,7 +416,7 @@ cursor() {
 	fi
 
 	if [[ ! -e "$target_file" ]]; then
-		ln -s "$source_file" "$target_file"
+		ln -sf "$source_file" "$target_file"
 	fi
 
 	/usr/share/cursor/cursor "$@"
