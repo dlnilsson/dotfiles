@@ -1,0 +1,10 @@
+[Unit]
+Description=Notify on charger connect/disconnect via UPower (battery state)
+
+[Service]
+ExecStart=%h/.dotfiles/bin/ac-notify
+Restart=always
+
+[Install]
+WantedBy=default.target
+

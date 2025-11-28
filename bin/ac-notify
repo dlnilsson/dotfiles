@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+DEV="/org/freedesktop/UPower/devices/battery_BAT0"
+
+get_state() {
+    upower -i "$DEV" | grep -Po 'state:\s+\K.*' 2>/dev/null
+}
+get_icon() {
+    upower -i "$DEV" | grep -Po "icon-name:\s+'*\K[^']+" 2>/dev/null
+}
+state_to_mode() {
+    # Map battery state -> "ac" or "bat"
+    case "$1" in
+        charging|fully-charged|pending-charge)
+            echo "ac"
+            ;;
+        *)
+            echo "bat"
+            ;;
+    esac
+}
+
+state="$(get_state)"
+if [[ -z "$state" ]]; then
+    notify-send --expire-time=3000 --transient "Power" "Failed to read battery state"
+    exit 1
+fi
+
+mode="$(state_to_mode "$state")"
+last_mode="$mode"
+icon="$(get_icon)"
+: "${icon:=battery-symbolic}"
+
+# Initial notification (optional)
+if [[ "$mode" == "ac" ]]; then
+    notify-send -i "$icon" --expire-time=3000 --transient "Power" "Charger is connected"
+else
+    notify-send -i "$icon" --expire-time=3000 --transient "Power" "Charger is disconnected"
+fi
+
+# Listen for property changes on the battery
+dbus-monitor --system \
+  "type='signal',sender='org.freedesktop.UPower',interface='org.freedesktop.DBus.Properties',path='$DEV',member='PropertiesChanged'" \
+  | while read -r line; do
+        # When State changes, recompute
+        if [[ "$line" == *"State"* ]]; then
+            state="$(get_state)"
+            [[ -z "$state" ]] && continue
+
+            mode="$(state_to_mode "$state")"
+
+            if [[ "$mode" != "$last_mode" ]]; then
+                if [[ "$mode" == "ac" ]]; then
+                    notify-send -i "$icon" --expire-time=3000 --transient "Power" "Charger connected"
+                else
+                    notify-send -i "$icon" --expire-time=3000 --transient "Power" "Charger disconnected"
+                fi
+                last_mode="$mode"
+            fi
+        fi
+    done
