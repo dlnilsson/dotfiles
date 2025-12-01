@@ -4,6 +4,30 @@ set -euo pipefail
 
 command -v hyprpicker >/dev/null 2>&1 || { echo "hyprpicker not found in PATH"; exit 1; }
 command -v wl-copy     >/dev/null 2>&1 || { echo "wl-copy (wl-clipboard) not found in PATH"; exit 1; }
+command -v hyprctl     >/dev/null 2>&1 || { echo "hyprctl not found in PATH"; exit 1; }
+command -v jq          >/dev/null 2>&1 || { echo "jq not found in PATH"; exit 1; }
+
+wait_for_rofi_to_close() {
+  # Wait up to ~2 seconds for the rofi layer to disappear
+  for _ in {1..40}; do
+    # Returns 0 if any rofi layer exists on any monitor, non-zero otherwise
+    if ! hyprctl -j layers 2>/dev/null \
+      | jq -e '
+        to_entries[]
+        | .value.levels
+        | to_entries[]
+        | .value[]
+        | select(.namespace == "rofi")
+      ' >/dev/null 2>&1; then
+      # Small extra delay to let fade-out finish
+      sleep 0.05
+      return
+    fi
+    sleep 0.05
+  done
+}
+
+wait_for_rofi_to_close
 
 raw="$(hyprpicker "$@" 2>&1 || true)"
 color="$(printf '%s\n' "$raw" | grep -Eo '#[0-9A-Fa-f]{6,8}' | head -n1 || true)"
