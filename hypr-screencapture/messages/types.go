@@ -5,6 +5,8 @@ type Kind int
 const (
 	ScOn Kind = iota
 	ScOff
+	CameraOn
+	CameraOff
 )
 
 type Source int

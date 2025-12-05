@@ -36,10 +36,14 @@ import (
 )
 
 type notificationState struct {
-	mu               sync.Mutex
-	count            int
+	// protects all fields in this struct
+	mu sync.Mutex
+	// total count of notifications sent
+	count int
+	// tracks the last time each message was sent
 	lastMessageTimes map[string]time.Time
-	cooldown         time.Duration
+	// minimum duration between duplicate notifications
+	cooldown time.Duration
 }
 
 func (n *notificationState) shouldNotify(message string, isInitialOff bool) bool {
@@ -70,12 +74,16 @@ const (
 )
 
 var (
+	// path to the status file written for waybar
 	statusFile = filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "hypr", "screencast.status")
-	procNames  = []string{
+	// process names to monitor for screencast detection
+	procNames = []string{
 		"wl-screenrec",
 	}
+	// interval for polling process status
 	pollEvery = 2 * time.Second
 
+	// notification state manager with cooldown
 	notifications = &notificationState{
 		cooldown: 10 * time.Second,
 	}
@@ -89,23 +97,24 @@ func sendNotification(title, message string, iconBytes []byte) error {
 	if err != nil {
 		return err
 	}
-
-	tmp, err := bytesToFilename(iconBytes)
-	if err != nil {
-		return err
-	}
-	defer os.Remove(tmp)
-
 	args := []string{
 		title,
 		message,
 		"-a",
 		"hypr-screencapture",
-		"-i", tmp,
 		"-t", "3000",
 		"-u", "normal",
 		"--transient",
 	}
+	if iconBytes != nil {
+		tmp, err := bytesToFilename(iconBytes)
+		if err != nil {
+			return err
+		}
+		defer os.Remove(tmp)
+		args = append(args, "-i", tmp)
+	}
+
 	c := exec.Command(cmd, args...)
 	return c.Run()
 }
@@ -130,23 +139,37 @@ func bytesToFilename(data []byte) (string, error) {
 type msg = messages.Msg
 
 const (
-	msgScOn  = messages.ScOn
-	msgScOff = messages.ScOff
+	msgScOn     = messages.ScOn
+	msgScOff    = messages.ScOff
+	msgCameraOn = messages.CameraOn
 )
 
 type screencastHandler struct {
 	event.DefaultEventHandler
-	ch     chan<- msg
+	// channel for sending messages
+	ch chan<- msg
+	// Hyprland IPC client for dispatching commands
 	client *hyprland.RequestClient
+	// tracks window addresses that have already been handled
+	handledAddresses map[string]bool
+	// protects handledAddresses map
+	handledMu sync.Mutex
 }
 
 func (h *screencastHandler) Screencast(w event.Screencast) {
 	log.Printf("Screencast %v --- %v", w.Sharing, w.Owner)
+	var m msg
 	if w.Sharing {
-		h.ch <- msg{Kind: msgScOn, Source: messages.SourceHyprland}
-		return
+		m = msg{Kind: msgScOn, Source: messages.SourceHyprland}
+	} else {
+		m = msg{Kind: msgScOff, Source: messages.SourceHyprland}
 	}
-	h.ch <- msg{Kind: msgScOff, Source: messages.SourceHyprland}
+	select {
+	case h.ch <- m:
+		log.Printf("DEBUG: Hyprland sent message: %+v", m)
+	default:
+		log.Printf("DEBUG: WARNING - Hyprland failed to send message (channel full): %+v", m)
+	}
 }
 
 // dispatchCommands executes a slice of commands and logs any errors
@@ -159,12 +182,23 @@ func (h *screencastHandler) dispatchCommands(commands []string) {
 }
 
 func (h *screencastHandler) handleHangoutWindow(address string) {
+	h.handledMu.Lock()
+	defer h.handledMu.Unlock()
+	if h.handledAddresses == nil {
+		h.handledAddresses = make(map[string]bool)
+	}
+	if h.handledAddresses[address] {
+		return
+	}
+	h.handledAddresses[address] = true
+
 	time.Sleep(100 * time.Millisecond)
 	log.Printf("DEBUG: handling hangout window: %s", address)
 
 	h.dispatchCommands([]string{
 		fmt.Sprintf("tagwindow +meeting address:%s", address),
 		fmt.Sprintf("pin address:%s", address),
+		fmt.Sprintf("setfloating address:%s", address),
 		fmt.Sprintf("movewindowpixel exact %s,address:%s", h.meetingPosition(address), address),
 		// rounding 1 is key to avoid flickering
 		fmt.Sprintf("setprop address:%s rounding 1", address),
@@ -218,8 +252,17 @@ func (h *screencastHandler) meetingPosition(addr string) string {
 	return defaultPosition
 }
 
+func isHangoutTitle(title string) bool {
+	return slices.ContainsFunc([]string{
+		"https://meet.google.com - Meet –",
+		"Meet – ",
+	}, func(prefix string) bool {
+		return strings.HasPrefix(title, prefix)
+	})
+}
+
 func (h *screencastHandler) isHangoutWindow(w event.OpenWindow) bool {
-	return strings.HasPrefix(w.Title, "Meet – ")
+	return isHangoutTitle(w.Title)
 }
 
 func (h *screencastHandler) isPictureInPictureWindow(w event.OpenWindow) bool {
@@ -228,31 +271,31 @@ func (h *screencastHandler) isPictureInPictureWindow(w event.OpenWindow) bool {
 }
 
 func (h *screencastHandler) ActiveWindow(w event.ActiveWindow) {
-	selector := []string{
+	a := func() string {
+		activeClient, err := h.client.ActiveWindow()
+		if err != nil {
+			return ""
+		}
+		return activeClient.Address
+	}
+
+	if slices.ContainsFunc([]string{
 		"Extension: (Bitwarden Password Manager) - Bitwarden — Zen Browser",
 		"Extension: (Bitwarden Password Manager) - Bitwarden — Mozilla Firefox",
 		"Bitwarden",
-	}
-
-	if slices.ContainsFunc(selector, func(match string) bool {
+	}, func(match string) bool {
 		return w.Title == match
 	}) {
+		addr := fmt.Sprintf("address:%s", a())
 		h.dispatchCommands([]string{
-			"tagwindow starship",
+			"tagwindow +starship",
+			fmt.Sprintf("setfloating %s", addr),
+			fmt.Sprintf("resizewindowpixel exact 900 725,%s", addr),
+			fmt.Sprintf("centerwindow %s", addr),
 		})
-
-		activeClient, err := h.client.ActiveWindow()
-		if err != nil {
-			return
-		}
-
-		addressSelector := fmt.Sprintf("address:%s", activeClient.Address)
-
-		h.dispatchCommands([]string{
-			fmt.Sprintf("setfloating %s", addressSelector),
-			fmt.Sprintf("resizewindowpixel exact 900 600,%s", addressSelector),
-			fmt.Sprintf("centerwindow %s", addressSelector),
-		})
+	}
+	if isHangoutTitle(w.Title) {
+		h.handleHangoutWindow(a())
 	}
 }
 
@@ -328,8 +371,11 @@ func main() {
 	// Fan out messages to both channels with rate limiting and PipeWire prioritization
 	go func() {
 		var (
-			lastSent          = make(map[messages.Kind]time.Time)
-			lastSource        = make(map[messages.Kind]messages.Source)
+			// tracks the last time each message kind was sent
+			lastSent = make(map[messages.Kind]time.Time)
+			// tracks the source of the last message for each kind
+			lastSource = make(map[messages.Kind]messages.Source)
+			// minimum duration between messages of the same kind
 			rateLimitDuration = time.Second
 		)
 		for {
@@ -337,7 +383,7 @@ func main() {
 			case <-ctx.Done():
 				return
 			case m := <-ch:
-				log.Printf("DEBUG: Fan-out received message: %+v", m)
+				log.Printf("DEBUG: Fan-out received message: Kind=%v Source=%v", m.Kind, m.Source)
 
 				// Check rate limit with PipeWire prioritization
 				now := time.Now()
@@ -349,11 +395,11 @@ func main() {
 							if lastSrc == messages.SourceHyprland && m.Source == messages.SourcePipeWire {
 								log.Printf("DEBUG: Prioritizing PipeWire message over Hyprland (last sent %v ago)", timeSinceLastSent)
 							} else {
-								log.Printf("DEBUG: Rate limiting message %+v (last sent %v ago)", m, timeSinceLastSent)
+								log.Printf("DEBUG: Rate limiting message Kind=%v Source=%v (last sent %v ago)", m.Kind, m.Source, timeSinceLastSent)
 								continue
 							}
 						} else {
-							log.Printf("DEBUG: Rate limiting message %+v (last sent %v ago)", m, timeSinceLastSent)
+							log.Printf("DEBUG: Rate limiting message Kind=%v Source=%v (last sent %v ago)", m.Kind, m.Source, timeSinceLastSent)
 							continue
 						}
 					}
@@ -365,20 +411,21 @@ func main() {
 
 				select {
 				case managerCh <- m:
-					log.Printf("DEBUG: Fan-out sent message to manager")
+					log.Printf("DEBUG: Fan-out sent message Kind=%v to manager", m.Kind)
 				case <-ctx.Done():
 					return
 				default:
-					log.Printf("DEBUG: Fan-out failed to send to manager (channel full)")
+					log.Printf("DEBUG: Fan-out failed to send Kind=%v to manager (channel full)", m.Kind)
 				}
 				select {
 				case pinWindowCh <- m:
-					log.Printf("DEBUG: Fan-out sent message to pinWindow")
+					log.Printf("DEBUG: Fan-out sent message Kind=%v to pinWindow", m.Kind)
 				case <-ctx.Done():
 					return
 				default:
-					log.Printf("DEBUG: Fan-out failed to send to pinWindow (channel full)")
+					log.Printf("DEBUG: Fan-out failed to send Kind=%v to pinWindow (channel full)", m.Kind)
 				}
+
 			}
 		}
 	}()
@@ -434,7 +481,13 @@ func pinWindow(ctx context.Context, ch <-chan msg) {
 				log.Printf("DEBUG: screencast started, looking for windows to pin")
 				go pinWindowsWithRetry(ctx, client, config)
 			case msgScOff:
-				log.Printf("DEBUG: screencast stopped, no action needed for pinWindow")
+				if err := sendNotification("Camera", "📸 Camera off!", nil); err != nil {
+					fmt.Fprintf(os.Stderr, "could not send camera notification: %v", err)
+				}
+			case msgCameraOn:
+				if err := sendNotification("Camera", "📸 Camera on!", nil); err != nil {
+					fmt.Fprintf(os.Stderr, "could not send camera notification: %v", err)
+				}
 			}
 		}
 	}
@@ -570,19 +623,19 @@ func calculateWindowPosition(client *hyprland.RequestClient, window hyprland.Cli
 
 func executeWindowCommands(client *hyprland.RequestClient, address, position string) {
 	commands := []string{
-		fmt.Sprintf("pin address:%s", address),
-		fmt.Sprintf("setprop address:%s decorate 0", address),
-		fmt.Sprintf("setprop address:%s noborder 1", address),
-		fmt.Sprintf("setprop address:%s noshadow 1", address),
-		fmt.Sprintf("setprop address:%s opacity 1.0 1.0", address),
-		fmt.Sprintf("setprop address:%s noblur 1", address),
-		fmt.Sprintf("setprop address:%s rounding 0", address),
-		fmt.Sprintf("movewindowpixel exact %s,address:%s", position, address),
+		"pin",
+		"setprop decorate 0",
+		"setprop noborder 1",
+		"setprop noshadow 1",
+		"setprop opacity 1.0 1.0",
+		"setprop noblur 1",
+		"setprop rounding 0",
+		fmt.Sprintf("movewindowpixel exact %s,", position),
 	}
 	for _, command := range commands {
-		log.Printf("DEBUG: executing command: %s", command)
-		if _, err := client.Dispatch(command); err != nil {
-			log.Printf("ERROR: failed to execute command %s: %v", command, err)
+		formatted := fmt.Sprintf("%s address:%s", command, address)
+		if _, err := client.Dispatch(formatted); err != nil {
+			log.Printf("ERROR: failed to execute command %s: %v", formatted, err)
 		}
 	}
 }
@@ -634,8 +687,8 @@ func verifyWindowPinned(client *hyprland.RequestClient, address string) bool {
 
 func manager(ctx context.Context, ch <-chan msg) {
 	var (
-		lastWritten *bool              // last ON/OFF written
-		watchCancel context.CancelFunc // cancel current watcher
+		lastWritten *bool
+		watchCancel context.CancelFunc
 	)
 
 	writeIfChanged := func(on bool) {
