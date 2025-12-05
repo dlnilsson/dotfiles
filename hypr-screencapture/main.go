@@ -29,6 +29,7 @@ import (
 
 	_ "embed"
 
+	"github.com/dlnilsson/dotfiles/hypr-screencapture/config"
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/messages"
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/pipewire"
 	"github.com/thiagokokada/hyprland-go"
@@ -68,25 +69,11 @@ func (n *notificationState) shouldNotify(message string, isInitialOff bool) bool
 	return false
 }
 
-const (
-	// defaultPosition is used with dispatch movewindowpixel if we can't compute a better position
-	defaultPosition = "74% 2%"
-)
-
 var (
-	// path to the status file written for waybar
-	statusFile = filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "hypr", "screencast.status")
-	// process names to monitor for screencast detection
-	procNames = []string{
-		"wl-screenrec",
-	}
-	// interval for polling process status
-	pollEvery = 2 * time.Second
+	cfg   *config.Config
+	cfgMu sync.RWMutex
 
-	// notification state manager with cooldown
-	notifications = &notificationState{
-		cooldown: 10 * time.Second,
-	}
+	notifications *notificationState
 )
 
 //go:embed camera.png
@@ -238,25 +225,34 @@ func (h *screencastHandler) OpenWindow(w event.OpenWindow) {
 func (h *screencastHandler) meetingPosition(addr string) string {
 	clients, err := h.client.Clients()
 	if err != nil {
-		return defaultPosition
+		cfgMu.RLock()
+		pos := cfg.Positioning.DefaultPosition
+		cfgMu.RUnlock()
+		return pos
 	}
 	for _, client := range clients {
 		if client.Address == addr {
 			p, err := calculateWindowPosition(h.client, client)
 			if err != nil {
-				return defaultPosition
+				cfgMu.RLock()
+				pos := cfg.Positioning.DefaultPosition
+				cfgMu.RUnlock()
+				return pos
 			}
 			return p
 		}
 	}
-	return defaultPosition
+	cfgMu.RLock()
+	pos := cfg.Positioning.DefaultPosition
+	cfgMu.RUnlock()
+	return pos
 }
 
 func isHangoutTitle(title string) bool {
-	return slices.ContainsFunc([]string{
-		"https://meet.google.com - Meet –",
-		"Meet – ",
-	}, func(prefix string) bool {
+	cfgMu.RLock()
+	prefixes := cfg.WindowMatching.MeetTitlePrefixes
+	cfgMu.RUnlock()
+	return slices.ContainsFunc(prefixes, func(prefix string) bool {
 		return strings.HasPrefix(title, prefix)
 	})
 }
@@ -279,11 +275,10 @@ func (h *screencastHandler) ActiveWindow(w event.ActiveWindow) {
 		return activeClient.Address
 	}
 
-	if slices.ContainsFunc([]string{
-		"Extension: (Bitwarden Password Manager) - Bitwarden — Zen Browser",
-		"Extension: (Bitwarden Password Manager) - Bitwarden — Mozilla Firefox",
-		"Bitwarden",
-	}, func(match string) bool {
+	cfgMu.RLock()
+	bitwardenTitles := cfg.WindowMatching.BitwardenTitles
+	cfgMu.RUnlock()
+	if slices.ContainsFunc(bitwardenTitles, func(match string) bool {
 		return w.Title == match
 	}) {
 		addr := fmt.Sprintf("address:%s", a())
@@ -299,12 +294,47 @@ func (h *screencastHandler) ActiveWindow(w event.ActiveWindow) {
 	}
 }
 
+func reloadConfig() {
+	newCfg, err := config.Load("")
+	if err != nil {
+		panic(fmt.Sprintf("failed to reload config: %v", err))
+	}
+
+	cfgMu.Lock()
+	cfg = newCfg
+	notifications.cooldown = cfg.Notifications.Cooldown
+	cfgMu.Unlock()
+
+	log.Printf("Config reloaded successfully")
+}
+
 func main() {
 	if os.Geteuid() == 0 {
 		fmt.Fprintln(os.Stderr, "Do not run this program as root or with sudo")
 		os.Exit(1)
 	}
 
+	var err error
+	cfg, err = config.Load("")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to load config: %v", err)
+		os.Exit(1)
+	}
+
+	if err := config.EnsureConfigDir(); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to create config directory: %v", err)
+		os.Exit(1)
+	}
+
+	cfgMu.Lock()
+	notifications = &notificationState{
+		cooldown: cfg.Notifications.Cooldown,
+	}
+	cfgMu.Unlock()
+
+	cfgMu.RLock()
+	statusFile := cfg.Paths.StatusFile
+	cfgMu.RUnlock()
 	if err := os.MkdirAll(filepath.Dir(statusFile), 0o755); err != nil {
 		fmt.Fprintf(os.Stderr, "could not create directory for status file: %v", err)
 		os.Exit(1)
@@ -330,8 +360,17 @@ func main() {
 	defer cli.Close()
 	defer cancel()
 
-	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-	go func() { <-sigCh; cancel() }()
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	go func() {
+		for sig := range sigCh {
+			switch sig {
+			case syscall.SIGHUP:
+				reloadConfig()
+			case syscall.SIGINT, syscall.SIGTERM:
+				cancel()
+			}
+		}
+	}()
 
 	defer pipewire.StopPipeWireLoop()
 
@@ -458,16 +497,19 @@ type pinConfig struct {
 func pinWindow(ctx context.Context, ch <-chan msg) {
 	var (
 		client = hyprland.MustClient()
-		config = pinConfig{
-			initialDelay:  500 * time.Millisecond,
-			maxRetries:    3,
-			retryDelay:    500 * time.Millisecond,
-			maxRetryDelay: 2 * time.Second,
-			pollInterval:  500 * time.Millisecond,
-			maxPollTime:   10 * time.Second,
-		}
+		pinCfg pinConfig
 	)
-	log.Printf("DEBUG: pinWindow started with config: %+v", config)
+	cfgMu.RLock()
+	pinCfg = pinConfig{
+		initialDelay:  cfg.PinWindow.InitialDelay,
+		maxRetries:    cfg.PinWindow.MaxRetries,
+		retryDelay:    cfg.PinWindow.RetryDelay,
+		maxRetryDelay: cfg.PinWindow.MaxRetryDelay,
+		pollInterval:  cfg.PinWindow.PollInterval,
+		maxPollTime:   cfg.PinWindow.MaxPollTime,
+	}
+	cfgMu.RUnlock()
+	log.Printf("DEBUG: pinWindow started with config: %+v", pinCfg)
 	for {
 		select {
 		case <-ctx.Done():
@@ -479,7 +521,7 @@ func pinWindow(ctx context.Context, ch <-chan msg) {
 			switch m.Kind {
 			case msgScOn:
 				log.Printf("DEBUG: screencast started, looking for windows to pin")
-				go pinWindowsWithRetry(ctx, client, config)
+				go pinWindowsWithRetry(ctx, client, pinCfg)
 			case msgScOff:
 				if err := sendNotification("Camera", "📸 Camera off!", nil); err != nil {
 					fmt.Fprintf(os.Stderr, "could not send camera notification: %v", err)
@@ -567,16 +609,15 @@ func findPinCandidates(clients []hyprland.Client, alreadyPinned map[string]bool)
 
 func isLikelyScreencastWindow(c hyprland.Client) bool {
 	var (
-		title              = strings.ToLower(c.Title)
-		class              = strings.ToLower(c.Class)
-		screencastKeywords = []string{
-			"sharing indicator", "sharing", "screen", "recording", "capture",
-			"cast", "obs", "streamlabs", "discord", "zoom", "teams", "meet",
-			"chrome", "firefox", "browser", "portal", "slack", "zen-browser",
-		}
+		title = strings.ToLower(c.Title)
+		class = strings.ToLower(c.Class)
 	)
 
-	for _, keyword := range screencastKeywords {
+	cfgMu.RLock()
+	keywords := cfg.WindowMatching.ScreencastKeywords
+	cfgMu.RUnlock()
+
+	for _, keyword := range keywords {
 		if strings.Contains(title, keyword) || strings.Contains(class, keyword) {
 			return true
 		}
@@ -605,14 +646,16 @@ func calculateWindowPosition(client *hyprland.RequestClient, window hyprland.Cli
 	var (
 		windowWidth  = window.Size[0]
 		monitorWidth = monitor.Width
-
-		rightPadding = 2
-		xPos         = monitorWidth - windowWidth - rightPadding
-		yPos         = 20
-
-		xPercent = int(float64(xPos) / float64(monitorWidth) * 100)
-		yPercent = int(float64(yPos) / float64(monitor.Height) * 100)
 	)
+
+	cfgMu.RLock()
+	rightPadding := cfg.Positioning.RightPadding
+	yPos := cfg.Positioning.YPosition
+	cfgMu.RUnlock()
+
+	xPos := monitorWidth - windowWidth - rightPadding
+	xPercent := int(float64(xPos) / float64(monitorWidth) * 100)
+	yPercent := int(float64(yPos) / float64(monitor.Height) * 100)
 
 	if yPercent < 2 {
 		yPercent = 2
@@ -646,7 +689,9 @@ func tryPinWindow(client *hyprland.RequestClient, window hyprland.Client, config
 	position, err := calculateWindowPosition(client, window)
 	if err != nil {
 		log.Printf("WARN: failed to calculate window position: %v, using default", err)
-		position = defaultPosition
+		cfgMu.RLock()
+		position = cfg.Positioning.DefaultPosition
+		cfgMu.RUnlock()
 	}
 
 	for attempt := 0; attempt < config.maxRetries; attempt++ {
@@ -706,6 +751,10 @@ func manager(ctx context.Context, ch <-chan msg) {
 			log.Printf("DEBUG: Stopping existing watcher before starting new one")
 			watchCancel()
 		}
+		cfgMu.RLock()
+		procNames := cfg.Processes.Monitor
+		pollEvery := cfg.Processes.PollInterval
+		cfgMu.RUnlock()
 		log.Printf("DEBUG: Starting new watcher for %v", procNames)
 		wctx, cancel := context.WithCancel(ctx)
 		watchCancel = cancel
@@ -733,7 +782,9 @@ func manager(ctx context.Context, ch <-chan msg) {
 			log.Printf("DEBUG: manager received message: %+v", m)
 			switch m.Kind {
 			case msgScOn:
-
+				cfgMu.RLock()
+				procNames := cfg.Processes.Monitor
+				cfgMu.RUnlock()
 				alive := isAnyProcessAlive(procNames)
 				log.Printf("DEBUG: msgScOn - checking processes %v: alive=%v", procNames, alive)
 				if alive {
@@ -813,6 +864,9 @@ func writeStatus(on bool) {
 		}
 	}
 
+	cfgMu.RLock()
+	statusFile := cfg.Paths.StatusFile
+	cfgMu.RUnlock()
 	tmp := statusFile + ".tmp"
 	if err := os.WriteFile(tmp, []byte(onOff(on)+""), 0o644); err != nil {
 		fmt.Fprintf(os.Stderr, "could not write status file: %v", err)
