@@ -11,16 +11,16 @@ import (
 )
 
 type Config struct {
-	Paths         PathsConfig
-	Processes     ProcessesConfig
-	Notifications NotificationsConfig
-	PinWindow     PinWindowConfig
+	Paths          PathsConfig
+	Processes      ProcessesConfig
+	Notifications  NotificationsConfig
+	PinWindow      PinWindowConfig
 	WindowMatching WindowMatchingConfig
-	Positioning   PositioningConfig
+	Positioning    PositioningConfig
 }
 
 type PathsConfig struct {
-	StatusFile string
+	SocketPath string
 }
 
 type ProcessesConfig struct {
@@ -56,7 +56,7 @@ type PositioningConfig struct {
 func Default() *Config {
 	return &Config{
 		Paths: PathsConfig{
-			StatusFile: filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "hypr", "screencast.status"),
+			SocketPath: filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "hypr", "screencast.sock"),
 		},
 		Processes: ProcessesConfig{
 			Monitor:      []string{"wl-screenrec"},
@@ -234,8 +234,8 @@ func (p *iniParser) getInt(section, key string) (int, error) {
 }
 
 func (p *iniParser) applyPaths(cfg *Config) error {
-	if val := p.getString("paths", "status_file"); val != "" {
-		cfg.Paths.StatusFile = val
+	if val := p.getString("paths", "socket_path"); val != "" {
+		cfg.Paths.SocketPath = val
 	}
 	return nil
 }
@@ -333,4 +333,3 @@ func EnsureConfigDir() error {
 	configDir := filepath.Join(homeDir, ".config", "hypr-screencapture")
 	return os.MkdirAll(configDir, 0o755)
 }
-

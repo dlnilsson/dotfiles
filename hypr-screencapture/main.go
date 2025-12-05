@@ -1,9 +1,9 @@
-// hypr-screencapture: monitor Hyprland screencast events and write status to file
+// hypr-screencapture: monitor Hyprland screencast events and expose status via Unix socket
 // combine with waybar custom script module to show screencast status in bar
 // example:
 //
 //	"custom/recording": {
-//	    "exec": "cat $XDG_RUNTIME_DIR/hypr/screencast.status",
+//	    "exec": "hypr-screencapture status",
 //	    "interval": 3,
 //	    "format": "{}",
 //	    "tooltip": false,
@@ -14,8 +14,11 @@ package main
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -34,6 +37,17 @@ import (
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/pipewire"
 	"github.com/thiagokokada/hyprland-go"
 	"github.com/thiagokokada/hyprland-go/event"
+)
+
+const (
+	// https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html
+	// exit codes for systemd
+	exUnavailable = 69
+	exOSErr       = 71
+	exCantCreat   = 73
+	exIOErr       = 74
+	exNoPerm      = 77
+	exConfig      = 78
 )
 
 type notificationState struct {
@@ -74,6 +88,11 @@ var (
 	cfgMu sync.RWMutex
 
 	notifications *notificationState
+
+	socketStatus struct {
+		mu     sync.RWMutex
+		status string
+	}
 )
 
 //go:embed camera.png
@@ -121,6 +140,10 @@ func bytesToFilename(data []byte) (string, error) {
 
 	out = tmp.Name()
 	return out, nil
+}
+
+func stderr(format string, args ...any) {
+	fmt.Fprintf(os.Stderr, format+"\n", args...)
 }
 
 type msg = messages.Msg
@@ -297,7 +320,8 @@ func (h *screencastHandler) ActiveWindow(w event.ActiveWindow) {
 func reloadConfig() {
 	newCfg, err := config.Load("")
 	if err != nil {
-		panic(fmt.Sprintf("failed to reload config: %v", err))
+		stderr("failed to reload config: %v", err)
+		os.Exit(exConfig)
 	}
 
 	cfgMu.Lock()
@@ -308,22 +332,130 @@ func reloadConfig() {
 	log.Printf("Config reloaded successfully")
 }
 
+func startSocketServer(ctx context.Context, socketPath string) error {
+	if err := os.MkdirAll(filepath.Dir(socketPath), 0o755); err != nil {
+		return fmt.Errorf("could not create directory for socket: %w", err)
+	}
+
+	if _, err := os.Stat(socketPath); err == nil {
+		if err := os.Remove(socketPath); err != nil {
+			return fmt.Errorf("could not remove stale socket: %w", err)
+		}
+	}
+
+	listener, err := net.Listen("unix", socketPath)
+	if err != nil {
+		return fmt.Errorf("could not listen on socket: %w", err)
+	}
+
+	go func() {
+		<-ctx.Done()
+		listener.Close()
+		os.Remove(socketPath)
+	}()
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+			}
+
+			conn, err := listener.Accept()
+			if err != nil {
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					stderr("ERROR: failed to accept connection: %v", err)
+					continue
+				}
+			}
+
+			go func(c net.Conn) {
+				defer c.Close()
+
+				socketStatus.mu.RLock()
+				status := socketStatus.status
+				socketStatus.mu.RUnlock()
+
+				if _, err := fmt.Fprintln(c, status); err != nil {
+					stderr("ERROR: failed to write status to client: %v", err)
+				}
+			}(conn)
+		}
+	}()
+
+	return nil
+}
+
+func runStatusCommand() {
+	cfg, err := config.Load("")
+	if err != nil {
+		stderr("failed to load config: %v", err)
+		os.Exit(exConfig)
+	}
+
+	socketPath := cfg.Paths.SocketPath
+
+	conn, err := net.Dial("unix", socketPath)
+	if err != nil {
+		stderr("could not connect to socket: %v", err)
+		os.Exit(exUnavailable)
+	}
+	defer conn.Close()
+
+	var buf bytes.Buffer
+	if _, err := io.Copy(&buf, conn); err != nil {
+		stderr("could not read from socket: %v", err)
+		os.Exit(exIOErr)
+	}
+
+	fmt.Print(strings.TrimSpace(buf.String()))
+}
+
+func checkServerRunning(socketPath string) error {
+	if _, err := os.Stat(socketPath); err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+
+	conn, err := net.Dial("unix", socketPath)
+	if err != nil {
+		if err := os.Remove(socketPath); err != nil {
+			return fmt.Errorf("stale socket exists and could not be removed: %w", err)
+		}
+		return nil
+	}
+	conn.Close()
+
+	return errors.New("another instance of hypr-screencapture is already running")
+}
+
 func main() {
 	if os.Geteuid() == 0 {
-		fmt.Fprintln(os.Stderr, "Do not run this program as root or with sudo")
-		os.Exit(1)
+		stderr("Do not run this program as root or with sudo")
+		os.Exit(exNoPerm)
+	}
+
+	if len(os.Args) > 1 && os.Args[1] == "status" {
+		runStatusCommand()
+		return
 	}
 
 	var err error
 	cfg, err = config.Load("")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to load config: %v", err)
-		os.Exit(1)
+		stderr("failed to load config: %v", err)
+		os.Exit(exConfig)
 	}
 
 	if err := config.EnsureConfigDir(); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to create config directory: %v", err)
-		os.Exit(1)
+		stderr("failed to create config directory: %v", err)
+		os.Exit(exCantCreat)
 	}
 
 	cfgMu.Lock()
@@ -332,13 +464,6 @@ func main() {
 	}
 	cfgMu.Unlock()
 
-	cfgMu.RLock()
-	statusFile := cfg.Paths.StatusFile
-	cfgMu.RUnlock()
-	if err := os.MkdirAll(filepath.Dir(statusFile), 0o755); err != nil {
-		fmt.Fprintf(os.Stderr, "could not create directory for status file: %v", err)
-		os.Exit(1)
-	}
 	writeStatus(false)
 
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
@@ -360,6 +485,20 @@ func main() {
 	defer cli.Close()
 	defer cancel()
 
+	cfgMu.RLock()
+	socketPath := cfg.Paths.SocketPath
+	cfgMu.RUnlock()
+
+	if err := checkServerRunning(socketPath); err != nil {
+		stderr("%v", err)
+		os.Exit(exUnavailable)
+	}
+
+	if err := startSocketServer(ctx, socketPath); err != nil {
+		stderr("could not start socket server: %v", err)
+		os.Exit(exOSErr)
+	}
+
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	go func() {
 		for sig := range sigCh {
@@ -376,7 +515,7 @@ func main() {
 
 	go func() {
 		if ret := pipewire.StartPipeWireLoop(); ret != 0 {
-			log.Printf("PipeWire loop exited with code: %d", ret)
+			stderr("PipeWire loop exited with code: %d", ret)
 		}
 	}()
 
@@ -395,14 +534,14 @@ func main() {
 			}
 		)
 		if err := cli.Subscribe(ctx, handler, events...); err != nil && ctx.Err() == nil {
-			fmt.Fprintf(os.Stderr, "Subscribe exited with error: %v", err)
+			stderr("Subscribe exited with error: %v", err)
 			cancel()
 		}
 	}()
 
 	log.Printf("XDG_RUNTIME_DIR=%q HYPRLAND_INSTANCE_SIGNATURE=%q", os.Getenv("XDG_RUNTIME_DIR"), os.Getenv("HYPRLAND_INSTANCE_SIGNATURE"))
 	if c, err := hc.Clients(); err != nil {
-		log.Printf("IPC check: Clients() error: %v", err)
+		stderr("IPC check: Clients() error: %v", err)
 	} else {
 		log.Printf("IPC check: saw %d clients at start", len(c))
 	}
@@ -524,11 +663,11 @@ func pinWindow(ctx context.Context, ch <-chan msg) {
 				go pinWindowsWithRetry(ctx, client, pinCfg)
 			case msgScOff:
 				if err := sendNotification("Camera", "📸 Camera off!", nil); err != nil {
-					fmt.Fprintf(os.Stderr, "could not send camera notification: %v", err)
+					stderr("could not send camera notification: %v", err)
 				}
 			case msgCameraOn:
 				if err := sendNotification("Camera", "📸 Camera on!", nil); err != nil {
-					fmt.Fprintf(os.Stderr, "could not send camera notification: %v", err)
+					stderr("could not send camera notification: %v", err)
 				}
 			}
 		}
@@ -852,7 +991,7 @@ func writeStatus(on bool) {
 	defer func() {
 		go func() {
 			if err := toggleNotificationInhibitor(on); err != nil {
-				fmt.Fprintf(os.Stderr, "could not toggle notification inhibitor: %v", err)
+				stderr("could not toggle notification inhibitor: %v", err)
 			}
 		}()
 	}()
@@ -860,22 +999,15 @@ func writeStatus(on bool) {
 	isInitialOff := message == messageOff && notifications.count == 0
 	if notifications.shouldNotify(message, isInitialOff) {
 		if err := sendNotification("Screencast", message, icon); err != nil {
-			fmt.Fprintf(os.Stderr, "could not send notification: %v", err)
+			stderr("could not send notification: %v", err)
 		}
 	}
 
-	cfgMu.RLock()
-	statusFile := cfg.Paths.StatusFile
-	cfgMu.RUnlock()
-	tmp := statusFile + ".tmp"
-	if err := os.WriteFile(tmp, []byte(onOff(on)+""), 0o644); err != nil {
-		fmt.Fprintf(os.Stderr, "could not write status file: %v", err)
-		os.Exit(1)
-	}
-	if err := os.Rename(tmp, statusFile); err != nil {
-		fmt.Fprintf(os.Stderr, "could not rename status file: %v", err)
-		os.Exit(1)
-	}
+	statusStr := onOff(on)
+	socketStatus.mu.Lock()
+	socketStatus.status = statusStr
+	socketStatus.mu.Unlock()
+	log.Printf("DEBUG: Updated socket status: %s", statusStr)
 }
 
 // isAnyProcessAlive returns true if there exists at least one process
