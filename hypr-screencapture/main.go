@@ -382,6 +382,11 @@ func startSocketServer(ctx context.Context, socketPath string) error {
 
 				if _, err := fmt.Fprintln(c, status); err != nil {
 					stderr("ERROR: failed to write status to client: %v", err)
+					return
+				}
+
+				if unixConn, ok := c.(*net.UnixConn); ok {
+					unixConn.CloseWrite()
 				}
 			}(conn)
 		}
@@ -407,7 +412,7 @@ func runStatusCommand() {
 	defer conn.Close()
 
 	var buf bytes.Buffer
-	if _, err := io.Copy(&buf, conn); err != nil {
+	if _, err := io.Copy(&buf, conn); err != nil && err != io.EOF {
 		stderr("could not read from socket: %v", err)
 		os.Exit(exIOErr)
 	}
