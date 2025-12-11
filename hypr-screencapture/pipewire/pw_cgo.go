@@ -7,7 +7,7 @@ package pipewire
 import "C"
 
 import (
-	"log"
+	"log/slog"
 	"strings"
 	"unsafe"
 
@@ -21,12 +21,12 @@ func SetChannel(ch chan<- messages.Msg) {
 }
 
 func StartPipeWireLoop() int {
-	log.Printf("[pw] Starting PipeWire loop...")
+	slog.Info("Starting PipeWire loop")
 	return int(C.pw_run_loop())
 }
 
 func StopPipeWireLoop() {
-	log.Printf("[pw] Stopping PipeWire loop...")
+	slog.Info("Stopping PipeWire loop")
 	C.pw_quit_loop()
 }
 
@@ -100,64 +100,22 @@ var (
 	cameraInUse  = false
 )
 
-func isCameraNode(mediaClass, name, descLower string) bool {
-	if strings.HasPrefix(name, "v4l2_input.") {
-		log.Printf("isCameraNode: v4l2_input prefix: %+v\n", name)
-		return true
-	}
-	if strings.Contains(descLower, "v4l2") || strings.Contains(descLower, "camera") || strings.Contains(descLower, "webcam") {
-		log.Printf("isCameraNode: description match: %+v desc=%+v\n", name, descLower)
-		return true
-	}
-	if mediaClass == "Video/Source" {
-		if strings.Contains(name, "v4l2") || strings.Contains(name, "camera") || strings.Contains(name, "webcam") {
-			log.Printf("isCameraNode: Video/Source with camera name: %+v\n", name)
-			return true
-		}
-		if !strings.Contains(descLower, "screen") && !strings.Contains(descLower, "display") &&
-			!strings.Contains(descLower, "monitor") && name != "xdg-desktop-portal-hyprland" &&
-			name != "xdg-desktop-portal-wlr" && name != "xdg-desktop-portal-gnome" &&
-			name != "xdg-desktop-portal-kde" && descLower != "" {
-			log.Printf("isCameraNode: Video/Source (potential camera): %+v desc=%+v\n", name, descLower)
-			return true
-		}
-	}
-	return false
-}
-
-func isScreenshareNode(mc, name, descLower, appLower string) bool {
-	if isCameraNode(mc, name, descLower) {
-		return false
-	}
-	log.Printf("isScreenshareNode: MC %+v NAME %+v DESCLOWER %+v APPLOWER %+v\n", mc, name, descLower, appLower)
-	// Portal-produced virtual screen source (common names)
-	if mc == "Video/Source" && (name == "xdg-desktop-portal-hyprland" ||
-		name == "xdg-desktop-portal-wlr" ||
-		name == "xdg-desktop-portal-gnome" ||
-		name == "xdg-desktop-portal-kde") {
-		return true
-	}
-	// App’s capture sink (browser/Zoom receives)
-	if mc == "Stream/Input/Video" && appLower != "" && appLower != "pipewire" {
-		return true
-	}
-	// Fallback: generic non-camera virtual source
-	if mc == "Video/Source" &&
-		!strings.Contains(descLower, "camera") &&
-		!strings.HasPrefix(name, "v4l2_input.") {
-		return true
-	}
-	return false
-}
-
 /* Called by pw_cgo.go (cgo callbacks) */
 func onNodeAdd(id uint32, mediaClass, mediaRole, mediaType, mediaCategory, name, desc, app, portalApp string) {
 	var (
 		dsLower = strings.ToLower(desc)
 		apLower = strings.ToLower(app)
 	)
-	log.Printf("[pw] NODE ADD id=%d mediaclass=%q mediaRole=%q mediaType=%q mediaCategory=%q name=%q desc=%q app=%q portalApp=%q\n",
-		id, mediaClass, mediaRole, mediaType, mediaCategory, name, desc, app, portalApp)
+	slog.Debug("NODE ADD",
+		"id", id,
+		"mediaclass", mediaClass,
+		"mediaRole", mediaRole,
+		"mediaType", mediaType,
+		"mediaCategory", mediaCategory,
+		"name", name,
+		"desc", desc,
+		"app", app,
+		"portalApp", portalApp)
 
 	allNodes[id] = nodeProps{
 		MediaClass:    mediaClass,
@@ -170,7 +128,7 @@ func onNodeAdd(id uint32, mediaClass, mediaRole, mediaType, mediaCategory, name,
 		PortalApp:     portalApp,
 	}
 
-	if isScreenshareNode(mediaClass, name, dsLower, apLower) {
+	if IsScreenshareNode(mediaClass, name, dsLower, apLower) {
 		known[id] = nodeProps{
 			MediaClass:    mediaClass,
 			MediaRole:     mediaRole,
@@ -191,11 +149,15 @@ func onNodeAdd(id uint32, mediaClass, mediaRole, mediaType, mediaCategory, name,
 			default:
 			}
 		} else {
-			log.Printf("[pw] START id=%d media.class=%q name=%q app=%q portal=%q\n",
-				id, mediaClass, name, app, portalApp)
+			slog.Info("START",
+				"id", id,
+				"media.class", mediaClass,
+				"name", name,
+				"app", app,
+				"portal", portalApp)
 		}
-	} else if isCameraNode(mediaClass, name, dsLower) {
-		log.Printf("[pw] CAMERA NODE DETECTED id=%d name=%q media.class=%q desc=%q\n", id, name, mediaClass, desc)
+	} else if IsCameraNode(mediaClass, name, dsLower) {
+		slog.Info("CAMERA NODE DETECTED", "id", id, "name", name, "media.class", mediaClass, "desc", desc)
 		knownCameras[id] = nodeProps{
 			MediaClass:    mediaClass,
 			MediaRole:     mediaRole,
@@ -206,19 +168,19 @@ func onNodeAdd(id uint32, mediaClass, mediaRole, mediaType, mediaCategory, name,
 			AppLower:      apLower,
 			PortalApp:     portalApp,
 		}
-		log.Printf("[pw] Total known cameras: %d\n", len(knownCameras))
+		slog.Debug("Total known cameras", "count", len(knownCameras))
 		checkCameraUsage()
 	} else if mediaClass == "Video/Source" || mediaClass == "Stream/Output/Video" || mediaClass == "Stream/Input/Video" {
-		log.Printf("[pw] VIDEO NODE (not camera) id=%d name=%q media.class=%q desc=%q app=%q\n", id, name, mediaClass, desc, app)
+		slog.Debug("VIDEO NODE (not camera)", "id", id, "name", name, "media.class", mediaClass, "desc", desc, "app", app)
 		if app != "" {
-			log.Printf("[pw] VIDEO NODE created by app: %q - checking if this might link to camera", app)
+			slog.Debug("VIDEO NODE created by app - checking if this might link to camera", "app", app)
 		}
 	}
 }
 
 func onNodeRemove(id uint32) {
 	if props, ok := allNodes[id]; ok {
-		log.Printf("[pw] NODE REMOVE id=%d name=%q media.class=%q\n", id, props.Name, props.MediaClass)
+		slog.Debug("NODE REMOVE", "id", id, "name", props.Name, "media.class", props.MediaClass)
 		delete(allNodes, id)
 	}
 
@@ -231,8 +193,7 @@ func onNodeRemove(id uint32) {
 			default:
 			}
 		} else {
-			log.Printf("[pw] STOP  id=%d name=%q media.class=%q\n",
-				id, props.Name, props.MediaClass)
+			slog.Info("STOP", "id", id, "name", props.Name, "media.class", props.MediaClass)
 		}
 	} else if props, ok := knownCameras[id]; ok {
 		delete(knownCameras, id)
@@ -244,8 +205,7 @@ func onNodeRemove(id uint32) {
 			default:
 			}
 		} else {
-			log.Printf("[pw] CAMERA STOP  id=%d name=%q media.class=%q\n",
-				id, props.Name, props.MediaClass)
+			slog.Info("CAMERA STOP", "id", id, "name", props.Name, "media.class", props.MediaClass)
 		}
 	}
 }
@@ -283,13 +243,16 @@ func onLinkAdd(id, outputNodeID, inputNodeID uint32, state int) {
 		inputMediaClass = props.MediaClass
 	}
 
-	log.Printf("[pw] LINK ADD id=%d output_node=%d (%q, %q) input_node=%d (%q, %q) state=%d%s\n",
-		id, outputNodeID, outputName, outputMediaClass, inputNodeID, inputName, inputMediaClass, state, cameraNote)
-
-	if outputNodeID == 73 || outputNodeID == 75 || inputNodeID == 73 || inputNodeID == 75 {
-		log.Printf("[pw] *** LINK INVOLVES CAMERA NODE *** link=%d output=%d input=%d (camera nodes: 73, 75)",
-			id, outputNodeID, inputNodeID)
-	}
+	slog.Debug("LINK ADD",
+		"id", id,
+		"output_node", outputNodeID,
+		"output_name", outputName,
+		"output_mediaclass", outputMediaClass,
+		"input_node", inputNodeID,
+		"input_name", inputName,
+		"input_mediaclass", inputMediaClass,
+		"state", state,
+		"camera_note", cameraNote)
 
 	if outputIsCamera || inputIsCamera {
 		cameraNodeID := func() uint32 {
@@ -298,35 +261,47 @@ func onLinkAdd(id, outputNodeID, inputNodeID uint32, state int) {
 			}
 			return inputNodeID
 		}()
-		log.Printf("[pw] *** CAMERA LINK DETECTED *** link=%d camera_node=%d (output=%d, input=%d) state=%d\n",
-			id, cameraNodeID, outputNodeID, inputNodeID, state)
-		log.Printf("[pw] *** CAMERA LINK INFO *** camera_node=%d is in knownCameras: %v\n",
-			cameraNodeID, func() bool {
+		slog.Info("CAMERA LINK DETECTED",
+			"link", id,
+			"camera_node", cameraNodeID,
+			"output", outputNodeID,
+			"input", inputNodeID,
+			"state", state)
+		slog.Debug("CAMERA LINK INFO",
+			"camera_node", cameraNodeID,
+			"in_knownCameras", func() bool {
 				_, ok := knownCameras[cameraNodeID]
 				return ok
 			}())
 	} else if outputMediaClass == "Video/Source" || inputMediaClass == "Video/Source" ||
 		outputMediaClass == "Stream/Input/Video" || inputMediaClass == "Stream/Input/Video" ||
 		outputMediaClass == "Stream/Output/Video" || inputMediaClass == "Stream/Output/Video" {
-		log.Printf("[pw] *** VIDEO LINK (not camera) *** link=%d output=%d (%q) input=%d (%q) state=%d\n",
-			id, outputNodeID, outputName, inputNodeID, inputName, state)
-		log.Printf("[pw] *** VIDEO LINK CHECK *** output_node %d in knownCameras: %v, input_node %d in knownCameras: %v\n",
-			outputNodeID, func() bool { _, ok := knownCameras[outputNodeID]; return ok }(),
-			inputNodeID, func() bool { _, ok := knownCameras[inputNodeID]; return ok }())
+		slog.Debug("VIDEO LINK (not camera)",
+			"link", id,
+			"output", outputNodeID,
+			"output_name", outputName,
+			"input", inputNodeID,
+			"input_name", inputName,
+			"state", state)
+		slog.Debug("VIDEO LINK CHECK",
+			"output_node", outputNodeID,
+			"output_in_knownCameras", func() bool { _, ok := knownCameras[outputNodeID]; return ok }(),
+			"input_node", inputNodeID,
+			"input_in_knownCameras", func() bool { _, ok := knownCameras[inputNodeID]; return ok }())
 	}
 	knownLinks[id] = linkInfo{
 		OutputNodeID: outputNodeID,
 		InputNodeID:  inputNodeID,
 		State:        state,
 	}
-	log.Printf("[pw] Total known links: %d\n", len(knownLinks))
+	slog.Debug("Total known links", "count", len(knownLinks))
 	checkCameraUsage()
 }
 
 func onLinkRemove(id uint32) {
-	log.Printf("[pw] LINK REMOVE id=%d\n", id)
+	slog.Debug("LINK REMOVE", "id", id)
 	delete(knownLinks, id)
-	log.Printf("[pw] Total known links: %d\n", len(knownLinks))
+	slog.Debug("Total known links", "count", len(knownLinks))
 	checkCameraUsage()
 }
 
@@ -347,13 +322,15 @@ func onLinkStateChange(id uint32, state int) {
 			inputName = props.Name
 		}
 
-		log.Printf("[pw] LINK STATE CHANGE id=%d output_node=%d (%q) input_node=%d (%q) old_state=%d new_state=%d\n",
-			id, link.OutputNodeID, outputName, link.InputNodeID, inputName, link.State, state)
+		slog.Debug("LINK STATE CHANGE",
+			"id", id,
+			"output_node", link.OutputNodeID,
+			"output_name", outputName,
+			"input_node", link.InputNodeID,
+			"input_name", inputName,
+			"old_state", link.State,
+			"new_state", state)
 
-		if link.OutputNodeID == 73 || link.OutputNodeID == 75 || link.InputNodeID == 73 || link.InputNodeID == 75 {
-			log.Printf("[pw] *** LINK STATE CHANGE INVOLVES CAMERA NODE *** link=%d output=%d input=%d state=%d",
-				id, link.OutputNodeID, link.InputNodeID, state)
-		}
 		link.State = state
 		knownLinks[id] = link
 		checkCameraUsage()
@@ -380,17 +357,20 @@ func checkCameraUsage() {
 		}
 
 		if isCamera {
-			log.Printf("[pw] CHECK: link=%d camera_node=%d (camera: %q) state=%d (state 4 = active)\n",
-				linkID, cameraNodeID, cameraName, link.State)
+			slog.Debug("CHECK: link camera node state",
+				"link", linkID,
+				"camera_node", cameraNodeID,
+				"camera", cameraName,
+				"state", link.State)
 			if link.State == 4 {
-				log.Printf("[pw] CHECK: Found active camera link! link=%d camera_node=%d", linkID, cameraNodeID)
+				slog.Debug("CHECK: Found active camera link", "link", linkID, "camera_node", cameraNodeID)
 				newCameraInUse = true
 				break
 			}
 		}
 	}
 	if len(knownCameras) > 0 {
-		log.Printf("[pw] CHECK: known cameras: %v\n", func() []uint32 {
+		slog.Debug("CHECK: known cameras", "cameras", func() []uint32 {
 			var ids []uint32
 			for id := range knownCameras {
 				ids = append(ids, id)
@@ -405,23 +385,23 @@ func checkCameraUsage() {
 			var msg messages.Msg
 			if cameraInUse {
 				msg = messages.Msg{Kind: messages.CameraOn, Source: messages.SourcePipeWire}
-				log.Printf("[pw] SENDING CameraOn message to channel")
+				slog.Debug("SENDING CameraOn message to channel")
 			} else {
 				msg = messages.Msg{Kind: messages.CameraOff, Source: messages.SourcePipeWire}
-				log.Printf("[pw] SENDING CameraOff message to channel")
+				slog.Debug("SENDING CameraOff message to channel")
 			}
 			select {
 			case msgChannel <- msg:
-				log.Printf("[pw] Successfully sent camera message: %+v", msg)
+				slog.Debug("Successfully sent camera message", "message", msg)
 			default:
-				log.Printf("[pw] ERROR: Failed to send camera message (channel full): %+v", msg)
+				slog.Error("Failed to send camera message (channel full)", "message", msg)
 			}
 		} else {
-			log.Printf("[pw] WARNING: msgChannel is nil, cannot send camera message")
+			slog.Warn("msgChannel is nil, cannot send camera message")
 			if cameraInUse {
-				log.Printf("[pw] CAMERA IN USE (active link detected)")
+				slog.Info("CAMERA IN USE (active link detected)")
 			} else {
-				log.Printf("[pw] CAMERA NOT IN USE (no active links)")
+				slog.Info("CAMERA NOT IN USE (no active links)")
 			}
 		}
 	}

@@ -3,6 +3,7 @@ package config
 import (
 	"bufio"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -17,6 +18,11 @@ type Config struct {
 	PinWindow      PinWindowConfig
 	WindowMatching WindowMatchingConfig
 	Positioning    PositioningConfig
+	Logging        LoggingConfig
+}
+
+type LoggingConfig struct {
+	Level string
 }
 
 type PathsConfig struct {
@@ -94,20 +100,21 @@ func Default() *Config {
 			RightPadding:    2,
 			YPosition:       20,
 		},
+		Logging: LoggingConfig{
+			Level: "DEBUG",
+		},
 	}
 }
 
-func Load(path string) (*Config, error) {
+func Load() (*Config, error) {
 	cfg := Default()
 
-	if path == "" {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			return cfg, fmt.Errorf("failed to get home directory: %w", err)
-		}
-		configDir := filepath.Join(homeDir, ".config", "hypr-screencapture")
-		path = filepath.Join(configDir, "hypr-screencapture.conf")
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return cfg, fmt.Errorf("failed to get home directory: %w", err)
 	}
+	configDir := filepath.Join(homeDir, ".config", "hypr-screencapture")
+	path := filepath.Join(configDir, "hypr-screencapture.conf")
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return cfg, nil
@@ -117,7 +124,11 @@ func Load(path string) (*Config, error) {
 	if err != nil {
 		return cfg, fmt.Errorf("failed to open config file: %w", err)
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			slog.Error("failed to close config file", "error", err)
+		}
+	}()
 
 	parser := newINIParser(file)
 	if err := parser.parse(cfg); err != nil {
@@ -194,6 +205,9 @@ func (p *iniParser) apply(cfg *Config) error {
 		return err
 	}
 	if err := p.applyPositioning(cfg); err != nil {
+		return err
+	}
+	if err := p.applyLogging(cfg); err != nil {
 		return err
 	}
 	return nil
@@ -321,6 +335,19 @@ func (p *iniParser) applyPositioning(cfg *Config) error {
 		return fmt.Errorf("invalid y_position: %w", err)
 	} else if val > 0 {
 		cfg.Positioning.YPosition = val
+	}
+	return nil
+}
+
+func (p *iniParser) applyLogging(cfg *Config) error {
+	if val := p.getString("logging", "log_level"); val != "" {
+		valUpper := strings.ToUpper(val)
+		switch valUpper {
+		case "DEBUG", "INFO", "WARN", "ERROR":
+			cfg.Logging.Level = valUpper
+		default:
+			return fmt.Errorf("invalid log_level: %q (must be one of: DEBUG, INFO, WARN, ERROR)", val)
+		}
 	}
 	return nil
 }
