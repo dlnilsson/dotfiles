@@ -1,10 +1,16 @@
 [Unit]
 Description=Notify on charger connect/disconnect via UPower (battery state)
+BindsTo=graphical-session.target
+After=graphical-session.target
+Wants=swaync.service
+After=swaync.service
 
 [Service]
 ExecStart=%h/.dotfiles/bin/ac-notify
-Restart=always
+Restart=on-failure
+Environment=XDG_RUNTIME_DIR=%t
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=%t/bus
 
 [Install]
-WantedBy=default.target
+WantedBy=graphical-session.target
 

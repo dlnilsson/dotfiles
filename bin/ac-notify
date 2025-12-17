@@ -1,23 +1,48 @@
 #!/usr/bin/env bash
+set -euo pipefail
+shopt -s nullglob
 
 DEV="/org/freedesktop/UPower/devices/battery_BAT0"
 
 get_state() {
-    upower -i "$DEV" | grep -Po 'state:\s+\K.*' 2>/dev/null
+    upower -i "$DEV" | grep -Po 'state:\s+\K.*' 2>/dev/null || true
 }
+
 get_icon() {
-    upower -i "$DEV" | grep -Po "icon-name:\s+'*\K[^']+" 2>/dev/null
+    local icon
+    icon="$(upower -i "$DEV" | grep -Po "icon-name:\s+'*\K[^']+" 2>/dev/null || true)"
+    echo "${icon:-battery-symbolic}"
 }
+
 state_to_mode() {
-    # Map battery state -> "ac" or "bat"
     case "$1" in
-        charging|fully-charged|pending-charge)
-            echo "ac"
-            ;;
-        *)
-            echo "bat"
-            ;;
+        charging|fully-charged|pending-charge) echo "ac" ;;
+        *) echo "bat" ;;
     esac
+}
+
+set_kitty_opacity() {
+    local opacity="$1"
+    for socket in /tmp/kitty-*; do
+        kitty @ --to "unix:$socket" set-background-opacity --all "$opacity" 2>/dev/null || true
+    done
+}
+
+set_decorations() {
+    local enabled="$1"
+    hyprctl keyword decoration:blur:enabled "$enabled" &>/dev/null || true
+    hyprctl keyword decoration:shadow:enabled "$enabled" &>/dev/null || true
+    hyprctl keyword animations:enabled "$enabled" &>/dev/null || true
+
+    local batch
+    batch="$(hyprctl clients -j 2>/dev/null | jq -r '.[].address | "dispatch setprop address:\(.) opaque toggle"' | paste -sd';' -)"
+    [[ -n "$batch" ]] && hyprctl --batch "$batch" &>/dev/null || true
+
+    if [[ "$enabled" == "true" ]]; then
+        set_kitty_opacity 1
+    else
+        set_kitty_opacity 0.75
+    fi
 }
 
 state="$(get_state)"
@@ -28,34 +53,24 @@ fi
 
 mode="$(state_to_mode "$state")"
 last_mode="$mode"
+
 icon="$(get_icon)"
-: "${icon:=battery-symbolic}"
+set_decorations "$([[ "$mode" == "ac" ]] && echo true || echo false)"
+notify-send -i "$icon" --expire-time=3000 --transient "Power" "Charger is $([[ "$mode" == "ac" ]] && echo connected || echo disconnected)"
 
-# Initial notification (optional)
-if [[ "$mode" == "ac" ]]; then
-    notify-send -i "$icon" --expire-time=3000 --transient "Power" "Charger is connected"
-else
-    notify-send -i "$icon" --expire-time=3000 --transient "Power" "Charger is disconnected"
-fi
-
-# Listen for property changes on the battery
 dbus-monitor --system \
-  "type='signal',sender='org.freedesktop.UPower',interface='org.freedesktop.DBus.Properties',path='$DEV',member='PropertiesChanged'" \
-  | while read -r line; do
-        # When State changes, recompute
-        if [[ "$line" == *"State"* ]]; then
-            state="$(get_state)"
-            [[ -z "$state" ]] && continue
+    "type='signal',sender='org.freedesktop.UPower',interface='org.freedesktop.DBus.Properties',path='$DEV',member='PropertiesChanged'" \
+    | while read -r line; do
+        [[ "$line" != *'"State"'* ]] && continue
 
-            mode="$(state_to_mode "$state")"
+        state="$(get_state)"
+        [[ -z "$state" ]] && continue
 
-            if [[ "$mode" != "$last_mode" ]]; then
-                if [[ "$mode" == "ac" ]]; then
-                    notify-send -i "$icon" --expire-time=3000 --transient "Power" "Charger connected"
-                else
-                    notify-send -i "$icon" --expire-time=3000 --transient "Power" "Charger disconnected"
-                fi
-                last_mode="$mode"
-            fi
-        fi
+        mode="$(state_to_mode "$state")"
+        [[ "$mode" == "$last_mode" ]] && continue
+
+        icon="$(get_icon)"
+        set_decorations "$([[ "$mode" == "ac" ]] && echo true || echo false)"
+        notify-send -i "$icon" --expire-time=3000 --transient "Power" "Charger $([[ "$mode" == "ac" ]] && echo connected || echo disconnected)"
+        last_mode="$mode"
     done
