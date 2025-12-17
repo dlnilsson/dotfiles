@@ -54,7 +54,7 @@ alias dps='docker ps -a'
 alias dia="docker images -a"
 alias dsl='docker service ls'
 
-
+alias ag='rg'
 
 info_msg() {
 	local green=$(tput setaf 2)
