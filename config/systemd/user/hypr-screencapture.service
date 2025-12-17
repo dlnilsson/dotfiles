@@ -25,6 +25,7 @@ ExecStartPre=/bin/sh -lc '\
 
 # Your binary (adjust path if needed)
 ExecStart=%h/go/bin/hypr-screencapture
+ExecReload=/bin/kill -HUP $MAINPID
 
 # Restart policy
 Restart=on-failure

@@ -9,15 +9,14 @@ import (
 	"log/slog"
 	"net"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/config"
-)
-
-const (
-	exUnavailable = 69
-	exIOErr       = 74
+	"github.com/dlnilsson/dotfiles/hypr-screencapture/exit"
 )
 
 func StartSocketServer(ctx context.Context, socketPath string, socketStatus *SocketStatus) error {
@@ -98,7 +97,7 @@ func RunStatusCommand(cfg *config.Config) (string, int, error) {
 
 	conn, err := net.Dial("unix", socketPath)
 	if err != nil {
-		return "", exUnavailable, err
+		return "", exit.Unavailable, err
 	}
 	defer func() {
 		if err := conn.Close(); err != nil {
@@ -108,10 +107,69 @@ func RunStatusCommand(cfg *config.Config) (string, int, error) {
 
 	var buf bytes.Buffer
 	if _, err := io.Copy(&buf, conn); err != nil && err != io.EOF {
-		return "", exIOErr, err
+		return "", exit.IOErr, err
 	}
 
 	return strings.TrimSpace(buf.String()), 0, nil
+}
+
+func RunSubscribeCommand(cfg *config.Config) error {
+	socketPath := cfg.Paths.SocketPath
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-sigCh
+		cancel()
+	}()
+
+	var (
+		lastStatus *string
+		ticker     = time.NewTicker(2 * time.Second)
+
+		readStatus = func() (string, error) {
+			conn, err := net.Dial("unix", socketPath)
+			if err != nil {
+				return "", err
+			}
+
+			var buf bytes.Buffer
+			if _, err := io.Copy(&buf, conn); err != nil && err != io.EOF {
+				conn.Close()
+				return "", err
+			}
+			conn.Close()
+
+			return strings.TrimSpace(buf.String()), nil
+		}
+	)
+
+	defer ticker.Stop()
+
+	initialStatus, err := readStatus()
+	if err != nil {
+		return fmt.Errorf("failed to read initial status: %w", err)
+	}
+	fmt.Println(initialStatus)
+	lastStatus = &initialStatus
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			status, err := readStatus()
+			if err != nil {
+				continue
+			}
+			if lastStatus == nil || status != *lastStatus {
+				fmt.Println(status)
+				lastStatus = &status
+			}
+		}
+	}
 }
 
 func CheckServerRunning(socketPath string) error {

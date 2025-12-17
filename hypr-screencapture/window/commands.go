@@ -3,9 +3,13 @@ package window
 import (
 	"fmt"
 	"log/slog"
+	"strings"
 )
 
 func BuildCommands(address, position string) []string {
+	if !strings.HasPrefix(address, "0x") {
+		address = "0x" + address
+	}
 	var (
 		commands = make([]string, 0, 18)
 		addr     = fmt.Sprintf("address:%s", address)

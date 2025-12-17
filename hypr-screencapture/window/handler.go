@@ -43,13 +43,11 @@ func (h *ScreencastHandler) Screencast(w event.Screencast) {
 }
 
 func (h *ScreencastHandler) OpenWindow(w event.OpenWindow) {
-	address := "0x" + w.Address
-
 	switch {
 	case IsHangoutWindow(w, h.cfg):
-		h.handleHangoutWindow(address)
+		h.handleHangoutWindow(w.Address)
 	case IsPictureInPictureWindow(w):
-		h.handlePictureInPictureWindow(address)
+		h.handlePictureInPictureWindow(w.Address)
 	}
 }
 

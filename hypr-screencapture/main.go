@@ -3,8 +3,7 @@
 // example:
 //
 //	"custom/recording": {
-//	    "exec": "hypr-screencapture status",
-//	    "interval": 3,
+//	    "exec": "hypr-screencapture status -subscribe",
 //	    "format": "{}",
 //	    "tooltip": false,
 //	    "on-click": "/home/dln/.dotfiles/bin/screen-recorder"
@@ -13,6 +12,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log/slog"
 	"os"
@@ -24,6 +24,7 @@ import (
 	_ "embed"
 
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/config"
+	"github.com/dlnilsson/dotfiles/hypr-screencapture/exit"
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/logger"
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/manager"
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/messages"
@@ -33,16 +34,6 @@ import (
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/window"
 	"github.com/thiagokokada/hyprland-go"
 	"github.com/thiagokokada/hyprland-go/event"
-)
-
-const (
-	// https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html
-	// exit codes for systemd
-	exUnavailable = 69
-	exOSErr       = 71
-	exCantCreat   = 73
-	exNoPerm      = 77
-	exConfig      = 78
 )
 
 //go:embed camera.png
@@ -57,7 +48,7 @@ func reloadConfig() {
 	newCfg, err := config.Load()
 	if err != nil {
 		slog.Error("failed to reload config", "error", err)
-		os.Exit(exConfig)
+		os.Exit(exit.Config)
 	}
 
 	logLevel, err := logger.ParseLogLevel(newCfg.Logging.Level)
@@ -77,24 +68,46 @@ func reloadConfig() {
 func main() {
 	if os.Geteuid() == 0 {
 		fmt.Fprintf(os.Stderr, "Do not run this program as root or with sudo\n")
-		os.Exit(exNoPerm)
+		os.Exit(exit.NoPerm)
 	}
 
 	var err error
 	cfg, err = config.Load()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to load config: %v\n", err)
-		os.Exit(exConfig)
+		os.Exit(exit.Config)
 	}
 
 	logLevel, err := logger.ParseLogLevel(cfg.Logging.Level)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to parse log level: %v\n", err)
-		os.Exit(exConfig)
+		os.Exit(exit.Config)
 	}
 	logger.Init(logLevel)
 
 	if len(os.Args) > 1 && os.Args[1] == "status" {
+		statusCmd := flag.NewFlagSet("status", flag.ExitOnError)
+		subscribe := statusCmd.Bool("subscribe", false, "continuously listen for status updates")
+		statusCmd.Usage = func() {
+			fmt.Fprintf(os.Stderr, "Usage: %s status [flags]\n\n", os.Args[0])
+			fmt.Fprintf(os.Stderr, "Get the current screencast status from the Unix socket.\n\n")
+			fmt.Fprintf(os.Stderr, "Flags:\n")
+			statusCmd.PrintDefaults()
+		}
+
+		if err := statusCmd.Parse(os.Args[2:]); err != nil {
+			statusCmd.Usage()
+			os.Exit(exit.Config)
+		}
+
+		if *subscribe {
+			if err := manager.RunSubscribeCommand(cfg); err != nil {
+				slog.Error("subscribe command failed", "error", err)
+				os.Exit(exit.Unavailable)
+			}
+			return
+		}
+
 		status, code, err := manager.RunStatusCommand(cfg)
 		if err != nil {
 			slog.Error("status command failed", "error", err)
@@ -105,7 +118,7 @@ func main() {
 
 	if err := config.EnsureConfigDir(); err != nil {
 		slog.Error("failed to create config directory", "error", err)
-		os.Exit(exCantCreat)
+		os.Exit(exit.CantCreat)
 	}
 
 	var (
@@ -145,12 +158,12 @@ func main() {
 
 	if err := manager.CheckServerRunning(socketPath); err != nil {
 		slog.Error("server already running", "error", err)
-		os.Exit(exUnavailable)
+		os.Exit(exit.Unavailable)
 	}
 
 	if err := manager.StartSocketServer(ctx, socketPath, socketStatus); err != nil {
 		slog.Error("could not start socket server", "error", err)
-		os.Exit(exOSErr)
+		os.Exit(exit.OSErr)
 	}
 
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
