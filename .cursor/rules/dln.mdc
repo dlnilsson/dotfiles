@@ -19,7 +19,7 @@ var (
 )
 ```
 
-- In unit tests, acquire contexts via `t.Context()`; avoid `context.Background()` and `context.TODO()`.
+- In unit tests, acquire contexts via `t.Context()`; avoid `context.Background()` and `context.TODO()`. This rule should only be appliedd to *_test.go files.
 - Use `errors.New()` for static error messages. Only reach for `fmt.Errorf()` when interpolating dynamic data.
 
 
