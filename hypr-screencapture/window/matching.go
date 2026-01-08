@@ -1,6 +1,7 @@
 package window
 
 import (
+	"log/slog"
 	"regexp"
 	"slices"
 	"strings"
@@ -11,9 +12,11 @@ import (
 
 func IsHangoutTitle(title string, cfg *config.Config) bool {
 	prefixes := cfg.WindowMatching.MeetTitlePrefixes
-	return slices.ContainsFunc(prefixes, func(prefix string) bool {
+	foo := slices.ContainsFunc(prefixes, func(prefix string) bool {
 		return strings.HasPrefix(title, prefix)
 	})
+	slog.Debug("IsHangoutTitle", "title", title, "prefixes", prefixes, "result", foo)
+	return foo
 }
 
 func IsHangoutWindow(w event.OpenWindow, cfg *config.Config) bool {
@@ -25,9 +28,9 @@ func IsPictureInPictureWindow(w event.OpenWindow) bool {
 	return pipRegex.MatchString(w.Title)
 }
 
-func IsBitwardenWindow(title string, cfg *config.Config) bool {
-	bitwardenTitles := cfg.WindowMatching.BitwardenTitles
-	return slices.ContainsFunc(bitwardenTitles, func(match string) bool {
+func IsStarShipWindow(title string, cfg *config.Config) bool {
+	starshipTitles := cfg.WindowMatching.StarshipTitles
+	return slices.ContainsFunc(starshipTitles, func(match string) bool {
 		return title == match
 	})
 }

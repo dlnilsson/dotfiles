@@ -88,11 +88,10 @@ func (c *Client) FindPinCandidates(clients []hyprland.Client, alreadyPinned map[
 
 func (c *Client) IsLikelyScreencastWindow(client hyprland.Client, cfg *config.Config) bool {
 	var (
-		title = strings.ToLower(client.Title)
-		class = strings.ToLower(client.Class)
+		title    = strings.ToLower(client.Title)
+		class    = strings.ToLower(client.Class)
+		keywords = cfg.WindowMatching.ScreencastKeywords
 	)
-
-	keywords := cfg.WindowMatching.ScreencastKeywords
 
 	for _, keyword := range keywords {
 		if strings.Contains(title, keyword) || strings.Contains(class, keyword) {
@@ -100,5 +99,5 @@ func (c *Client) IsLikelyScreencastWindow(client hyprland.Client, cfg *config.Co
 		}
 	}
 
-	return client.Size[0] > 0 && client.Size[1] > 0
+	return false
 }

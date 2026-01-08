@@ -43,6 +43,7 @@ func CalculatePosition(c *Client, window hyprland.Client, cfg *config.Config) (s
 func GetMeetingPosition(c *Client, addr string, cfg *config.Config) string {
 	clients, err := c.Clients()
 	if err != nil {
+		slog.Warn("Failed to get clients during meeting position calculation", "error", err)
 		return cfg.Positioning.DefaultPosition
 	}
 	for _, client := range clients {

@@ -48,9 +48,10 @@ type PinWindowConfig struct {
 }
 
 type WindowMatchingConfig struct {
-	BitwardenTitles    []string
-	MeetTitlePrefixes  []string
-	ScreencastKeywords []string
+	StarshipTitles      []string
+	MeetTitlePrefixes   []string
+	ScreencastKeywords  []string
+	ExcludeFromStarship []string
 }
 
 type PositioningConfig struct {
@@ -80,7 +81,7 @@ func Default() *Config {
 			MaxPollTime:   10 * time.Second,
 		},
 		WindowMatching: WindowMatchingConfig{
-			BitwardenTitles: []string{
+			StarshipTitles: []string{
 				"Extension: (Bitwarden Password Manager) - Bitwarden — Zen Browser",
 				"Extension: (Bitwarden Password Manager) - Bitwarden — Mozilla Firefox",
 				"Bitwarden",
@@ -94,6 +95,7 @@ func Default() *Config {
 				"cast", "obs", "streamlabs", "discord", "zoom", "teams", "meet",
 				"chrome", "firefox", "browser", "portal", "slack", "zen-browser",
 			},
+			ExcludeFromStarship: []string{"browser"},
 		},
 		Positioning: PositioningConfig{
 			DefaultPosition: "74% 2%",
@@ -310,14 +312,17 @@ func (p *iniParser) applyPinWindow(cfg *Config) error {
 }
 
 func (p *iniParser) applyWindowMatching(cfg *Config) error {
-	if vals := p.getStringArray("window_matching", "bitwarden_titles[]"); len(vals) > 0 {
-		cfg.WindowMatching.BitwardenTitles = vals
+	if vals := p.getStringArray("window_matching", "starship_titles[]"); len(vals) > 0 {
+		cfg.WindowMatching.StarshipTitles = vals
 	}
 	if vals := p.getStringArray("window_matching", "meet_title_prefixes[]"); len(vals) > 0 {
 		cfg.WindowMatching.MeetTitlePrefixes = vals
 	}
 	if vals := p.getStringArray("window_matching", "screencast_keywords[]"); len(vals) > 0 {
 		cfg.WindowMatching.ScreencastKeywords = vals
+	}
+	if vals := p.getStringArray("window_matching", "exclude_from_starship[]"); len(vals) > 0 {
+		cfg.WindowMatching.ExcludeFromStarship = vals
 	}
 	return nil
 }

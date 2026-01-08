@@ -25,7 +25,6 @@ func BuildCommands(address, position string) []string {
 		fmt.Sprintf("setfloating %s", addr),
 		fmt.Sprintf("movewindowpixel exact %s,%s", position, addr),
 		fmt.Sprintf("setprop %s rounding 1", addr),
-		fmt.Sprintf("setprop %s no_anim 1", addr),
 		fmt.Sprintf("setprop %s no_max_size 0", addr),
 		fmt.Sprintf("setprop %s opaque toggle", addr),
 		fmt.Sprintf("setprop %s immediate unset", addr),

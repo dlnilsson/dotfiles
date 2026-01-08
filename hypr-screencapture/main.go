@@ -193,6 +193,7 @@ func main() {
 			event.EventScreencast,
 			event.EventActiveWindow,
 			event.EventOpenWindow,
+			event.EventCloseWindow,
 		}
 		if err := cli.Subscribe(ctx, handler, events...); err != nil && ctx.Err() == nil {
 			slog.Error("Subscribe exited with error", "error", err)
@@ -202,7 +203,8 @@ func main() {
 
 	slog.Debug("Environment variables",
 		"XDG_RUNTIME_DIR", os.Getenv("XDG_RUNTIME_DIR"),
-		"HYPRLAND_INSTANCE_SIGNATURE", os.Getenv("HYPRLAND_INSTANCE_SIGNATURE"))
+		"HYPRLAND_INSTANCE_SIGNATURE", os.Getenv("HYPRLAND_INSTANCE_SIGNATURE"),
+	)
 	if clients, err := hc.Clients(); err != nil {
 		slog.Error("IPC check: Clients() error", "error", err)
 	} else {
