@@ -3,6 +3,7 @@ package window
 import (
 	"fmt"
 	"log/slog"
+	"slices"
 	"time"
 
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/config"
@@ -43,34 +44,37 @@ func (h *ScreencastHandler) Screencast(w event.Screencast) {
 }
 
 func (h *ScreencastHandler) OpenWindow(w event.OpenWindow) {
+	addr := NormalizeAddress(w.Address)
 	switch {
 	case IsHangoutWindow(w, h.cfg):
-		h.handleHangoutWindow(w.Address)
+		h.handleHangoutWindow(addr)
 	case IsPictureInPictureWindow(w):
-		h.handlePictureInPictureWindow(w.Address)
+		h.handlePictureInPictureWindow(addr)
 	}
 }
 
 func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
-	a := func() string {
-		activeClient, err := h.Client.ActiveWindow()
-		if err != nil {
-			return ""
-		}
-		return activeClient.Address
+	activeWindow, err := h.Client.ActiveWindow()
+	if err != nil {
+		return
 	}
+	var (
+		address = activeWindow.Address
+		addr    = fmt.Sprintf("address:%s", address)
+	)
 
 	if IsBitwardenWindow(w.Title, h.cfg) {
-		addr := fmt.Sprintf("address:%s", a())
-		DispatchCommands(h.Client, []string{
-			"tagwindow +starship",
-			fmt.Sprintf("setfloating %s", addr),
-			fmt.Sprintf("resizewindowpixel exact 900 725,%s", addr),
-			fmt.Sprintf("centerwindow %s", addr),
-		})
+		if !slices.Contains(activeWindow.Tags, "browser") {
+			DispatchCommands(h.Client, []string{
+				"tagwindow +starship",
+				fmt.Sprintf("setfloating %s", addr),
+				fmt.Sprintf("resizewindowpixel exact 900 725,%s", addr),
+				fmt.Sprintf("centerwindow %s", addr),
+			})
+		}
 	}
 	if IsHangoutTitle(w.Title, h.cfg) {
-		h.handleHangoutWindow(a())
+		h.handleHangoutWindow(address)
 	}
 }
 

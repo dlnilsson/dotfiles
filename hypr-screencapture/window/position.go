@@ -2,6 +2,7 @@ package window
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/config"
 	"github.com/thiagokokada/hyprland-go"
@@ -28,18 +29,13 @@ func CalculatePosition(c *Client, window hyprland.Client, cfg *config.Config) (s
 	var (
 		windowWidth  = window.Size[0]
 		monitorWidth = monitor.Width
+		rightPadding = cfg.Positioning.RightPadding
+		yPos         = cfg.Positioning.YPosition
 	)
-
-	rightPadding := cfg.Positioning.RightPadding
-	yPos := cfg.Positioning.YPosition
 
 	xPos := monitorWidth - windowWidth - rightPadding
 	xPercent := int(float64(xPos) / float64(monitorWidth) * 100)
-	yPercent := int(float64(yPos) / float64(monitor.Height) * 100)
-
-	if yPercent < 2 {
-		yPercent = 2
-	}
+	yPercent := max(int(float64(yPos)/float64(monitor.Height)*100), 2)
 
 	return fmt.Sprintf("%d%% %d%%", xPercent, yPercent), nil
 }
@@ -53,10 +49,13 @@ func GetMeetingPosition(c *Client, addr string, cfg *config.Config) string {
 		if client.Address == addr {
 			p, err := CalculatePosition(c, client, cfg)
 			if err != nil {
+				slog.Warn("Using default position because failed to calculate position", "address", addr, "error", err)
 				return cfg.Positioning.DefaultPosition
 			}
+			slog.Debug("Calculated position", "address", addr, "position", p)
 			return p
 		}
 	}
+	slog.Warn("Using default position because", "address", addr)
 	return cfg.Positioning.DefaultPosition
 }
