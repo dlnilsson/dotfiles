@@ -1,0 +1,6 @@
+#!/bin/bash
+
+ZED_SOURCE_DIR="/home/dln/.config/zed"
+ZED_DEST_DIR="/home/dln/.dotfiles/config/zed" # absolute path to repo storing your config
+
+rsync -av --exclude='.tmp*' "$ZED_SOURCE_DIR/" "$ZED_DEST_DIR/"

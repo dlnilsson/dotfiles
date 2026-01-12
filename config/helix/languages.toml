@@ -1,0 +1,8 @@
+# Turn on gofumpt in gopls
+[language-server.gopls.config]
+"formatting.gofumpt" = true
+
+# Optional, to ensure format-on-save for Go
+[[language]]
+name = "go"
+auto-format = true
