@@ -20,7 +20,7 @@ choose_yubikey() {
 
   if [[ "$yubikeys" = "" ]]; then
     if hash notify-send 2>/dev/null; then
-      notify-send "wofi-ykman" "YubiKey not detected." -a "wofi-ykman"
+      notify-send --transient "wofi-ykman" "YubiKey not detected." -a "wofi-ykman"
     fi
     return 1
   fi
