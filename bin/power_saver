@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -euo pipefail
+shopt -s nullglob
+
+STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/power_saver_state"
+
+set_kitty_opacity() {
+    local opacity="$1"
+    for socket in /tmp/kitty-*; do
+        kitty @ --to "unix:$socket" set-background-opacity --all "$opacity" 2>/dev/null || true
+    done
+    sed -i "s/^background_opacity.*/background_opacity $opacity/" ~/.config/kitty/background.conf
+}
+
+get_status() {
+    if [[ -f "$STATE_FILE" ]]; then
+        cat "$STATE_FILE"
+    else
+        echo "performance"
+    fi
+}
+
+case "${1:-}" in
+    --status)
+        get_status
+        exit 0
+        ;;
+    --toggle)
+        if [[ "$(get_status)" == "powersave" ]]; then
+            set -- false
+        else
+            set -- true
+        fi
+        ;;
+esac
+
+enabled="${1:-true}"
+
+if [[ "$enabled" == "true" ]]; then
+    hyprctl keyword decoration:blur:enabled 0 &>/dev/null || true
+    hyprctl keyword decoration:shadow:enabled 0 &>/dev/null || true
+    hyprctl keyword animations:enabled 0 &>/dev/null || true
+    set_kitty_opacity 1
+    for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
+        echo "powersave" > "$cpu/cpufreq/scaling_governor"
+    done
+    echo "powersave" > "$STATE_FILE"
+else
+    hyprctl keyword decoration:blur:enabled 1 &>/dev/null || true
+    hyprctl keyword decoration:shadow:enabled 1 &>/dev/null || true
+    hyprctl keyword animations:enabled 1 &>/dev/null || true
+    set_kitty_opacity 0.75
+    for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
+        echo "performance" > "$cpu/cpufreq/scaling_governor"
+    done
+    echo "performance" > "$STATE_FILE"
+fi
+
+batch="$(hyprctl clients -j 2>/dev/null | jq -r '.[].address | "dispatch setprop address:\(.) opaque toggle"' | paste -sd';' -)"
+[[ -n "$batch" ]] && hyprctl --batch "$batch" &>/dev/null || true
+
