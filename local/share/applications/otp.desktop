@@ -1,0 +1,13 @@
+[Desktop Entry]
+
+Type=Application
+Version=1.0
+Name=OTP
+Comment=One time passwords
+GenericName=OneTimePasswords
+Path=/home/dln/.dotfiles/bin/
+Exec=/home/dln/.dotfiles/bin/wofi-ykman
+Icon=/usr/share/icons/Papirus/32x32/emblems/emblem-locked.svg
+Terminal=false
+Categories=Utility;
+Keywords=hypr;wayland;keys;otp
