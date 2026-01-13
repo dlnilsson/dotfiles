@@ -7,6 +7,8 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "scroll_beyond_last_line": "off",
+  "vim_mode": false,
   "language_models": {
     "openai_compatible": {
       "OpenAI custom": {
