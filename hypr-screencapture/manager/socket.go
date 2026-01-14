@@ -93,9 +93,7 @@ func StartSocketServer(ctx context.Context, socketPath string, socketStatus *Soc
 }
 
 func RunStatusCommand(cfg *config.Config) (string, int, error) {
-	socketPath := cfg.Paths.SocketPath
-
-	conn, err := net.Dial("unix", socketPath)
+	conn, err := net.Dial("unix", cfg.Paths.SocketPath)
 	if err != nil {
 		return "", exit.Unavailable, err
 	}

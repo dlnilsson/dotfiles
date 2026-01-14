@@ -21,6 +21,7 @@ func BuildCommands(address, position string) []string {
 	)
 
 	commands = append(commands,
+		fmt.Sprintf("moveoutofgroup %s", addr),
 		fmt.Sprintf("pin %s", addr),
 		fmt.Sprintf("setfloating %s", addr),
 		fmt.Sprintf("movewindowpixel exact %s,%s", position, addr),
