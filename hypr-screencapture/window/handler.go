@@ -77,6 +77,7 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 	if IsStarShipWindow(w.Title, h.cfg) {
 		// The only way to reliably detect if it's a popup (starship)
 		// is to rely on user behavior: the browser is the only window in the workspace.
+		time.Sleep(100 * time.Millisecond)
 		clients, err := h.Client.Clients()
 		var siblings []hyprland.Client
 		if err == nil {
@@ -92,14 +93,25 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 				siblings = append(siblings, client)
 			}
 		}
+		windows := 0
+		workspaces, err := h.Client.Workspaces()
+		if err == nil {
+			for _, w := range workspaces {
+				if w.Id == activeWindow.Workspace.Id {
+					windows = w.Windows
+				}
+			}
+		}
 		slog.Debug("active window size initial size",
 			"title", w.Title,
 			"size", activeWindow.Size,
 			"siblings", len(siblings),
+			"workspace", activeWindow.Workspace.Id,
+			"workspace_windows", windows,
 			"has", hasAnyTag(activeWindow.Tags, h.cfg.WindowMatching.ExcludeFromStarship...),
-			"full", (len(siblings) > 0 && !hasAnyTag(activeWindow.Tags, h.cfg.WindowMatching.ExcludeFromStarship...)),
+			"full", (len(siblings) > 0 || windows > 1 && !hasAnyTag(activeWindow.Tags, h.cfg.WindowMatching.ExcludeFromStarship...)),
 		)
-		if len(siblings) > 0 &&
+		if len(siblings) >= 1 || windows > 1 &&
 			!hasAnyTag(activeWindow.Tags, h.cfg.WindowMatching.ExcludeFromStarship...) {
 			DispatchCommands(h.Client, []string{
 				"denywindowfromgroup on",
