@@ -7,22 +7,102 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "scroll_beyond_last_line": "off",
+  "vim_mode": false,
+  "language_models": {
+    "openai_compatible": {
+      "OpenAI custom": {
+        "api_url": "https://api.openai.com/v1",
+        "available_models": [
+          {
+            "name": "gpt-4.1-mini-2025-04-14",
+            "max_tokens": 200000,
+            "max_output_tokens": 32000,
+            "max_completion_tokens": 200000,
+            "capabilities": {
+              "tools": true,
+              "images": false,
+              "parallel_tool_calls": false,
+              "prompt_cache_key": false,
+            },
+          },
+        ],
+      },
+    },
+  },
+  "helix_mode": true,
+  "project_panel": {
+    "button": true,
+  },
+  "status_bar": {
+    "active_language_button": true,
+  },
+  "ui_font_family": "JetBrainsMono Nerd Font Mono",
+  "terminal": {
+    "toolbar": {
+      "breadcrumbs": false,
+    },
+  },
+  "base_keymap": "VSCode",
+  "minimap": {
+    "show": "never",
+  },
+  "buffer_font_fallbacks": ["JetBrainsMono Nerd Font Mono", "Monaspace Neon"],
+  "file_types": {
+    "ignore": ["copyright"],
+    "terraform": ["*.hcl"],
+    "html": ["*.tmpl"],
+  },
+  "ensure_final_newline_on_save": true,
+  "edit_predictions": {
+    "disabled_globs": [
+      "**/.env",
+      "**/.env.*",
+      "**/credentials.json",
+      "**/credentials.*.json",
+      "**/secret.json",
+      "**/secrets.json",
+      "**/*.key",
+      "**/*.pem",
+      "**/*.pfx",
+      "**/*.p12",
+      "**/*.crt",
+      "**/*.cer",
+      "**/id_rsa",
+      "**/id_dsa",
+      "**/.ssh/id_*",
+      "**/.git",
+    ],
+  },
   "icon_theme": {
     "mode": "dark",
     "light": "Zed (Default)",
-    "dark": "Zed (Default)"
+    "dark": "Catppuccin Macchiato",
+  },
+  "agent_servers": {
+    "OpenCode": {
+      "command": "opencode",
+      "args": ["acp"],
+    },
   },
   "agent": {
+    "inline_assistant_model": {
+      "provider": "OpenAI custom",
+      "model": "gpt-4.1-mini-2025-04-14",
+    },
+    "default_model": {
+      "provider": "OpenAI custom",
+      "model": "gpt-4.1-mini-2025-04-14",
+    },
     "model_parameters": [],
     "always_allow_tool_actions": true,
-    "version": "2"
   },
   "features": {
-    "edit_prediction_provider": "zed"
+    "edit_prediction_provider": "copilot",
   },
   "ui_font_size": 16,
-  "buffer_font_size": 16,
-  "buffer_font_family": "Iosevka Curly Slab",
+  "buffer_font_size": 14.0,
+  "buffer_font_family": "JetBrainsMono Nerd Font Mono",
   "buffer_font_features": {
     "calt": true,
     "liga": true,
@@ -34,16 +114,12 @@
     "ss06": true,
     "ss07": true,
     "ss08": true,
-    "ss09": true
+    "ss09": true,
   },
-  "theme": {
-    "mode": "dark",
-    "light": "Nord",
-    "dark": "One Dark"
-  },
+  "theme": "Nord Dark",
   "git": {
     "inline_blame": {
-      "enabled": false
-    }
-  }
+      "enabled": false,
+    },
+  },
 }
