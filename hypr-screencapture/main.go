@@ -208,7 +208,9 @@ func main() {
 			event.EventActiveWindow,
 			event.EventOpenWindow,
 			event.EventCloseWindow,
+			event.EventMonitorRemoved,
 		}
+		slog.Debug("Subscribing to events", "events", events)
 		if err := cli.Subscribe(ctx, handler, events...); err != nil && ctx.Err() == nil {
 			slog.Error("Subscribe exited with error", "error", err)
 			cancel()

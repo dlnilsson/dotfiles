@@ -170,3 +170,36 @@ func hasAnyTag(tags []string, values ...string) bool {
 	}
 	return false
 }
+
+func (e *ScreencastHandler) MonitorRemoved(m event.MonitorName) {
+	slog.Debug("MonitorRemoved", "monitor", m)
+	time.Sleep(2 * time.Second)
+	monitors, err := e.Client.Monitors()
+	if err != nil {
+		slog.Error("Failed to get monitors", "error", err)
+		return
+	}
+	if !allMonitorsDisabled(monitors) {
+		return
+	}
+	slog.Warn("all monitors disabled, enabling eDP-1")
+	response, err := e.Client.Keyword("monitor eDP-1,highres,auto,1")
+	slog.Debug("response", "response", response)
+	if err != nil {
+		slog.Error("Failed to enable eDP-1", "error", err)
+	}
+	r, err := e.Client.Reload()
+	if err != nil {
+		slog.Error("Failed to reload", "error", err)
+	}
+	slog.Debug("Reload response", "response", r)
+}
+
+func allMonitorsDisabled(monitors []hyprland.Monitor) bool {
+	for _, monitor := range monitors {
+		if !monitor.Disabled {
+			return false
+		}
+	}
+	return true
+}
