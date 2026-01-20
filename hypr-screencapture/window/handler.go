@@ -16,14 +16,14 @@ type ScreencastHandler struct {
 	event.DefaultEventHandler
 	ch     chan<- messages.Msg
 	Client *Client
-	cfg    *config.Config
+	cfgFn  func() *config.Config
 }
 
-func NewScreencastHandler(ch chan<- messages.Msg, client *Client, cfg *config.Config) *ScreencastHandler {
+func NewScreencastHandler(ch chan<- messages.Msg, client *Client, cfgFn func() *config.Config) *ScreencastHandler {
 	return &ScreencastHandler{
 		ch:     ch,
 		Client: client,
-		cfg:    cfg,
+		cfgFn:  cfgFn,
 	}
 }
 
@@ -48,7 +48,7 @@ func (h *ScreencastHandler) OpenWindow(w event.OpenWindow) {
 	addr := NormalizeAddress(w.Address)
 	slog.Debug("OpenWindow", "address", addr, "title", w.Title, "class", w.Class)
 	switch {
-	case IsHangoutWindow(w, h.cfg):
+	case IsHangoutWindow(w, h.cfgFn()):
 		slog.Debug("Switch OK hangout window")
 		h.handleHangoutWindow(addr)
 	case IsPictureInPictureWindow(w):
@@ -73,8 +73,9 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 		address = activeWindow.Address
 		addr    = fmt.Sprintf("address:%s", address)
 	)
-	slog.Debug("active Window starship", "is_starship", IsStarShipWindow(w.Title, h.cfg))
-	if IsStarShipWindow(w.Title, h.cfg) {
+	cfg := h.cfgFn()
+	slog.Debug("active Window starship", "is_starship", IsStarShipWindow(w.Title, cfg))
+	if IsStarShipWindow(w.Title, cfg) {
 		// The only way to reliably detect if it's a popup (starship)
 		// is to rely on user behavior: the browser is the only window in the workspace.
 		time.Sleep(100 * time.Millisecond)
@@ -108,11 +109,11 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 			"siblings", len(siblings),
 			"workspace", activeWindow.Workspace.Id,
 			"workspace_windows", windows,
-			"has", hasAnyTag(activeWindow.Tags, h.cfg.WindowMatching.ExcludeFromStarship...),
-			"full", (len(siblings) > 0 || windows > 1 && !hasAnyTag(activeWindow.Tags, h.cfg.WindowMatching.ExcludeFromStarship...)),
+			"has", hasAnyTag(activeWindow.Tags, cfg.WindowMatching.ExcludeFromStarship...),
+			"full", (len(siblings) > 0 || windows > 1 && !hasAnyTag(activeWindow.Tags, cfg.WindowMatching.ExcludeFromStarship...)),
 		)
 		if len(siblings) >= 1 || windows > 1 &&
-			!hasAnyTag(activeWindow.Tags, h.cfg.WindowMatching.ExcludeFromStarship...) {
+			!hasAnyTag(activeWindow.Tags, cfg.WindowMatching.ExcludeFromStarship...) {
 			DispatchCommands(h.Client, []string{
 				"denywindowfromgroup on",
 				"tagwindow +starship",
@@ -122,7 +123,7 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 			})
 		}
 	}
-	if IsHangoutTitle(w.Title, h.cfg) {
+	if IsHangoutTitle(w.Title, cfg) {
 		h.handleHangoutWindow(address)
 	}
 }
@@ -142,7 +143,8 @@ func (h *ScreencastHandler) handleHangoutWindow(address string) {
 		"denywindowfromgroup on",
 		cmd,
 	})
-	position := GetMeetingPosition(h.Client, address, h.cfg)
+	cfg := h.cfgFn()
+	position := GetMeetingPosition(h.Client, address, cfg)
 	commands := BuildCommands(address, position)
 
 	DispatchCommands(h.Client, append([]string{cmd}, commands...))
@@ -153,7 +155,7 @@ func (h *ScreencastHandler) handlePictureInPictureWindow(address string) {
 	time.Sleep(100 * time.Millisecond)
 	slog.Debug("handling picture-in-picture window", "address", address)
 
-	position := GetMeetingPosition(h.Client, address, h.cfg)
+	position := GetMeetingPosition(h.Client, address, h.cfgFn())
 	DispatchCommands(h.Client, []string{
 		fmt.Sprintf("movewindowpixel exact %s,address:%s", position, address),
 	})

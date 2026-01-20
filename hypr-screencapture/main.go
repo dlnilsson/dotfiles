@@ -40,9 +40,16 @@ import (
 var icon []byte
 
 var (
-	cfg   *config.Config
-	cfgMu sync.RWMutex
+	cfg           *config.Config
+	notifierState *notifier.State
+	cfgMu         sync.RWMutex
 )
+
+func currentConfig() *config.Config {
+	cfgMu.RLock()
+	defer cfgMu.RUnlock()
+	return cfg
+}
 
 func reloadConfig() {
 	newCfg, err := config.Load()
@@ -62,7 +69,15 @@ func reloadConfig() {
 	cfg = newCfg
 	cfgMu.Unlock()
 
-	slog.Info("Config reloaded successfully", "log_level", newCfg.Logging.Level)
+	if notifierState != nil {
+		notifierState.UpdateCooldown(newCfg.Notifications.Cooldown)
+	}
+
+	slog.Info("Config reloaded successfully",
+		"log_level", newCfg.Logging.Level,
+		"starship_titles", len(newCfg.WindowMatching.StarshipTitles),
+		"meet_title_prefixes", len(newCfg.WindowMatching.MeetTitlePrefixes),
+	)
 }
 
 func main() {
@@ -84,6 +99,8 @@ func main() {
 		os.Exit(exit.Config)
 	}
 	logger.Init(logLevel)
+
+	notifierState = notifier.NewState(cfg.Notifications.Cooldown)
 
 	if len(os.Args) > 1 && os.Args[1] == "status" {
 		statusCmd := flag.NewFlagSet("status", flag.ExitOnError)
@@ -122,10 +139,9 @@ func main() {
 	}
 
 	var (
-		notifierState = notifier.NewState(cfg.Notifications.Cooldown)
-		socketStatus  = &manager.SocketStatus{}
-		mgr           = manager.New(
-			cfg,
+		socketStatus = &manager.SocketStatus{}
+		mgr          = manager.New(
+			currentConfig,
 			notifierState,
 			socketStatus,
 			icon,
@@ -140,7 +156,7 @@ func main() {
 		hc          = hyprland.MustClient()
 
 		windowClient = window.NewClient(hc)
-		handler      = window.NewScreencastHandler(ch, windowClient, cfg)
+		handler      = window.NewScreencastHandler(ch, windowClient, currentConfig)
 	)
 
 	mgr.WriteStatus(false)
@@ -152,9 +168,7 @@ func main() {
 	}()
 	defer cancel()
 
-	cfgMu.RLock()
-	socketPath := cfg.Paths.SocketPath
-	cfgMu.RUnlock()
+	socketPath := currentConfig().Paths.SocketPath
 
 	if err := manager.CheckServerRunning(socketPath); err != nil {
 		slog.Error("server already running", "error", err)
@@ -267,7 +281,7 @@ func main() {
 
 	go mgr.Run(ctx, managerCh)
 
-	p := pinner.New(windowClient, cfg)
+	p := pinner.New(windowClient, currentConfig)
 	go p.Run(ctx, pinWindowCh)
 
 	<-ctx.Done()

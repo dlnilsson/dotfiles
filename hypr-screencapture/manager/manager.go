@@ -11,26 +11,26 @@ import (
 )
 
 type Manager struct {
-	cfg            *config.Config
+	cfg            func() *config.Config
 	notifier       *notifier.State
 	socketStatus   *SocketStatus
 	processWatcher *ProcessWatcher
 	icon           []byte
 }
 
-type SocketStatus struct {
-	mu     sync.RWMutex
-	status string
-}
-
-func New(cfg *config.Config, notifier *notifier.State, socketStatus *SocketStatus, icon []byte) *Manager {
+func New(cfgFn func() *config.Config, notifier *notifier.State, socketStatus *SocketStatus, icon []byte) *Manager {
 	return &Manager{
-		cfg:            cfg,
+		cfg:            cfgFn,
 		notifier:       notifier,
 		socketStatus:   socketStatus,
 		processWatcher: NewProcessWatcher(),
 		icon:           icon,
 	}
+}
+
+type SocketStatus struct {
+	mu     sync.RWMutex
+	status string
 }
 
 func (m *Manager) Run(ctx context.Context, ch <-chan messages.Msg) {
@@ -47,8 +47,9 @@ func (m *Manager) Run(ctx context.Context, ch <-chan messages.Msg) {
 
 	startWatcher := func() {
 		m.processWatcher.Stop()
-		procNames := m.cfg.Processes.Monitor
-		pollEvery := m.cfg.Processes.PollInterval
+		cfg := m.cfg()
+		procNames := cfg.Processes.Monitor
+		pollEvery := cfg.Processes.PollInterval
 		slog.Debug("Starting new watcher", "processes", procNames)
 		m.processWatcher.Start(ctx, procNames, pollEvery, func() {
 			slog.Debug("Watcher onGone callback called")
@@ -69,7 +70,8 @@ func (m *Manager) Run(ctx context.Context, ch <-chan messages.Msg) {
 			slog.Debug("manager received message", "message", msg)
 			switch msg.Kind {
 			case messages.ScOn:
-				procNames := m.cfg.Processes.Monitor
+				cfg := m.cfg()
+				procNames := cfg.Processes.Monitor
 				alive := IsAnyProcessAlive(procNames)
 				slog.Debug("msgScOn - checking processes", "processes", procNames, "alive", alive)
 				if alive {

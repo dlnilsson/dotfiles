@@ -23,22 +23,25 @@ type pinConfig struct {
 
 type Pinner struct {
 	*window.Client
-	config pinConfig
-	cfg    *config.Config
+	cfgFn func() *config.Config
 }
 
-func New(c *window.Client, cfg *config.Config) *Pinner {
+func New(c *window.Client, cfgFn func() *config.Config) *Pinner {
 	return &Pinner{
 		Client: c,
-		config: pinConfig{
-			initialDelay:  cfg.PinWindow.InitialDelay,
-			maxRetries:    cfg.PinWindow.MaxRetries,
-			retryDelay:    cfg.PinWindow.RetryDelay,
-			maxRetryDelay: cfg.PinWindow.MaxRetryDelay,
-			pollInterval:  cfg.PinWindow.PollInterval,
-			maxPollTime:   cfg.PinWindow.MaxPollTime,
-		},
-		cfg: cfg,
+		cfgFn:  cfgFn,
+	}
+}
+
+func (p *Pinner) currentPinConfig() pinConfig {
+	cfg := p.cfgFn()
+	return pinConfig{
+		initialDelay:  cfg.PinWindow.InitialDelay,
+		maxRetries:    cfg.PinWindow.MaxRetries,
+		retryDelay:    cfg.PinWindow.RetryDelay,
+		maxRetryDelay: cfg.PinWindow.MaxRetryDelay,
+		pollInterval:  cfg.PinWindow.PollInterval,
+		maxPollTime:   cfg.PinWindow.MaxPollTime,
 	}
 }
 
@@ -68,11 +71,12 @@ func (p *Pinner) Run(ctx context.Context, ch <-chan messages.Msg) {
 }
 
 func (p *Pinner) pinWindowsWithRetry(ctx context.Context) {
-	time.Sleep(p.config.initialDelay)
+	pc := p.currentPinConfig()
+	time.Sleep(pc.initialDelay)
 	var (
 		pinnedWindows   = make(map[string]bool)
-		ticker          = time.NewTicker(p.config.pollInterval)
-		pollCtx, cancel = context.WithTimeout(ctx, p.config.maxPollTime)
+		ticker          = time.NewTicker(pc.pollInterval)
+		pollCtx, cancel = context.WithTimeout(ctx, pc.maxPollTime)
 	)
 	defer cancel()
 	defer ticker.Stop()
@@ -91,7 +95,8 @@ func (p *Pinner) pinWindowsWithRetry(ctx context.Context) {
 				continue
 			}
 
-			candidates := p.Client.FindPinCandidates(clients, pinnedWindows, p.cfg)
+			cfg := p.cfgFn()
+			candidates := p.Client.FindPinCandidates(clients, pinnedWindows, cfg)
 			if len(candidates) == 0 {
 				continue
 			}
@@ -116,16 +121,18 @@ func (p *Pinner) pinWindowsWithRetry(ctx context.Context) {
 func (p *Pinner) tryPinWindow(win hyprland.Client) bool {
 	addr := win.Address
 
-	position, err := window.CalculatePosition(p.Client, win, p.cfg)
+	cfg := p.cfgFn()
+	position, err := window.CalculatePosition(p.Client, win, cfg)
 	if err != nil {
 		slog.Warn("failed to calculate window position, using default", "error", err)
-		position = p.cfg.Positioning.DefaultPosition
+		position = cfg.Positioning.DefaultPosition
 	}
 
-	for attempt := 0; attempt < p.config.maxRetries; attempt++ {
+	pc := p.currentPinConfig()
+	for attempt := 0; attempt < pc.maxRetries; attempt++ {
 		if attempt > 0 {
-			delay := min(time.Duration(attempt)*p.config.retryDelay, p.config.maxRetryDelay)
-			slog.Debug("retrying pin operation", "address", addr, "attempt", attempt+1, "maxRetries", p.config.maxRetries, "delay", delay)
+			delay := min(time.Duration(attempt)*pc.retryDelay, pc.maxRetryDelay)
+			slog.Debug("retrying pin operation", "address", addr, "attempt", attempt+1, "maxRetries", pc.maxRetries, "delay", delay)
 			time.Sleep(delay)
 		}
 		p.executeWindowCommands(addr, position)
@@ -136,7 +143,7 @@ func (p *Pinner) tryPinWindow(win hyprland.Client) bool {
 
 		slog.Debug("pin command succeeded but window doesn't appear to be pinned", "address", addr)
 	}
-	slog.Error("failed to pin window after attempts", "address", addr, "attempts", p.config.maxRetries)
+	slog.Error("failed to pin window after attempts", "address", addr, "attempts", pc.maxRetries)
 	return false
 }
 
