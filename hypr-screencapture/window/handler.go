@@ -182,11 +182,35 @@ func (e *ScreencastHandler) MonitorRemoved(m event.MonitorName) {
 	if !allMonitorsDisabled(monitors) {
 		return
 	}
-	slog.Warn("all monitors disabled, enabling eDP-1")
-	response, err := e.Client.Keyword("monitor eDP-1,highres,auto,1")
-	slog.Debug("response", "response", response)
+
+	var (
+		monitorName string
+		lowestID    int
+		found       bool
+	)
+
+	for _, monitor := range monitors {
+		if !monitor.Disabled {
+			continue
+		}
+		if !found || monitor.Id < lowestID {
+			lowestID = monitor.Id
+			monitorName = monitor.Name
+			found = true
+		}
+	}
+
+	if !found {
+		slog.Error("no disabled monitors found")
+		return
+	}
+
+	keyword := fmt.Sprintf("monitor %s,highres,auto,1", monitorName)
+	slog.Warn("all monitors disabled, enabling monitor", "monitor", monitorName, "id", lowestID)
+	response, err := e.Client.Keyword(keyword)
+	slog.Debug(keyword, "response", response)
 	if err != nil {
-		slog.Error("Failed to enable eDP-1", "error", err)
+		slog.Error("Failed to enable monitor", "error", err)
 	}
 	r, err := e.Client.Reload()
 	if err != nil {
