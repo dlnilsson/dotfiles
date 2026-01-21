@@ -25,3 +25,32 @@ elif (( percent <= 20 )); then
 fi
 
 echo "<span foreground='$color'>$glyph $percent% ($state)</span>"
+wlan=$(cat /sys/class/net/wlan0/operstate | tr -d '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | tr '[:lower:]' '[:upper:]')
+
+# Usage:
+#   echo "$(wifi_strength)"        # defaults to wlan0
+#   echo "$(wifi_strength wlp2s0)" # specific interface
+wifi_strength() {
+  local ifname="${1:-wlan0}"
+  local rssi pct bars
+
+  rssi="$(iw dev "$ifname" link 2>/dev/null | awk '/signal:/ {print $2; exit}')"
+  [[ -n "$rssi" ]] || { echo "󰤭 0%"; return 1; }  # nf-md-wifi_off
+
+  pct=$(( 2 * (rssi + 100) ))
+  (( pct < 0 )) && pct=0
+  (( pct > 100 )) && pct=100
+
+  # Nerd Font Material Design Wi-Fi icons (off -> full)
+  if   (( pct >= 80 )); then bars="󰤨"  # wifi_strength_4
+  elif (( pct >= 60 )); then bars="󰤥"  # wifi_strength_3
+  elif (( pct >= 40 )); then bars="󰤢"  # wifi_strength_2
+  elif (( pct >= 20 )); then bars="󰤟"  # wifi_strength_1
+  else                    bars="󰤯"  # wifi_strength_outline
+  fi
+
+  echo -e "$bars   ${pct}%"
+}
+
+echo "<span>WLAN0 $wlan  $(wifi_strength)</span>"
+
