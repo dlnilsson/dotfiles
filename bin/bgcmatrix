@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SOCK="${KITTY_CTR_SOCKET:-unix:@mykitty}"
+TITLE="CMatrix"
+DELAY="${KITTY_CMATRIX_DELAY:-0.20}"  # seconds
+
+cmd=(bash -lc "sleep ${DELAY}; exec cmatrix -b")
+
+if kitty @ --to "$SOCK" ls >/dev/null 2>&1; then
+  kitty @ --to "$SOCK" launch \
+    --type=os-window \
+    --os-window-state=fullscreen \
+    --os-window-class=kitty-cmatrix \
+    --os-window-name=kitty-cmatrix \
+    --title="$TITLE" \
+    "${cmd[@]}"
+  exit 0
+fi
+
+exec kitty --start-as=fullscreen --app-id=kitty-cmatrix --name=kitty-cmatrix --title="$TITLE" "${cmd[@]}"

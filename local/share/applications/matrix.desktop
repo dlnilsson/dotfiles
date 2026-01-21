@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=CMatrix (Kitty)
+Comment=Run cmatrix in a fullscreen Kitty window
+Exec=/usr/bin/env bash -lc "$HOME/.dotfiles/bin/bgcmatrix"
+Icon=utilities-terminal
+Terminal=false
+Categories=Utility;System;
+StartupNotify=true
+
