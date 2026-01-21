@@ -7,4 +7,4 @@ Exec=/home/dln/.dotfiles/bin/hyprpicker-copy
 Terminal=false
 Categories=Graphics;Utility;
 Keywords=color;picker;eyedropper;hypr;wayland;
-Icon=color-select
+Icon=/home/dln/.local/share/icons/Nordzy/actions@2x/24/color-picker-white.svg
