@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+
+status=$(wpctl get-volume @DEFAULT_AUDIO_SOURCE@)
+swayosd-client --custom-message="toggle microphone $status" --custom-icon=audio-input-microphone
