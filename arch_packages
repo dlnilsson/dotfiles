@@ -61,6 +61,7 @@ gnome-calculator
 gnome-keyring
 gnome-themes-extra
 go
+golangci-lint
 go-yq
 graphviz
 grim
@@ -78,6 +79,7 @@ hyprpolkitagent
 hyprsunset
 imagemagick
 imwheel
+inotify-tools
 intel-media-driver
 ipython
 iwd
@@ -91,13 +93,13 @@ less
 libva-intel-driver
 linux
 linux-firmware
+linux-headers
 lsd
 lshw
 man-db
 mariadb-clients
 mesa-utils
 meson
-micro
 mitmproxy
 mkcert
 msedit
@@ -109,9 +111,11 @@ ncdu
 neovim
 nix
 nodejs-lts-iron
+noto-fonts
 noto-fonts-cjk
 noto-fonts-emoji
 npm
+nss-mdns
 nvm
 nwg-displays
 nwg-look
@@ -120,6 +124,7 @@ openssh
 papirus-icon-theme
 parallel
 pavucontrol
+pelican
 perl-image-exiftool
 pipewire-alsa
 pipewire-docs
@@ -142,6 +147,7 @@ ruby
 rust
 screen
 sddm
+seahorse
 shellcheck
 slurp
 smartmontools
@@ -178,11 +184,13 @@ waybar
 wev
 wget
 whois
+wireless-regdb
 wireless_tools
 wl-clipboard
 woff2-font-awesome
 wofi
 wpa_supplicant
+wtype
 xdg-desktop-portal-gtk
 xdg-desktop-portal-hyprland
 xdg-utils
@@ -196,6 +204,8 @@ yarn
 yubico-pam
 yubikey-manager
 yubikey-touch-detector
+zathura
+zathura-pdf-poppler
 zed
 zip
 zoxide
