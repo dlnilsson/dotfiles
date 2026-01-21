@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Switch audio
+Comment=switch audio output
+Path=/home/dln/.dotfiles/bin/
+Exec=/home/dln/.dotfiles/bin/omarchy-cmd-audio-switch
+Terminal=false
+Categories=Graphics;Utility;
+Keywords=audio;audio-switch;switch;hypr;wayland;
+Icon=color-select
