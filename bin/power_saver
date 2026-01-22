@@ -37,18 +37,26 @@ esac
 enabled="${1:-true}"
 
 if [[ "$enabled" == "true" ]]; then
-    hyprctl keyword decoration:blur:enabled 0 &>/dev/null || true
-    hyprctl keyword decoration:shadow:enabled 0 &>/dev/null || true
-    hyprctl keyword animations:enabled 0 &>/dev/null || true
+    hyprctl --batch "\
+        keyword decoration:blur:enabled 0 ; \
+        keyword decoration:shadow:enabled 0 ; \
+        keyword general:gaps_out 0 ; \
+        keyword general:gaps_in 0 ; \
+        keyword general:border_size 0.25 ; \
+        keyword animations:enabled 0" &>/dev/null || true
     set_kitty_opacity 1
     for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
         echo "powersave" > "$cpu/cpufreq/scaling_governor"
     done
     echo "powersave" > "$STATE_FILE"
 else
-    hyprctl keyword decoration:blur:enabled 1 &>/dev/null || true
-    hyprctl keyword decoration:shadow:enabled 1 &>/dev/null || true
-    hyprctl keyword animations:enabled 1 &>/dev/null || true
+    hyprctl --batch "\
+        keyword decoration:blur:enabled 1 ; \
+        keyword decoration:shadow:enabled 1 ; \
+        keyword general:gaps_out 10 ; \
+        keyword general:gaps_in 5 ; \
+        keyword general:border_size 2 ; \
+        keyword animations:enabled 1" &>/dev/null || true
     set_kitty_opacity 0.75
     for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
         echo "performance" > "$cpu/cpufreq/scaling_governor"
