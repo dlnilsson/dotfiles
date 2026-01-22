@@ -55,6 +55,7 @@ func (h *ScreencastHandler) OpenWindow(w event.OpenWindow) {
 		h.handlePictureInPictureWindow(addr)
 	}
 }
+
 func (h *ScreencastHandler) CloseWindow(w event.CloseWindow) {
 	addr := NormalizeAddress(w.Address)
 	h.Client.RemoveHandled(addr)
@@ -173,7 +174,8 @@ func hasAnyTag(tags []string, values ...string) bool {
 
 func (e *ScreencastHandler) MonitorRemoved(m event.MonitorName) {
 	slog.Debug("MonitorRemoved", "monitor", m)
-	time.Sleep(2 * time.Second)
+	// sleep if multiple monitors are removed at once. give it a second to detect
+	time.Sleep(7 * time.Second)
 	monitors, err := e.Client.Monitors()
 	if err != nil {
 		slog.Error("Failed to get monitors", "error", err)
