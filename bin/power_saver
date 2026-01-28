@@ -22,7 +22,12 @@ get_status() {
 
 case "${1:-}" in
     --status)
-        get_status
+        mode="$(get_status)"
+        case "$mode" in
+            performance) printf '{"text":"\uf0e7","class":"performance"}\n' ;;
+            powersave)   printf '{"text":"\uf06c","class":"powersave"}\n' ;;
+            *)           printf '{"text":"?"}\n' ;;
+        esac
         exit 0
         ;;
     --toggle)
