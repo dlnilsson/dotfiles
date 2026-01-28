@@ -31,6 +31,6 @@ func IsPictureInPictureWindow(w event.OpenWindow) bool {
 func IsStarShipWindow(title string, cfg *config.Config) bool {
 	starshipTitles := cfg.WindowMatching.StarshipTitles
 	return slices.ContainsFunc(starshipTitles, func(match string) bool {
-		return title == match
+		return strings.EqualFold(title, match)
 	})
 }

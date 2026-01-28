@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -230,7 +231,8 @@ func (p *iniParser) getStringArray(section, key string) []string {
 	if len(vals) == 0 {
 		return nil
 	}
-	return vals
+	slices.Sort(vals)
+	return slices.Compact(vals)
 }
 
 func (p *iniParser) getDuration(section, key string) (time.Duration, error) {
