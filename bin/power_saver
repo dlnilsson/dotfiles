@@ -24,9 +24,9 @@ case "${1:-}" in
     --status)
         mode="$(get_status)"
         case "$mode" in
-            performance) printf '{"text":"\uf0e7","class":"performance"}\n' ;;
-            powersave)   printf '{"text":"\uf06c","class":"powersave"}\n' ;;
-            *)           printf '{"text":"?"}\n' ;;
+            performance) printf '{"text":"\uf0e7","alt":"performance","tooltip":"performance","class":"performance","percentage":100}\n' ;;
+            powersave)   printf '{"text":"\uf06c","alt":"powersave","tooltip":"powersave","class":"powersave","percentage":0}\n' ;;
+            *)           printf '{"text":"?","alt":"unknown","tooltip":"unknown","class":"unknown","percentage":0}\n' ;;
         esac
         exit 0
         ;;

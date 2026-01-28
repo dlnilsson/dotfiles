@@ -69,7 +69,7 @@
         "return-type": "json",
         "interval": 3,
         "format": "{text}",
-        "tooltip": false,
+        "tooltip": true,
         "on-click": "$HOME/.dotfiles/bin/power_saver --toggle"
     },
     "custom/camera": {
