@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Powermode
+Comment=Toggle power saver mode
+GenericName=Toggle power mode
+Path=/home/dln/.dotfiles/bin/
+Exec=/home/dln/.dotfiles/bin/power_saver --toggle
+Terminal=false
+Categories=Utility;System;
+Keywords=power;powersave;performance;hypr;wayland;
+Icon=battery

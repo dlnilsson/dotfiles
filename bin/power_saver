@@ -33,8 +33,10 @@ case "${1:-}" in
     --toggle)
         if [[ "$(get_status)" == "powersave" ]]; then
             set -- false
+			swayosd-client --custom-message="performance"
         else
             set -- true
+			swayosd-client --custom-message="powersave"
         fi
         ;;
 esac
