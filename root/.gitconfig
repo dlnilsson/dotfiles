@@ -109,6 +109,7 @@
 
 	# show diff of merge commit
 	showmerge = "!f() { rev=${1:-HEAD}; git show -p \"$rev^1..$rev\"; }; f"
+	fixsame = !git commit --amend --no-edit --date=\"$(git log -1 --format=%aD)\"
 [rerere]
 	enabled = true
 [interactive]

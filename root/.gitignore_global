@@ -35,7 +35,8 @@ staticcheck.conf
 main
 .env.development
 scripts/sendify-latest-*
-AGENTS.md
 .gocache
 **/.cursor/rules/dln.mdc
 .zed/*
+.cursor/worktrees.json
+.cursor/rules/dln.mdc
