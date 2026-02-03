@@ -209,6 +209,8 @@ func main() {
 			event.EventOpenWindow,
 			event.EventCloseWindow,
 			event.EventMonitorRemoved,
+			event.EventFocusedMonitorV2,
+			event.EventMonitorAddedV2,
 		}
 		slog.Debug("Subscribing to events", "events", events)
 		if err := cli.Subscribe(ctx, handler, events...); err != nil && ctx.Err() == nil {

@@ -171,6 +171,19 @@ func hasAnyTag(tags []string, values ...string) bool {
 	}
 	return false
 }
+func (e *ScreencastHandler) FocusedMonitorV2(m event.FocusedMonitorV2) {
+	slog.Info("FocusedMonitor",
+		"monitor_name", m.MonitorName,
+		"workspace_id", m.WorkspaceID,
+	)
+}
+func (e *ScreencastHandler) MonitorAddedV2(m event.MonitorAddedV2) {
+	slog.Info("MonitorAdded",
+		"monitor_id", m.ID,
+		"monitor_name", m.Name,
+		"monitor_description", m.Description,
+	)
+}
 
 func (e *ScreencastHandler) MonitorRemoved(m event.MonitorName) {
 	slog.Debug("MonitorRemoved", "monitor", m)
