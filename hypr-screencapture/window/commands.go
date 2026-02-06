@@ -16,14 +16,15 @@ func NormalizeAddress(address string) string {
 	return address
 }
 
-func BuildCommands(address, position string) []string {
+func BuildCommands(win hyprland.Client, position string) []string {
 	var (
 		commands = make([]string, 0, 18)
-		addr     = fmt.Sprintf("address:%s", NormalizeAddress(address))
+		addr     = fmt.Sprintf("address:%s", NormalizeAddress(win.Address))
 	)
-
+	if len(win.Grouped) > 0 {
+		commands = append(commands, fmt.Sprintf("moveoutofgroup %s", addr))
+	}
 	commands = append(commands,
-		fmt.Sprintf("moveoutofgroup %s", addr),
 		fmt.Sprintf("pin %s", addr),
 		fmt.Sprintf("setfloating %s", addr),
 		fmt.Sprintf("movewindowpixel exact %s,%s", position, addr),
@@ -53,6 +54,9 @@ func DispatchCommands(c *Client, commands []string) {
 
 	for _, cmd := range commands {
 		if trimmed, ok := strings.CutPrefix(cmd, "[[BATCH]]"); ok {
+			if !strings.HasPrefix(trimmed, "dispatch ") {
+				trimmed = "dispatch " + trimmed
+			}
 			batch = append(batch, trimmed)
 			continue
 		}
@@ -60,14 +64,22 @@ func DispatchCommands(c *Client, commands []string) {
 	}
 
 	for _, cmd := range normal {
-		var err error
+		var (
+			response []hyprland.Response
+			err      error
+		)
 		for attempt := range maxRetries {
-			if _, err = c.Dispatch(cmd); err == nil {
+			response, err = c.Dispatch(cmd)
+			if err == nil {
 				break
 			}
 			msg := err.Error()
 			if strings.Contains(msg, "Window does not qualify to be pinned") {
-				slog.Debug("window does not qualify to be pinned, aborting", "command", cmd)
+				slog.Debug("window does not qualify to be pinned, aborting",
+					"command", cmd,
+					"response", response,
+					"error", err,
+				)
 				return
 			}
 			if !strings.Contains(msg, "Window not found") {
@@ -84,11 +96,12 @@ func DispatchCommands(c *Client, commands []string) {
 	if len(batch) == 0 {
 		return
 	}
+	batches := strings.Join(batch, ";")
 	r, err := c.RawRequest(
-		hyprland.RawRequest(fmt.Sprintf("[[BATCH]]%s", strings.Join(batch, ";"))),
+		hyprland.RawRequest(fmt.Sprintf("[[BATCH]]%s", batches)),
 	)
 	if err != nil {
 		slog.Error("failed to dispatch batch commands", "error", err)
 	}
-	slog.Debug("batch commands response", "response", r)
+	slog.Debug("batch commands response", "response", r, "batches", batches)
 }

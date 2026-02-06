@@ -135,7 +135,7 @@ func (p *Pinner) tryPinWindow(win hyprland.Client) bool {
 			slog.Debug("retrying pin operation", "address", addr, "attempt", attempt+1, "maxRetries", pc.maxRetries, "delay", delay)
 			time.Sleep(delay)
 		}
-		p.executeWindowCommands(addr, position)
+		p.executeWindowCommands(win, position)
 
 		if p.verifyWindowPinned(addr) {
 			return true
@@ -147,8 +147,8 @@ func (p *Pinner) tryPinWindow(win hyprland.Client) bool {
 	return false
 }
 
-func (p *Pinner) executeWindowCommands(address, position string) {
-	commands := window.BuildCommands(address, position)
+func (p *Pinner) executeWindowCommands(win hyprland.Client, position string) {
+	commands := window.BuildCommands(win, position)
 	window.DispatchCommands(p.Client, commands)
 }
 

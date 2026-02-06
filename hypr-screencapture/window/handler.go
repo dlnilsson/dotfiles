@@ -50,7 +50,18 @@ func (h *ScreencastHandler) OpenWindow(w event.OpenWindow) {
 	switch {
 	case IsHangoutWindow(w, h.cfgFn()):
 		slog.Debug("Switch OK hangout window")
-		h.handleHangoutWindow(addr)
+		clients, err := h.Client.Clients()
+		if err != nil {
+			slog.Error("Failed to get clients", "error", err)
+			return
+		}
+		var window hyprland.Client
+		for _, client := range clients {
+			if client.Address == addr || client.Address == w.Address {
+				window = client
+			}
+		}
+		h.handleHangoutWindow(window)
 	case IsPictureInPictureWindow(w):
 		h.handlePictureInPictureWindow(addr)
 	}
@@ -76,10 +87,7 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 	)
 	cfg := h.cfgFn()
 	slog.Debug("active Window starship", "is_starship", IsStarShipWindow(w.Title, cfg))
-	if IsStarShipWindow(w.Title, cfg) {
-		// The only way to reliably detect if it's a popup (starship)
-		// is to rely on user behavior: the browser is the only window in the workspace.
-		time.Sleep(100 * time.Millisecond)
+	getSiblingsAndWindows := func() ([]hyprland.Client, int) {
 		clients, err := h.Client.Clients()
 		var siblings []hyprland.Client
 		if err == nil {
@@ -104,6 +112,13 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 				}
 			}
 		}
+		return siblings, windows
+	}
+	if IsStarShipWindow(w.Title, cfg) {
+		// The only way to reliably detect if it's a popup (starship)
+		// is to rely on user behavior: the browser is the only window in the workspace.
+		time.Sleep(100 * time.Millisecond)
+		siblings, windows := getSiblingsAndWindows()
 		slog.Debug("active window size initial size",
 			"title", w.Title,
 			"size", activeWindow.Size,
@@ -115,6 +130,9 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 		)
 		if len(siblings) >= 1 || windows > 1 &&
 			!hasAnyTag(activeWindow.Tags, cfg.WindowMatching.ExcludeFromStarship...) {
+			if activeWindow.Fullscreen < hyprland.Fullscreen {
+
+			}
 			DispatchCommands(h.Client, []string{
 				"denywindowfromgroup on",
 				"tagwindow +starship",
@@ -125,11 +143,21 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 		}
 	}
 	if IsHangoutTitle(w.Title, cfg) {
-		h.handleHangoutWindow(address)
+		siblings, windows := getSiblingsAndWindows()
+		slog.Debug("hangout window context",
+			"title", w.Title,
+			"siblings", len(siblings),
+			"workspace", activeWindow.Workspace.Id,
+			"workspace_windows", windows,
+		)
+		if len(siblings) > 1 {
+			h.handleHangoutWindow(activeWindow.Client)
+		}
 	}
 }
 
-func (h *ScreencastHandler) handleHangoutWindow(address string) {
+func (h *ScreencastHandler) handleHangoutWindow(win hyprland.Client) {
+	address := NormalizeAddress(win.Address)
 	if !h.Client.MarkHandled(address) {
 		slog.Debug("MarkHandled failed", "address", address)
 		return
@@ -146,7 +174,7 @@ func (h *ScreencastHandler) handleHangoutWindow(address string) {
 	})
 	cfg := h.cfgFn()
 	position := GetMeetingPosition(h.Client, address, cfg)
-	commands := BuildCommands(address, position)
+	commands := BuildCommands(win, position)
 
 	DispatchCommands(h.Client, append([]string{cmd}, commands...))
 	slog.Debug("Ok, hangout window handled")
