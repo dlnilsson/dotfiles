@@ -7,7 +7,6 @@ export PATH=$HOME/.cargo/bin:$PATH
 export PATH=$HOME/.local/bin:$PATH
 export PATH=$HOME/.npm-global/bin:$PATH
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
-#export EDITOR=nano
 export EDITOR=helix
 export GLAB_PAGER=delta
 export LANG=en_US.UTF-8
@@ -116,12 +115,20 @@ giphymd() {
     --preview="kitty icat --clear --transfer-mode=memory --stdin=no \
 	--place=\${FZF_PREVIEW_COLUMNS}x\${FZF_PREVIEW_LINES}@0x0 {}")
 
+  if [[ -z "$res" ]]; then
+    return 0
+  fi
+
   echo "![]($res)" | wl-copy --trim-newline
   clear
 }
 
 screen_record() {
 	local f=$(echo $HOME/Videos/$(date +"%Y-%m-%d_%H_%M").mp4)
+	if [[ -z "$f" ]]; then
+		notify-send "Screen recording failed: empty output path" -a "Screen Recorder"
+		return 1
+	fi
 	wl-screenrec -g "$(slurp)" --low-power=off --filename $f
 	wl-copy -t text/uri-list file:///$f
 	notify-send "Screen recording saved to $f" -a "Screen Recorder"
