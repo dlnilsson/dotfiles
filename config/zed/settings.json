@@ -96,8 +96,8 @@
   },
   "agent": {
     "inline_assistant_model": {
-      "provider": "OpenAI custom",
-      "model": "gpt-4.1-mini-2025-04-14",
+      "provider": "copilot_chat",
+      "model": "oswe-vscode-prime",
     },
     "default_model": {
       "provider": "OpenAI custom",
