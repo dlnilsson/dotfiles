@@ -41,3 +41,4 @@ main
 .cursor/rules/dln.mdc
 *.recording
 .claude/settings.local.json
+.agentrc
