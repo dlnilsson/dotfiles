@@ -3,7 +3,7 @@
 
 # Reload Hyprland if only the built-in panel is active to re-apply monitor keywords cleanly.
 maybe_reload_single_default() {
-  if hyprctl monitors -j | jq -e '
+  if hyprctl monitors all -j | jq -e '
     [.[] | select(.disabled != true)] as $enabled
     | $enabled
     | select(length == 1)
@@ -17,18 +17,18 @@ maybe_reload_single_default() {
 
 external=$(hyprctl monitors -j | jq -r '.[] | select(.name | test("^DP-[0-9]+"))')
 
-#pkill -SIGUSR2 waybar
-
 if [[ -n "$external" ]]; then
   if [[ $1 == "open" ]]; then
-    hyprctl keyword monitor eDP-1,1920x1200@60,0x0,1
+    hyprctl keyword monitor "eDP-1,highres,auto,1"
     maybe_reload_single_default
   else
     hyprctl keyword monitor "eDP-1,disable"
+    res=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | "\(.width)x\(.height) at \(.refreshRate | floor)hz"')
+    notify-send --transient "Running external" "$res" --expire-time=3000
   fi
 else
-  # best=$(hyprctl monitors -j | jq -r '.[] | select(.name == "eDP-1")' | jq -r '.availableModes[0]')
-  notify-send --transient "No external monitor detected" "Clamshell mode not activated" --expire-time=6000
-  hyprctl keyword monitor eDP-1,1920x1200@60,0x0,1
-  maybe_reload_single_default
+  hyprctl keyword monitor "eDP-1,highres,auto,1"
+  sleep 1
+  res=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | "\(.width)x\(.height) at \(.refreshRate | floor)hz"')
+  notify-send --transient "No external monitor detected" "running $res" --expire-time=3000
 fi
