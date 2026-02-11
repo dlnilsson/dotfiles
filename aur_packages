@@ -14,6 +14,7 @@ glide-browser-bin
 gnu-netcat
 gromit-mpx
 hackernews_tui
+hyprland-preview-share-picker-git
 iwgtk
 localsend-bin
 logiops-git
@@ -36,11 +37,13 @@ qimgv
 sddm-silent-theme
 signal-desktop-beta-bin
 slack-desktop
+soapui
 stripe-cli
 swayosd-git
 swhkd-bin
 termsyn-font
 tilix
+timer-bin
 ttf-times-new-roman
 uxplay
 visual-studio-code-bin
