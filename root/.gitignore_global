@@ -39,3 +39,5 @@ main
 .zed/*
 .cursor/worktrees.json
 .cursor/rules/dln.mdc
+*.recording
+.claude/settings.local.json
