@@ -9,6 +9,10 @@ context=$(echo "$input" | jq -r '.context_window.remaining_percentage // empty')
 
 session_id=$(echo "$input" | jq -r '.session_id')
 agentrc_file="$cwd/.agentrc"
+
+
+kitty @ --to "$KITTY_LISTEN_ON" set-window-title "Claude $cwd using $model"
+
 touch "$agentrc_file"
 if grep -q '^export CLAUDE_SESSION_ID=' "$agentrc_file"; then
     sed -i 's/^export CLAUDE_SESSION_ID=.*/export CLAUDE_SESSION_ID='"$session_id"'/' "$agentrc_file"
