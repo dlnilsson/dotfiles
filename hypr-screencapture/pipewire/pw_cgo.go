@@ -106,16 +106,16 @@ func onNodeAdd(id uint32, mediaClass, mediaRole, mediaType, mediaCategory, name,
 		dsLower = strings.ToLower(desc)
 		apLower = strings.ToLower(app)
 	)
-	slog.Debug("NODE ADD",
-		"id", id,
-		"mediaclass", mediaClass,
-		"mediaRole", mediaRole,
-		"mediaType", mediaType,
-		"mediaCategory", mediaCategory,
-		"name", name,
-		"desc", desc,
-		"app", app,
-		"portalApp", portalApp)
+	// slog.Debug("NODE ADD",
+	// 	"id", id,
+	// 	"mediaclass", mediaClass,
+	// 	"mediaRole", mediaRole,
+	// 	"mediaType", mediaType,
+	// 	"mediaCategory", mediaCategory,
+	// 	"name", name,
+	// 	"desc", desc,
+	// 	"app", app,
+	// 	"portalApp", portalApp)
 
 	allNodes[id] = nodeProps{
 		MediaClass:    mediaClass,
@@ -157,7 +157,7 @@ func onNodeAdd(id uint32, mediaClass, mediaRole, mediaType, mediaCategory, name,
 				"portal", portalApp)
 		}
 	} else if IsCameraNode(mediaClass, name, dsLower) {
-		slog.Info("CAMERA NODE DETECTED", "id", id, "name", name, "media.class", mediaClass, "desc", desc)
+		// slog.Info("CAMERA NODE DETECTED", "id", id, "name", name, "media.class", mediaClass, "desc", desc)
 		knownCameras[id] = nodeProps{
 			MediaClass:    mediaClass,
 			MediaRole:     mediaRole,
@@ -171,7 +171,7 @@ func onNodeAdd(id uint32, mediaClass, mediaRole, mediaType, mediaCategory, name,
 		slog.Debug("Total known cameras", "count", len(knownCameras))
 		checkCameraUsage()
 	} else if mediaClass == "Video/Source" || mediaClass == "Stream/Output/Video" || mediaClass == "Stream/Input/Video" {
-		slog.Debug("VIDEO NODE (not camera)", "id", id, "name", name, "media.class", mediaClass, "desc", desc, "app", app)
+		// slog.Debug("VIDEO NODE (not camera)", "id", id, "name", name, "media.class", mediaClass, "desc", desc, "app", app)
 		if app != "" {
 			slog.Debug("VIDEO NODE created by app - checking if this might link to camera", "app", app)
 		}
@@ -179,8 +179,8 @@ func onNodeAdd(id uint32, mediaClass, mediaRole, mediaType, mediaCategory, name,
 }
 
 func onNodeRemove(id uint32) {
-	if props, ok := allNodes[id]; ok {
-		slog.Debug("NODE REMOVE", "id", id, "name", props.Name, "media.class", props.MediaClass)
+	if _, ok := allNodes[id]; ok {
+		// slog.Debug("NODE REMOVE", "id", id, "name", props.Name, "media.class", props.MediaClass)
 		delete(allNodes, id)
 	}
 
@@ -230,10 +230,10 @@ func onLinkAdd(id, outputNodeID, inputNodeID uint32, state int) {
 		inputName = props.Name
 	}
 
-	cameraNote := ""
-	if outputIsCamera || inputIsCamera {
-		cameraNote = " [CAMERA LINK]"
-	}
+	// cameraNote := ""
+	// if outputIsCamera || inputIsCamera {
+	// 	cameraNote = " [CAMERA LINK]"
+	// }
 
 	var outputMediaClass, inputMediaClass string
 	if props, ok := allNodes[outputNodeID]; ok {
@@ -243,16 +243,16 @@ func onLinkAdd(id, outputNodeID, inputNodeID uint32, state int) {
 		inputMediaClass = props.MediaClass
 	}
 
-	slog.Debug("LINK ADD",
-		"id", id,
-		"output_node", outputNodeID,
-		"output_name", outputName,
-		"output_mediaclass", outputMediaClass,
-		"input_node", inputNodeID,
-		"input_name", inputName,
-		"input_mediaclass", inputMediaClass,
-		"state", state,
-		"camera_note", cameraNote)
+	// slog.Debug("LINK ADD",
+	// 	"id", id,
+	// 	"output_node", outputNodeID,
+	// 	"output_name", outputName,
+	// 	"output_mediaclass", outputMediaClass,
+	// 	"input_node", inputNodeID,
+	// 	"input_name", inputName,
+	// 	"input_mediaclass", inputMediaClass,
+	// 	"state", state,
+	// 	"camera_note", cameraNote)
 
 	if outputIsCamera || inputIsCamera {
 		cameraNodeID := func() uint32 {
@@ -294,42 +294,42 @@ func onLinkAdd(id, outputNodeID, inputNodeID uint32, state int) {
 		InputNodeID:  inputNodeID,
 		State:        state,
 	}
-	slog.Debug("Total known links", "count", len(knownLinks))
+	// slog.Debug("Total known links", "count", len(knownLinks))
 	checkCameraUsage()
 }
 
 func onLinkRemove(id uint32) {
-	slog.Debug("LINK REMOVE", "id", id)
+	// slog.Debug("LINK REMOVE", "id", id)
 	delete(knownLinks, id)
-	slog.Debug("Total known links", "count", len(knownLinks))
+	// slog.Debug("Total known links", "count", len(knownLinks))
 	checkCameraUsage()
 }
 
 func onLinkStateChange(id uint32, state int) {
 	if link, exists := knownLinks[id]; exists {
-		var (
-			outputName string
-			inputName  string
-		)
-		if props, ok := knownCameras[link.OutputNodeID]; ok {
-			outputName = props.Name
-		} else if props, ok := allNodes[link.OutputNodeID]; ok {
-			outputName = props.Name
-		}
-		if props, ok := knownCameras[link.InputNodeID]; ok {
-			inputName = props.Name
-		} else if props, ok := allNodes[link.InputNodeID]; ok {
-			inputName = props.Name
-		}
+		// var (
+		// 	outputName string
+		// 	inputName  string
+		// )
+		// if props, ok := knownCameras[link.OutputNodeID]; ok {
+		// 	outputName = props.Name
+		// } else if props, ok := allNodes[link.OutputNodeID]; ok {
+		// 	outputName = props.Name
+		// }
+		// if props, ok := knownCameras[link.InputNodeID]; ok {
+		// 	inputName = props.Name
+		// } else if props, ok := allNodes[link.InputNodeID]; ok {
+		// 	inputName = props.Name
+		// }
 
-		slog.Debug("LINK STATE CHANGE",
-			"id", id,
-			"output_node", link.OutputNodeID,
-			"output_name", outputName,
-			"input_node", link.InputNodeID,
-			"input_name", inputName,
-			"old_state", link.State,
-			"new_state", state)
+		// slog.Debug("LINK STATE CHANGE",
+		// 	"id", id,
+		// 	"output_node", link.OutputNodeID,
+		// 	"output_name", outputName,
+		// 	"input_node", link.InputNodeID,
+		// 	"input_name", inputName,
+		// 	"old_state", link.State,
+		// 	"new_state", state)
 
 		link.State = state
 		knownLinks[id] = link
@@ -369,15 +369,15 @@ func checkCameraUsage() {
 			}
 		}
 	}
-	if len(knownCameras) > 0 {
-		slog.Debug("CHECK: known cameras", "cameras", func() []uint32 {
-			var ids []uint32
-			for id := range knownCameras {
-				ids = append(ids, id)
-			}
-			return ids
-		}())
-	}
+	// if len(knownCameras) > 0 {
+	// 	slog.Debug("CHECK: known cameras", "cameras", func() []uint32 {
+	// 		var ids []uint32
+	// 		for id := range knownCameras {
+	// 			ids = append(ids, id)
+	// 		}
+	// 		return ids
+	// 	}())
+	// }
 
 	if newCameraInUse != cameraInUse {
 		cameraInUse = newCameraInUse
