@@ -416,3 +416,18 @@ label:focus {
 
 #custom-powermode.performance { color: #ffb000; }
 #custom-powermode.powersave { color: #7cb342; }
+
+/* glab reviews */
+#custom-glab {
+    margin: 0 5px;
+    padding: 0 5px;
+    color: @nord-grey3;
+}
+
+#custom-glab.pending {
+    color: @nord-orange;
+}
+
+#custom-glab.error {
+    color: @nord-red;
+}

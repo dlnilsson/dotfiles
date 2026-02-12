@@ -13,6 +13,7 @@
         "custom/camera",
         "custom/recording",
         "privacy",
+        "custom/glab",
         "hyprland/workspaces",
         "custom/powermode",
         "tray",
@@ -67,10 +68,23 @@
     "custom/powermode": {
         "exec": "$HOME/.dotfiles/bin/power_saver --status",
         "return-type": "json",
-        "interval": 3,
+        "interval": 120,
         "format": "{text}",
         "tooltip": true,
         "on-click": "$HOME/.dotfiles/bin/power_saver --toggle"
+    },
+    "custom/glab": {
+        "exec": "$HOME/.dotfiles/bin/glab-my-reviews",
+        "return-type": "json",
+        "interval": 120,
+        "format": "{icon} {text}",
+        "format-icons": {
+            "pending": "\uf296",
+            "error": "\uf071",
+            "none": "0"
+        },
+        "tooltip": true,
+        "on-click": "xdg-open https://gitlab.com/dashboard/merge_requests"
     },
     "custom/camera": {
         "exec": "/home/dln/.dotfiles/bin/check-camera",
