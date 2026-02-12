@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Waybar custom module: unapproved open MRs where I am a reviewer.
+# Uses GraphQL to get approval status in a single request.
+# Output: {"text": "...", "alt": "...", "tooltip": "...", "class": "...", "percentage": N}
+
+PER_PAGE=100
+
+QUERY='
+query ($perPage: Int!, $afterCursor: String) {
+  currentUser {
+    reviewRequestedMergeRequests(state: opened, first: $perPage, after: $afterCursor, sort: UPDATED_DESC) {
+      pageInfo { hasNextPage endCursor }
+      nodes {
+        approved
+        approvalsLeft
+        reference(full: true)
+        title
+        webUrl
+        author { name }
+      }
+    }
+  }
+}'
+
+all_nodes="[]"
+cursor="null"
+
+while :; do
+  body="$(jq -n \
+    --arg q "$QUERY" \
+    --argjson perPage "$PER_PAGE" \
+    --argjson cursor "$cursor" \
+    '{query: $q, variables: {perPage: $perPage, afterCursor: $cursor}}')"
+
+  resp="$(glab api graphql -X POST -H "Content-Type: application/json" --input <(printf '%s' "$body") 2>/dev/null)" || {
+    jq -cn '{text: "", alt: "error", tooltip: "GitLab API request failed", class: "error", percentage: 0}'
+    exit 0
+  }
+
+  nodes="$(jq '.data.currentUser.reviewRequestedMergeRequests.nodes' <<<"$resp")"
+  all_nodes="$(jq -s '.[0] + .[1]' <(printf '%s' "$all_nodes") <(printf '%s' "$nodes"))"
+
+  has_next="$(jq -r '.data.currentUser.reviewRequestedMergeRequests.pageInfo.hasNextPage' <<<"$resp")"
+  [[ "$has_next" == "true" ]] || break
+  cursor="$(jq '.data.currentUser.reviewRequestedMergeRequests.pageInfo.endCursor' <<<"$resp")"
+done
+
+# Filter to only unapproved MRs
+jq -c '
+  [.[] | select(.approved == false)] |
+  length as $total |
+  if $total == 0 then
+    {text: "", alt: "none", tooltip: "No open MRs awaiting review", class: "none", percentage: 0}
+  else
+    {
+      text: "\($total)",
+      alt: "reviews",
+      tooltip: (
+        [.[] | "\(.reference // "?")  \(.title)\r  \(.author.name // "?")"]
+        | join("\r\r")
+      ),
+      class: "pending",
+      percentage: $total
+    }
+  end
+' <<<"$all_nodes"
