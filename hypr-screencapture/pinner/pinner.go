@@ -96,7 +96,7 @@ func (p *Pinner) pinWindowsWithRetry(ctx context.Context) {
 			}
 
 			cfg := p.cfgFn()
-			candidates := p.Client.FindPinCandidates(clients, pinnedWindows, cfg)
+			candidates := p.FindPinCandidates(clients, pinnedWindows, cfg)
 			if len(candidates) == 0 {
 				continue
 			}

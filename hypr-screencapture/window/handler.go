@@ -130,9 +130,6 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 		)
 		if len(siblings) >= 1 || windows > 1 &&
 			!hasAnyTag(activeWindow.Tags, cfg.WindowMatching.ExcludeFromStarship...) {
-			if activeWindow.Fullscreen < hyprland.Fullscreen {
-
-			}
 			DispatchCommands(h.Client, []string{
 				"denywindowfromgroup on",
 				"tagwindow +starship",

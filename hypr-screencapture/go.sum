@@ -1,2 +1,4 @@
 github.com/dlnilsson/hyprland-go v0.0.0-20260119150245-8d3306850b33 h1:xfZLenuJO2VhbZONwNxZ/NqUOJzmYWwcW4cAfRo94RY=
 github.com/dlnilsson/hyprland-go v0.0.0-20260119150245-8d3306850b33/go.mod h1:gUGbdxhD7QdvPpdEwsB09x0HzICPkhKAuCeY+LVx5YM=
+github.com/golangci/golangci-lint/v2 v2.9.0 h1:x5RRwa/jpNEjOnbSQSTam47QBsB50NMzCCUKe4GY/0U=
+github.com/golangci/golangci-lint/v2 v2.9.0/go.mod h1:gAPaJitu6HsyiuwJYO+WtKT9WmCpQZHR+gkXlCw1bRY=

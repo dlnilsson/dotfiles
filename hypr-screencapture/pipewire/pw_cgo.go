@@ -179,10 +179,7 @@ func onNodeAdd(id uint32, mediaClass, mediaRole, mediaType, mediaCategory, name,
 }
 
 func onNodeRemove(id uint32) {
-	if _, ok := allNodes[id]; ok {
-		// slog.Debug("NODE REMOVE", "id", id, "name", props.Name, "media.class", props.MediaClass)
-		delete(allNodes, id)
-	}
+	delete(allNodes, id)
 
 	if props, ok := known[id]; ok {
 		delete(known, id)

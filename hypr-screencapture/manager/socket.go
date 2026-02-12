@@ -133,12 +133,12 @@ func RunSubscribeCommand(cfg *config.Config) error {
 				return "", err
 			}
 
+			defer func() { _ = conn.Close() }()
+
 			var buf bytes.Buffer
 			if _, err := io.Copy(&buf, conn); err != nil && err != io.EOF {
-				conn.Close()
 				return "", err
 			}
-			conn.Close()
 
 			return strings.TrimSpace(buf.String()), nil
 		}
