@@ -21,7 +21,7 @@ else
 fi
 
 # Shorten home dir to ~
-cwd="${cwd/#$HOME/~}"
+cwd="${cwd/#$HOME/\~}"
 
 # Green dir, white "on", blue branch, dirty/clean indicator
 printf '\033[32m%s\033[0m ' "$cwd"
@@ -35,6 +35,7 @@ if git -C "${cwd/#\~/$HOME}" rev-parse --git-dir >/dev/null 2>&1; then
             indicator='\033[31m✗\033[0m'
         fi
         printf '\033[37mon \033[34m%s\033[0m %b ' "$branch" "$indicator"
+        kitty @ --to "$KITTY_LISTEN_ON" set-window-title "Claude $cwd on $branch $model"
     fi
 fi
 
