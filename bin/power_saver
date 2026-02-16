@@ -56,6 +56,8 @@ if [[ "$enabled" == "true" ]]; then
         echo "powersave" > "$cpu/cpufreq/scaling_governor"
     done
     echo "powersave" > "$STATE_FILE"
+	batch="$(hyprctl clients -j 2>/dev/null | jq -r '.[].address | "dispatch setprop address:\(.) rounding 0"' | paste -sd';' -)"
+	[[ -n "$batch" ]] && hyprctl --batch "$batch" &>/dev/null || true
 else
     hyprctl --batch "\
         keyword decoration:blur:enabled 1 ; \
@@ -69,6 +71,8 @@ else
         echo "performance" > "$cpu/cpufreq/scaling_governor"
     done
     echo "performance" > "$STATE_FILE"
+	batch="$(hyprctl clients -j 2>/dev/null | jq -r '.[].address | "dispatch setprop address:\(.) rounding 10"' | paste -sd';' -)"
+	[[ -n "$batch" ]] && hyprctl --batch "$batch" &>/dev/null || true
 fi
 
 batch="$(hyprctl clients -j 2>/dev/null | jq -r '.[].address | "dispatch setprop address:\(.) opaque toggle"' | paste -sd';' -)"
