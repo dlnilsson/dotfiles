@@ -7,10 +7,10 @@ set -euo pipefail
 
 PER_PAGE=100
 
-QUERY='
-query ($perPage: Int!, $afterCursor: String) {
+QUERY="
+query (\$perPage: Int!, \$afterCursor: String) {
   currentUser {
-    reviewRequestedMergeRequests(state: opened, first: $perPage, after: $afterCursor, sort: UPDATED_DESC) {
+    reviewRequestedMergeRequests(state: opened, first: \$perPage, after: \$afterCursor, sort: UPDATED_DESC) {
       pageInfo { hasNextPage endCursor }
       nodes {
         approved
@@ -22,7 +22,7 @@ query ($perPage: Int!, $afterCursor: String) {
       }
     }
   }
-}'
+}"
 
 all_nodes="[]"
 cursor="null"
