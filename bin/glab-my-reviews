@@ -55,7 +55,7 @@ jq -c '
     {text: "", alt: "none", tooltip: "No open MRs awaiting review", class: "none", percentage: 0}
   else
     {
-      text: "\($total)",
+      text: "\uf296 \($total)",
       alt: "reviews",
       tooltip: (
         [.[] | "\(.reference // "?")  \(.title)\r  \(.author.name // "?")"]
