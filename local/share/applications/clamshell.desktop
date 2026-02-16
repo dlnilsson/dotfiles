@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Clamshell
+Comment=disable built in monitor
+GenericName=Clamshell-laptop
+Path=/home/dln/.dotfiles/bin/
+Exec=/home/dln/.dotfiles/bin/clamshell
+Terminal=false
+Categories=Utility;System;
+Keywords=power;powersave;performance;hypr;wayland;
+Icon=computer-laptop
