@@ -46,6 +46,7 @@ enabled="${1:-true}"
 if [[ "$enabled" == "true" ]]; then
     hyprctl --batch "\
         keyword decoration:blur:enabled 0 ; \
+        keyword decoration:rounding 0 ; \
         keyword decoration:shadow:enabled 0 ; \
         keyword general:gaps_out 0 ; \
         keyword general:gaps_in 0 ; \
@@ -61,6 +62,7 @@ if [[ "$enabled" == "true" ]]; then
 else
     hyprctl --batch "\
         keyword decoration:blur:enabled 1 ; \
+        keyword decoration:rounding 10; \
         keyword decoration:shadow:enabled 1 ; \
         keyword general:gaps_out 10 ; \
         keyword general:gaps_in 5 ; \
