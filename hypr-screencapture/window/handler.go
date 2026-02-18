@@ -134,7 +134,7 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 				"denywindowfromgroup on",
 				"tagwindow +starship",
 				fmt.Sprintf("setfloating %s", addr),
-				fmt.Sprintf("resizewindowpixel exact 900 725,%s", addr),
+				fmt.Sprintf("resizewindowpixel exact 900 825,%s", addr),
 				fmt.Sprintf("centerwindow %s", addr),
 			})
 		}
@@ -187,6 +187,27 @@ func (h *ScreencastHandler) handlePictureInPictureWindow(address string) {
 	})
 }
 
+// StarshipSize calculates the appropriate starship window size scaled to the
+// given monitor's resolution. The reference size is 900x825 at 1920x1080.
+func StarshipSize(monitor hyprland.Monitor) (int, int) {
+	var (
+		refWidth  = 1920.0
+		refHeight = 1080.0
+		refW      = 900.0
+		refH      = 825.0
+	)
+
+	var (
+		scaleX = float64(monitor.Width) / refWidth
+		scaleY = float64(monitor.Height) / refHeight
+		scale  = min(scaleX, scaleY)
+		w      = int(refW * scale)
+		h      = int(refH * scale)
+	)
+
+	return w, h
+}
+
 // hasAnyTag checks if any of the given values are present in the tags slice.
 func hasAnyTag(tags []string, values ...string) bool {
 	for _, v := range values {
@@ -196,12 +217,14 @@ func hasAnyTag(tags []string, values ...string) bool {
 	}
 	return false
 }
+
 func (e *ScreencastHandler) FocusedMonitorV2(m event.FocusedMonitorV2) {
 	slog.Info("FocusedMonitor",
 		"monitor_name", m.MonitorName,
 		"workspace_id", m.WorkspaceID,
 	)
 }
+
 func (e *ScreencastHandler) MonitorAddedV2(m event.MonitorAddedV2) {
 	slog.Info("MonitorAdded",
 		"monitor_id", m.ID,
