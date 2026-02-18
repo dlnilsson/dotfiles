@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+PATH="/usr/local/bin:/usr/bin:/bin:$HOME/.local/bin:$HOME/bin:${PATH:-}"
+export PATH
+
 # deps: glab, jq, notify-send, flock (util-linux), timeout (coreutils), xdg-open/open, gum
 
 
@@ -28,9 +31,19 @@ touch "$STATE_FILE"
 # ------------------------------------------------
 
 exec 9>"$LOCK_FILE"
-flock -n 9 || { gum log --time=DateTime -l info "Another instance is running, exiting"; exit 0; }
+flock -n 9 || { /usr/bin/gum log --time=DateTime -l info "Another instance is running, exiting"; exit 0; }
 
-gum log --time=DateTime -l info "Starting GitLab review check"
+SCRIPT_TIMEOUT="${SCRIPT_TIMEOUT:-120}"
+(
+  exec 9>&-
+  sleep "$SCRIPT_TIMEOUT"
+  /usr/bin/gum log --time=DateTime -l error "Script exceeded ${SCRIPT_TIMEOUT}s timeout, killing process"
+  kill -9 $$ 2>/dev/null
+) &
+WATCHDOG_PID=$!
+trap 'kill $WATCHDOG_PID 2>/dev/null' EXIT
+
+/usr/bin/gum log --time=DateTime -l info "Starting GitLab review check (PID=$$, timeout=${SCRIPT_TIMEOUT}s)"
 
 has_cmd() { command -v "$1" >/dev/null 2>&1; }
 
@@ -53,7 +66,7 @@ notify_review() {
   # args: REF TITLE AUTHOR URL
   local ref="$1" title="$2" author="$3" url="$4"
 
-  gum log --time=DateTime -l info "New review request found: $ref - $title (by $author)"
+  /usr/bin/gum log --time=DateTime -l info "New review request found: $ref - $title (by $author)"
 
   (
     exec 9>&-
@@ -76,12 +89,12 @@ ${url}" \
       open|default) open_ref "$ref" "$url" ;;
       *) : ;;
     esac
-  )
+  ) &
 }
 
 declare -A SEEN=()
 while IFS= read -r id; do [[ -n "$id" ]] && SEEN["$id"]=1; done < "$STATE_FILE"
-gum log --time=DateTime -l info "Loaded ${#SEEN[@]} previously seen review(s)"
+/usr/bin/gum log --time=DateTime -l info "Loaded ${#SEEN[@]} previously seen review(s)"
 
 build_vars_json() {
   local base="$1"
@@ -134,10 +147,10 @@ process_graphql_file() {
   local file="$1"
   local op vars body resp
 
-  gum log --time=DateTime -l info "Processing GraphQL file: $(basename "$file")"
+  /usr/bin/gum log --time=DateTime -l info "Processing GraphQL file: $(basename "$file")"
 
   op="$(extract_op_name "$file")"
-  [[ -z "$op" ]] && { gum log --time=DateTime -l error "Skip: cannot parse operation name in $file"; return 0; }
+  [[ -z "$op" ]] && { /usr/bin/gum log --time=DateTime -l error "Skip: cannot parse operation name in $file"; return 0; }
 
   vars="$(build_vars_json "$file")"
 
@@ -147,8 +160,11 @@ process_graphql_file() {
     --argjson vars "$vars" \
     '{operationName:$op, variables:$vars, query:$q}')"
 
-  resp="$(timeout "$REQUEST_TIMEOUT" glab api graphql -X POST -H "Content-Type: application/json" --input <(printf %s "$body"))" || { gum log --time=DateTime -l error "API request failed for $op (timeout=${REQUEST_TIMEOUT}s)"; return 0; }
-  [[ "$(jq -r 'has("errors")' <<<"$resp")" == "true" ]] && { gum log --time=DateTime -l error "GraphQL errors in response for $op"; return 0; }
+  /usr/bin/gum log --time=DateTime -l debug "Calling GitLab API for $op"
+  resp="$(timeout "$REQUEST_TIMEOUT" glab api graphql -X POST -H "Content-Type: application/json" --input <(printf %s "$body"))" || { /usr/bin/gum log --time=DateTime -l error "API request failed for $op (timeout=${REQUEST_TIMEOUT}s)"; return 0; }
+  /usr/bin/gum log --time=DateTime -l debug "API call completed for $op"
+  
+  [[ "$(jq -r 'has("errors")' <<<"$resp")" == "true" ]] && { /usr/bin/gum log --time=DateTime -l error "GraphQL errors in response for $op"; return 0; }
 
   # nodes -> TSV: id, reference, title, author, webUrl (skip if fields missing)
   mapfile -t rows < <(jq -r '
@@ -159,10 +175,12 @@ process_graphql_file() {
   ' <<<"$resp")
 
   local line gid ref title author url
+  /usr/bin/gum log --time=DateTime -l debug "Processing ${#rows[@]} MR(s)"
   for line in "${rows[@]}"; do
     IFS=$'\t' read -r gid ref title author url <<<"$line"
     [[ -z "$gid" ]] && continue
     if [[ -z "${SEEN[$gid]:-}" ]]; then
+      /usr/bin/gum log --time=DateTime -l debug "Spawning notification for $ref"
       notify_review "$ref" "$title" "$author" "$url"
       echo "$gid" >> "$STATE_FILE"
       SEEN["$gid"]=1
@@ -175,11 +193,11 @@ files=( "$GQL_DIR"/*.graphql )
 shopt -u nullglob
 
 if [[ ${#files[@]} -eq 0 ]]; then
-  gum log --time=DateTime -l info "No GraphQL files found in $GQL_DIR"
+  /usr/bin/gum log --time=DateTime -l info "No GraphQL files found in $GQL_DIR"
   exit 0
 fi
 
-gum log --time=DateTime -l info "Found ${#files[@]} GraphQL file(s) to process"
+/usr/bin/gum log --time=DateTime -l info "Found ${#files[@]} GraphQL file(s) to process"
 
 for f in "${files[@]}"; do
   process_graphql_file "$f"
@@ -188,5 +206,5 @@ done
 # Cap state growth
 tail -n 1000 "$STATE_FILE" > "$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
 
-gum log --time=DateTime -l info "GitLab review check completed"
+/usr/bin/gum log --time=DateTime -l info "GitLab review check completed"
 exit 0
