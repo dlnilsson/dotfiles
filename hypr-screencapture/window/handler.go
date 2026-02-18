@@ -130,11 +130,24 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 		)
 		if len(siblings) >= 1 || windows > 1 &&
 			!hasAnyTag(activeWindow.Tags, cfg.WindowMatching.ExcludeFromStarship...) {
+			var (
+				sw = 900
+				sh = 825
+			)
+			monitors, err := h.Client.Monitors()
+			if err == nil {
+				for _, m := range monitors {
+					if m.Id == activeWindow.Monitor {
+						sw, sh = StarshipSize(m)
+						break
+					}
+				}
+			}
 			DispatchCommands(h.Client, []string{
 				"denywindowfromgroup on",
 				"tagwindow +starship",
 				fmt.Sprintf("setfloating %s", addr),
-				fmt.Sprintf("resizewindowpixel exact 900 825,%s", addr),
+				fmt.Sprintf("resizewindowpixel exact %d %d,%s", sw, sh, addr),
 				fmt.Sprintf("centerwindow %s", addr),
 			})
 		}
