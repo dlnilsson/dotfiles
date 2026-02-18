@@ -438,5 +438,5 @@ claude() {
 	kitty @ set-window-title "Claude $current_window_id"
 	kitty @ set-window-logo none
 	/home/dln/.local/bin/claude "$@"
-	kitty @ set-window-title "$current_window_id"
+	kitty @ set-window-title ""
 }
