@@ -42,3 +42,4 @@ main
 *.recording
 .claude/settings.local.json
 .agentrc
+**/.claude/settings.local.json
