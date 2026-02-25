@@ -6,6 +6,7 @@ printf '%s' "$input" >/tmp/statusline-input-latest
 cwd=$(echo "$input" | jq -r '.workspace.current_dir')
 model=$(echo "$input" | jq -r '.model.display_name')
 context=$(echo "$input" | jq -r '.context_window.remaining_percentage // empty')
+cost=$(echo "$input" | jq -r '.cost.total_cost_usd // empty')
 
 session_id=$(echo "$input" | jq -r '.session_id')
 agentrc_file="$cwd/.agentrc"
@@ -35,7 +36,7 @@ if git -C "${cwd/#\~/$HOME}" rev-parse --git-dir >/dev/null 2>&1; then
             indicator='\033[31m✗\033[0m'
         fi
         printf '\033[37mon \033[34m%s\033[0m %b ' "$branch" "$indicator"
-        kitty @ --to "$KITTY_LISTEN_ON" set-window-title "Claude $cwd on $branch $model"
+        kitty @ --to "$KITTY_LISTEN_ON" set-window-title "Claude $cwd on $branch $model - $context%"
     fi
 fi
 
@@ -43,4 +44,9 @@ printf '\033[37m| \033[34m%s\033[0m' "$model"
 
 if [ -n "$context" ]; then
     printf ' \033[37m| \033[33m%s%%\033[0m' "$context"
+fi
+
+if [ -n "$cost" ]; then
+    cost_fmt=$(printf '$%.3f USD' "$cost")
+    printf ' \033[37m| \033[32m%s\033[0m' "$cost_fmt"
 fi
