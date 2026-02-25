@@ -12,37 +12,52 @@
   "buffer_line_height": "comfortable",
   "buffer_font_weight": 400.0,
   "toolbar": {
-    "breadcrumbs": true
+    "breadcrumbs": true,
   },
   "scrollbar": {
-    "git_diff": true
+    "git_diff": true,
+  },
+  "lsp": {
+    "gopls": {
+      "initialization_options": {
+        "hints": {
+          "assignVariableTypes": true,
+          "compositeLiteralFields": true,
+          "compositeLiteralTypes": true,
+          "constantValues": true,
+          "functionTypeParameters": true,
+          "parameterNames": true,
+          "rangeVariableTypes": true,
+        },
+      },
+    },
   },
   "zoomed_padding": true,
   "active_pane_modifiers": {
     "border_size": 0.0,
-    "inactive_opacity": 1.0
+    "inactive_opacity": 1.0,
   },
   "window_decorations": "server",
   "use_system_window_tabs": false,
   "bottom_dock_layout": "contained",
   "preview_tabs": {
-    "enabled": true
+    "enabled": true,
   },
   "tabs": {
-    "git_status": true
+    "git_status": true,
   },
   "tab_bar": {
-    "show": true
+    "show": true,
   },
   "title_bar": {
     "show_menus": false,
     "show_project_items": true,
     "show_branch_name": true,
-    "show_branch_icon": true
+    "show_branch_icon": true,
   },
   "confirm_quit": true,
   "scroll_beyond_last_line": "off",
-  "vim_mode": false,
+  "vim_mode": true,
   "language_models": {
     "openai_compatible": {
       "OpenAI custom": {
@@ -129,6 +144,9 @@
     },
   },
   "agent": {
+    "tool_permissions": {
+      "default": "allow"
+    },
     "inline_assistant_model": {
       "provider": "copilot_chat",
       "model": "oswe-vscode-prime",
@@ -138,7 +156,6 @@
       "model": "gpt-4.1-mini-2025-04-14",
     },
     "model_parameters": [],
-    "always_allow_tool_actions": true,
   },
   "ui_font_size": 16,
   "buffer_font_size": 14.0,

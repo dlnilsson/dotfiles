@@ -7,9 +7,57 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "text_rendering_mode": "platform_default",
+  "unnecessary_code_fade": 0.5,
+  "buffer_line_height": "comfortable",
+  "buffer_font_weight": 400.0,
+  "toolbar": {
+    "breadcrumbs": true,
+  },
+  "scrollbar": {
+    "git_diff": true,
+  },
+  "lsp": {
+    "gopls": {
+      "initialization_options": {
+        "hints": {
+          "assignVariableTypes": true,
+          "compositeLiteralFields": true,
+          "compositeLiteralTypes": true,
+          "constantValues": true,
+          "functionTypeParameters": true,
+          "parameterNames": true,
+          "rangeVariableTypes": true,
+        },
+      },
+    },
+  },
+  "zoomed_padding": true,
+  "active_pane_modifiers": {
+    "border_size": 0.0,
+    "inactive_opacity": 1.0,
+  },
+  "window_decorations": "server",
+  "use_system_window_tabs": false,
+  "bottom_dock_layout": "contained",
+  "preview_tabs": {
+    "enabled": true,
+  },
+  "tabs": {
+    "git_status": true,
+  },
+  "tab_bar": {
+    "show": true,
+  },
+  "title_bar": {
+    "show_menus": false,
+    "show_project_items": true,
+    "show_branch_name": true,
+    "show_branch_icon": true,
+  },
   "confirm_quit": true,
   "scroll_beyond_last_line": "off",
-  "vim_mode": false,
+  "vim_mode": true,
   "language_models": {
     "openai_compatible": {
       "OpenAI custom": {
@@ -46,6 +94,7 @@
   },
   "base_keymap": "VSCode",
   "minimap": {
+    "max_width_columns": 80,
     "show": "never",
   },
   "buffer_font_fallbacks": ["JetBrainsMono Nerd Font Mono", "Monaspace Neon"],
@@ -56,6 +105,7 @@
   },
   "ensure_final_newline_on_save": true,
   "edit_predictions": {
+    "provider": "copilot",
     "disabled_globs": [
       "**/.env",
       "**/.env.*",
@@ -95,8 +145,8 @@
   },
   "agent": {
     "inline_assistant_model": {
-      "provider": "OpenAI custom",
-      "model": "gpt-4.1-mini-2025-04-14",
+      "provider": "copilot_chat",
+      "model": "oswe-vscode-prime",
     },
     "default_model": {
       "provider": "OpenAI custom",
@@ -104,9 +154,6 @@
     },
     "model_parameters": [],
     "always_allow_tool_actions": true,
-  },
-  "features": {
-    "edit_prediction_provider": "copilot",
   },
   "ui_font_size": 16,
   "buffer_font_size": 14.0,
@@ -124,7 +171,7 @@
     "ss08": true,
     "ss09": true,
   },
-  "theme": "Nord Dark",
+  "theme": "Catppuccin Frappé",
   "git": {
     "inline_blame": {
       "delay_ms": 1000,
