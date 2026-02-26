@@ -430,13 +430,6 @@ cursor() {
 }
 
 claude() {
-	current_window_id=$(kitty @ ls | jq -r --arg id "$KITTY_WINDOW_ID" '
-.[] | .tabs[] | .windows[]
-| select(.id == ($id|tonumber))
-| .title
-')
-	kitty @ set-window-title "Claude $current_window_id"
-	kitty @ set-window-logo none
 	/home/dln/.local/bin/claude "$@"
 	kitty @ set-window-title ""
 }
