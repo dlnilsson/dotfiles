@@ -9,6 +9,7 @@ ccat
 cheese
 coreimage
 cursor-bin
+dprint-bin
 drm_info
 glide-browser-bin
 gnu-netcat
@@ -18,7 +19,6 @@ hyprland-preview-share-picker-git
 iwgtk
 localsend-bin
 logiops-git
-mullvad-browser-bin
 mycli
 nancy-bin
 nerd-fonts-complete-mono-glyphs

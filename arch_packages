@@ -146,7 +146,7 @@ rofi-calc
 rofi-emoji
 rsync
 ruby
-rust
+rustup
 screen
 sddm
 seahorse
@@ -172,6 +172,7 @@ ttf-jetbrains-mono-nerd
 typst
 unzip
 usbutils
+vhs
 vim
 vivaldi
 vlc
