@@ -1,7 +1,7 @@
 #!/bin/bash
 # Claude Code status line - materialshell theme
 input=$(cat)
-# printf '%s' "$input" >/tmp/statusline-input-latest
+printf '%s' "$input" | claude-status-log &
 
 cwd=$(echo "$input" | jq -r '.workspace.current_dir')
 model=$(echo "$input" | jq -r '.model.display_name')
