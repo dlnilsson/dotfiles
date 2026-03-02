@@ -23,14 +23,15 @@ SELECT session_id, recorded_at, json(raw)
 
 -- select token usage
 SELECT
-    session_id,
-    recorded_at,
-    raw ->> '$.model.display_name' AS model,
-    raw ->> '$.cost.total_cost_usd' AS cost,
-    raw ->> '$.context_window.total_input_tokens' AS input_tokens,
-    raw ->> '$.context_window.total_output_tokens' AS output_tokens
-FROM status
-WHERE id IN (
-    SELECT MAX(id) FROM status GROUP BY session_id
-)
-ORDER BY recorded_at DESC;
+      session_id,
+      recorded_at,
+      raw ->> '$.model.display_name' AS model,
+      raw ->> '$.cost.total_cost_usd' AS cost,
+      raw ->> '$.context_window.total_input_tokens' AS input_tokens,
+      raw ->> '$.context_window.total_output_tokens' AS output_tokens,
+      raw ->> '$.workspace.project_dir' AS project_dir
+  FROM status
+  WHERE id IN (
+      SELECT MAX(id) FROM status GROUP BY session_id
+  )
+  ORDER BY recorded_at DESC;
