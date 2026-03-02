@@ -36,7 +36,7 @@ if git -C "${cwd/#\~/$HOME}" rev-parse --git-dir >/dev/null 2>&1; then
             indicator='\033[31m✗\033[0m'
         fi
         printf '\033[37mon \033[34m%s\033[0m %b ' "$branch" "$indicator"
-        kitty @ --to "$KITTY_LISTEN_ON" set-window-title "Claude $cwd on $branch $model - $context%"
+        kitty @ --to "$KITTY_LISTEN_ON" set-window-title "Claude $cwd on $branch $model"
     fi
 fi
 
