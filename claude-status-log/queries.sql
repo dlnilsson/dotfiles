@@ -35,3 +35,10 @@ SELECT
       SELECT MAX(id) FROM status GROUP BY session_id
   )
   ORDER BY recorded_at DESC;
+
+
+-- delete old entries
+DELETE FROM status
+WHERE id NOT IN (
+    SELECT MAX(id) FROM status GROUP BY session_id
+);
