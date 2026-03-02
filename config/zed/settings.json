@@ -17,6 +17,12 @@
   "scrollbar": {
     "git_diff": true,
   },
+  "languages": {
+    "JSON": {
+      "format_on_save": "on",
+      "formatter": "language_server",
+    },
+  },
   "lsp": {
     "gopls": {
       "initialization_options": {
@@ -145,7 +151,7 @@
   },
   "agent": {
     "tool_permissions": {
-      "default": "allow"
+      "default": "allow",
     },
     "inline_assistant_model": {
       "provider": "copilot_chat",
