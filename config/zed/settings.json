@@ -134,7 +134,7 @@
   "icon_theme": {
     "mode": "dark",
     "light": "Zed (Default)",
-    "dark": "Catppuccin Macchiato",
+    "dark": "Catppuccin Frappé",
   },
   "agent_servers": {
     "opencode": {
@@ -180,8 +180,15 @@
     "ss09": true,
   },
   "theme": "Nord Dark",
-  "experimental.theme_overrides": {
-    "background.appearance": "blurred",
+  "theme_overrides": {
+    "Nord Dark": {
+      "background.appearance": "blurred",
+      "syntax": {
+        "comment": {
+          "font_style": "italic",
+        },
+      },
+    },
   },
   "git": {
     "inline_blame": {
