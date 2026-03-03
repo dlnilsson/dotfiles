@@ -2,12 +2,10 @@
   "$schema": "https://zed.dev/schema/themes/v0.2.0.json",
   "name": "Nord",
   "author": "Sergei <Mikasius> Metlenkin",
-
   "themes": [
     {
       "name": "Nord Dark",
       "appearance": "dark",
-
       "style": {
         "border": "#3b4252",
         "border.variant": "#4b5262",
@@ -15,11 +13,10 @@
         "border.selected": "#6c99a6",
         "border.disabled": "#3b4252",
         "border.transparent": "#3b4252",
-
         "elevated_surface.background": "#3b4252",
         "surface.background": "#2e3440",
         "background": "#2e3440",
-
+        "background.appearance": "blurred",
         "element.background": "#3b4252",
         "element.hover": "#6c99a666",
         "element.active": "#6c99a666",
@@ -31,13 +28,11 @@
         "ghost_element.active": null,
         "ghost_element.selected": "#6c99a666",
         "ghost_element.disabled": "#d8dee933",
-
         "text": "#eceff4",
         "text.muted": "#d8dee9",
         "text.placeholder": "#d8dee966",
         "text.disabled": "#d8dee966",
         "text.accent": "#88C0D0",
-
         "icon": null,
         "icon.muted": null,
         "icon.disabled": null,
@@ -59,7 +54,6 @@
         "scrollbar.thumb.border": "#434c5e99",
         "scrollbar.track.background": "#2e3440",
         "scrollbar.track.border": "#3b4252",
-
         "editor.foreground": "#d8dee9",
         "editor.background": "#2e3440",
         "editor.gutter.background": "#2e3440",
@@ -73,7 +67,6 @@
         "editor.active_wrap_guide": "#3b4252",
         "editor.document_highlight.read_background": "#5e81ac66",
         "editor.document_highlight.write_background": "#5e81ac66",
-
         "terminal.background": "#2e3440",
         "terminal.foreground": null,
         "terminal.bright_foreground": null,
@@ -102,7 +95,6 @@
         "terminal.ansi.white": "#e5e9f0",
         "terminal.ansi.bright_white": "#eceff4",
         "terminal.ansi.dim_white": null,
-
         "link_text.hover": "#6c99a6",
         "conflict": "#5e81ac",
         "conflict.background": null,
@@ -154,7 +146,6 @@
         "vim.helix_normal.background": "#ebcb8b",
         "vim.helix_select.background": "#b48ead",
         "vim.mode.text": "#2e3440",
-
         "players": [
           {
             "cursor": "#eceff4",
@@ -187,7 +178,6 @@
             "selection": "#d087703d"
           }
         ],
-
         "syntax": {
           "attribute": {
             "color": "#8FBCBB",
@@ -330,7 +320,6 @@
     {
       "name": "Nord Light",
       "appearance": "light",
-
       "style": {
         "border": "#e1e4e8",
         "border.variant": "#e1e4e8",
@@ -338,30 +327,25 @@
         "border.selected": "#e1e4e8",
         "border.transparent": "#e1e4e8",
         "border.disabled": "#e1e4e8",
-
         "elevated_surface.background": "#fafbfc",
         "surface.background": "#f6f8fa",
         "background": "#eceff4",
-
         "element.background": "#159739",
         "element.hover": "#ebf0f4",
         "element.active": "#ebf0f4",
         "element.selected": "#e2e5e9",
         "element.disabled": null,
-
         "drop_target.background": null,
         "ghost_element.background": null,
         "ghost_element.hover": "#ebf0f4",
         "ghost_element.active": "#ebf0f4",
         "ghost_element.selected": "#e2e5e9",
         "ghost_element.disabled": null,
-
         "text": "#444d56",
         "text.muted": "#6a737d",
         "text.placeholder": null,
         "text.disabled": null,
         "text.accent": null,
-
         "icon": null,
         "icon.muted": null,
         "icon.disabled": null,
@@ -383,7 +367,6 @@
         "scrollbar.thumb.border": "#959da533",
         "scrollbar.track.background": "#eceff4",
         "scrollbar.track.border": "#ffffff",
-
         "editor.foreground": "#24292e",
         "editor.background": "#eceff4",
         "editor.gutter.background": "#eceff4",
@@ -397,7 +380,6 @@
         "editor.active_wrap_guide": "#e1e4e8",
         "editor.document_highlight.read_background": null,
         "editor.document_highlight.write_background": null,
-
         "terminal.background": null,
         "terminal.foreground": null,
         "terminal.bright_foreground": null,
@@ -426,7 +408,6 @@
         "terminal.ansi.white": null,
         "terminal.ansi.bright_white": null,
         "terminal.ansi.dim_white": null,
-
         "link_text.hover": "#032f62",
         "conflict": "#e36209",
         "conflict.background": null,

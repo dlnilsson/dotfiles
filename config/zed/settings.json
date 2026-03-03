@@ -154,8 +154,8 @@
       "default": "allow",
     },
     "inline_assistant_model": {
-      "provider": "copilot_chat",
-      "model": "oswe-vscode-prime",
+      "provider": "openai",
+      "model": "gpt-5-nano",
     },
     "default_model": {
       "provider": "OpenAI custom",
@@ -179,7 +179,10 @@
     "ss08": true,
     "ss09": true,
   },
-  "theme": "Catppuccin Frappé",
+  "theme": "Nord Dark",
+  "experimental.theme_overrides": {
+    "background.appearance": "blurred",
+  },
   "git": {
     "inline_blame": {
       "delay_ms": 1000,
