@@ -44,6 +44,7 @@ emacs
 evtest
 eza
 fastfetch
+fd
 feh
 firefox
 flameshot
@@ -164,6 +165,7 @@ strace
 swaylock
 swaync
 tailscale
+television
 texlive-binextra
 the_silver_searcher
 tree
