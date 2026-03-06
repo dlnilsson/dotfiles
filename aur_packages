@@ -1,14 +1,13 @@
 1password
 adwaita-dark
 amdgpu_top-tui-bin
-beekeeper-studio-bin
 brillo
 bun-bin
 caffeine-ng
 ccat
-cheese
 coreimage
 cursor-bin
+datagrip
 dprint-bin
 drm_info
 glide-browser-bin
@@ -51,6 +50,7 @@ visual-studio-code-bin
 waterfox-bin
 wlogout
 wl-screenrec
+worktrunk-bin
 wpgtk
 xf86-video-vmware
 yay
