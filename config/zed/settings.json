@@ -151,12 +151,19 @@
     },
   },
   "agent": {
+    "favorite_models": [
+      {
+        "provider": "zed.dev",
+        "model": "claude-haiku-4-5",
+        "enable_thinking": false
+      }
+    ],
     "tool_permissions": {
       "default": "allow",
     },
     "inline_assistant_model": {
-      "provider": "openai",
-      "model": "gpt-5-nano",
+      "provider": "zed.dev",
+      "model": "claude-haiku-4-5",
     },
     "default_model": {
       "provider": "OpenAI custom",

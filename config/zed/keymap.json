@@ -22,7 +22,16 @@
   {
     "context": "Workspace",
     "bindings": {
-      "ctrl-shift-g": null
-    }
-  }
+      "ctrl-shift-g": null,
+    },
+  },
+  {
+    "bindings": {
+      "ctrl-p": [
+        // Or `ctrl-p`
+        "task::Spawn",
+        { "task_name": "Television File Finder", "reveal_target": "center" },
+      ],
+    },
+  },
 ]

@@ -43,3 +43,4 @@ main
 .claude/settings.local.json
 .agentrc
 **/.claude/settings.local.json
+.zed-go-cover.out
