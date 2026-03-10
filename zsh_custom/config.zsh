@@ -331,7 +331,7 @@ root() {
 	dir=$PWD
 
 	while [ "$dir" != "/" ]; do
-		if [ -d "$dir/.git" ]; then
+		if [ -e "$dir/.git" ]; then
 			cd "$dir"
 			kitty @ send-text "\n"
 			return
