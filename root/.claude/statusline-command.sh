@@ -43,7 +43,7 @@ fi
 printf '\033[37m| \033[34m%s\033[0m' "$model"
 
 if [ -n "$context" ]; then
-    printf ' \033[37m| \033[33m%s%%\033[0m' "$context"
+    printf ' \033[37m| %s\033[0m' "$(echo "$context" | CLICOLOR_FORCE=1 static-progressbar -width 20 -no-label)"
 fi
 
 if [ -n "$cost" ]; then
