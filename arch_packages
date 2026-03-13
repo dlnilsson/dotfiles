@@ -57,9 +57,11 @@ gedit
 ghostty
 git
 git-delta
+git-filter-repo
 github-cli
 git-lfs
 glab
+glow
 gnome-calculator
 gnome-keyring
 gnome-themes-extra
