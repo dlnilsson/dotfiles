@@ -73,9 +73,9 @@ function _wt_async_start() {
     local json branch statusline extra result=""
     json=$(wt list --format=json 2>/dev/null)
     if [[ $? -eq 0 ]]; then
-      branch=$(jq -r '.[] | select(.is_main) | .branch' <<< "$json")
+      branch=$(jq -r '.[] | select(.is_current) | .branch' <<< "$json")
       if [[ -n "$branch" ]]; then
-        statusline=$(jq -r '.[] | select(.is_main) | .statusline' <<< "$json")
+        statusline=$(jq -r '.[] | select(.is_current) | .statusline' <<< "$json")
         extra="${statusline#"$branch"}"
         result=$(printf '\033[37mon \033[34m%s\033[0m%b ' "$branch" "$extra")
       fi
