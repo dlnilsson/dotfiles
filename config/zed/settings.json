@@ -138,6 +138,9 @@
     "dark": "Catppuccin Frappé",
   },
   "agent_servers": {
+    "claude-acp": {
+      "type": "registry"
+    },
     "opencode": {
       "type": "extension",
       "favorite_models": ["openai/gpt-5.2-codex"],
