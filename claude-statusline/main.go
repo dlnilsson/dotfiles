@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -94,14 +95,13 @@ func main() {
 		sessionID = status.SessionID
 	)
 
-	if err := setKittyTitle(fmt.Sprintf("Claude %s using %s", cwd, model)); err != nil {
-		fmt.Fprintf(os.Stderr, "claude-statusline: set kitty title: %v\n", err)
-	}
 	if err := updateAgentRC(cwd, sessionID); err != nil {
 		fmt.Fprintf(os.Stderr, "claude-statusline: update agentrc: %v\n", err)
 	}
 
 	displayCWD := shortenHome(cwd)
+	title := fmt.Sprintf("Claude %s using %s", displayCWD, model)
+
 	var out strings.Builder
 	out.WriteString(green(displayCWD))
 	out.WriteByte(' ')
@@ -120,9 +120,11 @@ func main() {
 		if cut, ok := strings.CutSuffix(titleCWD, "."+branch); ok {
 			titleCWD = cut
 		}
-		if err := setKittyTitle(fmt.Sprintf("Claude %s on %s %s", titleCWD, branch, model)); err != nil {
-			fmt.Fprintf(os.Stderr, "claude-statusline: set kitty title: %v\n", err)
-		}
+		title = fmt.Sprintf("Claude %s on %s %s", titleCWD, branch, model)
+	}
+
+	if err := setKittyTitle(title); err != nil {
+		fmt.Fprintf(os.Stderr, "claude-statusline: set kitty title: %v\n", err)
 	}
 
 	out.WriteString(white("| "))
@@ -151,12 +153,35 @@ func forwardToStatusLog(input []byte) error {
 	return cmd.Start()
 }
 
+const kittyTitleMinInterval = 5 * time.Minute
+
 func setKittyTitle(title string) error {
 	listenOn := os.Getenv("KITTY_LISTEN_ON")
+	if listenOn == "" {
+		return nil
+	}
+
+	stateDir := os.TempDir()
+	stateFile := filepath.Join(stateDir, fmt.Sprintf("claude-statusline-title-%d", os.Getppid()))
+
+	prev, _ := os.ReadFile(stateFile)
+	if string(prev) == title {
+		if info, err := os.Stat(stateFile); err == nil {
+			if time.Since(info.ModTime()) < kittyTitleMinInterval {
+				return nil
+			}
+		}
+	}
+
 	cmd := exec.Command("kitty", "@", "--to", listenOn, "set-window-title", title)
 	cmd.Stdout = nil
 	cmd.Stderr = nil
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+
+	os.WriteFile(stateFile, []byte(title), 0600)
+	return nil
 }
 
 func updateAgentRC(cwd, sessionID string) error {
