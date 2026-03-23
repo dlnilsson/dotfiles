@@ -169,8 +169,8 @@
       "model": "claude-haiku-4-5",
     },
     "default_model": {
-      "provider": "OpenAI custom",
-      "model": "gpt-4.1-mini-2025-04-14",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-6-latest",
     },
     "model_parameters": [],
   },
