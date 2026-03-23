@@ -21,10 +21,13 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
     --color=info:#eacb8a,prompt:#bf6069,pointer:#b48dac
     --color=marker:#a3be8b,spinner:#b48dac,header:#a3be8b
 	--bind page-up:preview-up,page-down:preview-down'
-export FZF_CTRL_R_OPTS="--bind enter:accept"
+# export FZF_CTRL_R_OPTS="--bind enter:accept"
+# export FZF_CTRL_R_OPTS="--no-highlight-line"
+export FZF_CTRL_R_OPTS="--no-multi --no-highlight-line"
 export HUSKY=0
 export MICRO_TRUECOLOR=1
 # export TERMINAL=termite
+alias zed=zeditor
 alias hx=helix
 alias nano=hx
 alias tally='sort | uniq -c | sort'
