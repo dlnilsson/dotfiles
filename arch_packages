@@ -3,6 +3,7 @@ adw-gtk-theme
 age
 amd-ucode
 asciinema
+atuin
 aws-cli
 bandwhich
 base
@@ -142,6 +143,7 @@ python-pip
 qt5-wayland
 qt6ct
 qt6-wayland
+r
 radeontop
 reflector
 rofi
