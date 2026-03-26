@@ -1,0 +1,14 @@
+skip-commit-generation-prompt = true
+
+[post-start]
+copy = "wt step copy-ignored"
+
+[post-switch]
+symlink-bin = "ln -sfn {{ primary_worktree_path }}/.agentrc {{ worktree_path }}/.agentrc"
+symlink-memory = """
+primary_claude="$HOME/.claude/projects/$(echo {{ primary_worktree_path }} | tr '/.' '-')/memory"; \
+wt_claude="$HOME/.claude/projects/$(echo {{ worktree_path }} | tr '/.' '-')/memory"; \
+[ "$primary_claude" != "$wt_claude" ] && [ -f "$primary_claude/MEMORY.md" ] && \
+mkdir -p "$wt_claude" && ln -sfn "$primary_claude/MEMORY.md" "$wt_claude/MEMORY.md"
+"""
+
