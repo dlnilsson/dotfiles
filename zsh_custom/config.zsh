@@ -428,5 +428,6 @@ cursor() {
 
 claude() {
 	/home/dln/.local/bin/claude "$@"
+	reset
 	kitty @ set-window-title ""
 }
