@@ -15,17 +15,23 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// statusInput
+// See: https://code.claude.com/docs/en/statusline#full-json-schema
 type statusInput struct {
-	SessionID      string         `json:"session_id,omitempty,omitzero"`
-	TranscriptPath string         `json:"transcript_path,omitempty,omitzero"`
-	CWD            string         `json:"cwd,omitempty,omitzero"`
-	Model          statusModel    `json:"model,omitzero"`
-	Workspace      statusWS       `json:"workspace,omitzero"`
-	Version        string         `json:"version,omitempty,omitzero"`
-	OutputStyle    statusOutStyle `json:"output_style,omitzero"`
-	ContextWindow  statusContext  `json:"context_window,omitzero"`
-	Exceeds200K    bool           `json:"exceeds_200k_tokens,omitempty,omitzero"`
-	Cost           statusCost     `json:"cost,omitzero"`
+	SessionID      string           `json:"session_id,omitempty,omitzero"`
+	TranscriptPath string           `json:"transcript_path,omitempty,omitzero"`
+	CWD            string           `json:"cwd,omitempty,omitzero"`
+	Model          statusModel      `json:"model,omitzero"`
+	Workspace      statusWS         `json:"workspace,omitzero"`
+	Version        string           `json:"version,omitempty,omitzero"`
+	OutputStyle    statusOutStyle   `json:"output_style,omitzero"`
+	ContextWindow  statusContext    `json:"context_window,omitzero"`
+	Exceeds200K    bool             `json:"exceeds_200k_tokens,omitempty,omitzero"`
+	Cost           statusCost       `json:"cost,omitzero"`
+	RateLimits     statusRateLimits `json:"rate_limits,omitzero"`
+	Vim            statusVim        `json:"vim,omitzero"`
+	Agent          statusAgent      `json:"agent,omitzero"`
+	Worktree       statusWorktree   `json:"worktree,omitzero"`
 }
 
 type statusModel struct {
@@ -60,7 +66,37 @@ type statusUsage struct {
 }
 
 type statusCost struct {
-	TotalCostUSD *float64 `json:"total_cost_usd,omitempty,omitzero"`
+	TotalCostUSD       *float64 `json:"total_cost_usd,omitempty,omitzero"`
+	TotalDurationMS    int      `json:"total_duration_ms,omitempty,omitzero"`
+	TotalAPIDurationMS int      `json:"total_api_duration_ms,omitempty,omitzero"`
+	TotalLinesAdded    int      `json:"total_lines_added,omitempty,omitzero"`
+	TotalLinesRemoved  int      `json:"total_lines_removed,omitempty,omitzero"`
+}
+
+type statusRateLimits struct {
+	FiveHour statusRateLimit `json:"five_hour,omitzero"`
+	SevenDay statusRateLimit `json:"seven_day,omitzero"`
+}
+
+type statusRateLimit struct {
+	UsedPercentage *float64 `json:"used_percentage,omitempty,omitzero"`
+	ResetsAt       int64    `json:"resets_at,omitempty,omitzero"`
+}
+
+type statusVim struct {
+	Mode string `json:"mode,omitempty,omitzero"`
+}
+
+type statusAgent struct {
+	Name string `json:"name,omitempty,omitzero"`
+}
+
+type statusWorktree struct {
+	Name           string `json:"name,omitempty,omitzero"`
+	Path           string `json:"path,omitempty,omitzero"`
+	Branch         string `json:"branch,omitempty,omitzero"`
+	OriginalCWD    string `json:"original_cwd,omitempty,omitzero"`
+	OriginalBranch string `json:"original_branch,omitempty,omitzero"`
 }
 
 var (
@@ -180,7 +216,7 @@ func setKittyTitle(title string) error {
 		return err
 	}
 
-	os.WriteFile(stateFile, []byte(title), 0600)
+	os.WriteFile(stateFile, []byte(title), 0o600)
 	return nil
 }
 
@@ -190,7 +226,7 @@ func updateAgentRC(cwd, sessionID string) error {
 	}
 
 	agentRCPath := filepath.Join(cwd, ".agentrc")
-	file, err := os.OpenFile(agentRCPath, os.O_RDONLY|os.O_CREATE, 0644)
+	file, err := os.OpenFile(agentRCPath, os.O_RDONLY|os.O_CREATE, 0o644)
 	if err != nil {
 		return fmt.Errorf("open %s: %w", agentRCPath, err)
 	}
@@ -217,7 +253,7 @@ func updateAgentRC(cwd, sessionID string) error {
 		lines = append(lines, "export CLAUDE_SESSION_ID="+sessionID)
 	}
 
-	if err := os.WriteFile(agentRCPath, []byte(strings.Join(lines, "\n")+"\n"), 0644); err != nil {
+	if err := os.WriteFile(agentRCPath, []byte(strings.Join(lines, "\n")+"\n"), 0o644); err != nil {
 		return fmt.Errorf("write %s: %w", agentRCPath, err)
 	}
 	return nil
