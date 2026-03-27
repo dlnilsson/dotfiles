@@ -44,3 +44,11 @@ main
 .agentrc
 **/.claude/settings.local.json
 .zed-go-cover.out
+.config/wt.toml
+.worktreeinclude
+.claude/.mcp.json
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
