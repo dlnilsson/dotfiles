@@ -82,9 +82,17 @@ func DispatchCommands(c *Client, commands []string) {
 				)
 				return
 			}
-			if !strings.Contains(msg, "Window not found") {
-				break
-			}
+		if strings.Contains(msg, "empty response") {
+			slog.Debug("empty response, skipping",
+				"command", cmd,
+				"response", response,
+				"error", err,
+			)
+			return
+		}
+		if !strings.Contains(msg, "Window not found") {
+			break
+		}
 			slog.Debug("window not found, retrying", "command", cmd, "attempt", attempt+1)
 			time.Sleep(500 * time.Millisecond)
 		}
