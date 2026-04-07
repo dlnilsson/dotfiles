@@ -439,3 +439,21 @@ label:focus {
 #custom-glab.error {
     color: @nord-red;
 }
+
+/* VPN status */
+#custom-vpn {
+    padding: 0 5px;
+    margin: 0 5px;
+}
+
+#custom-vpn.tailscale {
+    color: @nord-frost2;
+}
+
+#custom-vpn.netbird {
+    color: @nord-green;
+}
+
+#custom-vpn.disconnected {
+    color: @nord-grey4;
+}

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Check tailscale
+if tailscale status &>/dev/null; then
+    tn=$(tailscale status --json | jq -r '.CurrentTailnet.Name // "unknown"')
+    echo '{"text":"tailscale","tooltip":"Tailscale: '"$tn"'","class":"tailscale"}'
+    exit 0
+fi
+
+# Check netbird
+if netbird status &>/dev/null; then
+    echo '{"text":"netbird","tooltip":"NetBird connected","class":"netbird"}'
+    exit 0
+fi
+
+# Neither running
+echo '{"text":"off","tooltip":"No VPN active","class":"disconnected"}'
+exit 0

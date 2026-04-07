@@ -13,6 +13,7 @@
         "custom/camera",
         "custom/recording",
         "privacy",
+        "custom/vpn",
         "custom/glab",
         "hyprland/workspaces",
         "custom/powermode",
@@ -58,6 +59,13 @@
                 "name": "obs"
             }
         ]
+    },
+    "custom/vpn": {
+        "exec": "/home/dln/.dotfiles/bin/vpn-status",
+        "return-type": "json",
+        "format": "{text}",
+        "tooltip": true,
+        "interval": 15
     },
     "custom/recording": {
         "exec": "/home/dln/go/bin/hypr-screencapture status -subscribe",
@@ -164,12 +172,12 @@
     },
     "hyprland/window": {
         "format": "{}",
-        "icon": true,
+        "icon": false,
         "rewrite": {
-            "(.*) — Zen Browser": "$1",
+            "(.*) — Zen Browser": " $1",
             "(.*) — Code - OSS": "$1",
             "(.*) - Visual Studio Code": "$1",
-            "(.*) - Slack.*": "$1",
+            "(.*) - Slack.*": " $1",
             "(.*) - Discord": "$1",
             "(.*) - Cursor": "$1",
             "(.*) - Chromium": "$1",
