@@ -7,6 +7,8 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"golang.org/x/text/unicode/norm"
 )
 
 // BugCluster represents a file and how many bug-related commits touched it.
@@ -195,9 +197,10 @@ func parseAuthors() ([]Author, error) {
 	return parseAuthorsOutput(output), nil
 }
 
-// parseAuthorsOutput parses raw git shortlog output into Author entries.
+// parseAuthorsOutput parses raw git shortlog output into Author entries,
+// merging entries that share the same name (different emails).
 func parseAuthorsOutput(output string) []Author {
-	result := make([]Author, 0, 32)
+	counts := make(map[string]int)
 
 	for line := range strings.SplitSeq(output, "\n") {
 		line = strings.TrimSpace(line)
@@ -216,11 +219,21 @@ func parseAuthorsOutput(output string) []Author {
 			continue
 		}
 
-		result = append(result, Author{
-			Name:  strings.TrimSpace(parts[1]),
-			Count: count,
-		})
+		name := norm.NFC.String(strings.TrimSpace(parts[1]))
+		counts[name] += count
 	}
+
+	result := make([]Author, 0, len(counts))
+	for name, count := range counts {
+		result = append(result, Author{Name: name, Count: count})
+	}
+
+	slices.SortFunc(result, func(a, b Author) int {
+		if a.Count != b.Count {
+			return b.Count - a.Count
+		}
+		return strings.Compare(a.Name, b.Name)
+	})
 
 	return result
 }

@@ -174,6 +174,23 @@ func TestParseAuthorsOutput(t *testing.T) {
 		}
 	})
 
+	t.Run("merges duplicate names", func(t *testing.T) {
+		t.Parallel()
+		var input = "   100\tAlice Smith\n    50\tAlice Smith\n    30\tBob Jones\n    20\tBob Jones\n"
+
+		result := parseAuthorsOutput(input)
+
+		if len(result) != 2 {
+			t.Fatalf("expected 2 entries, got %d", len(result))
+		}
+		if result[0].Name != "Alice Smith" || result[0].Count != 150 {
+			t.Fatalf("expected Alice Smith with 150, got %s with %d", result[0].Name, result[0].Count)
+		}
+		if result[1].Name != "Bob Jones" || result[1].Count != 50 {
+			t.Fatalf("expected Bob Jones with 50, got %s with %d", result[1].Name, result[1].Count)
+		}
+	})
+
 	t.Run("empty input", func(t *testing.T) {
 		t.Parallel()
 		result := parseAuthorsOutput("")
