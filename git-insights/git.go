@@ -204,17 +204,17 @@ func parseAuthors() ([]Author, error) {
 }
 
 // parseAuthorsOutput parses raw git shortlog output into Author entries,
-// merging entries that share the same name (different emails).
+// merging entries that share the same name (different emails) and grouping
+// variations like "jane", "janedoe", and "Jane Doe".
 func parseAuthorsOutput(output string) []Author {
+	// Phase 1: parse and merge exact names (after NFC normalization)
 	counts := make(map[string]int)
-
 	for line := range strings.SplitSeq(output, "\n") {
 		line = strings.TrimSpace(line)
 		if line == "" {
 			continue
 		}
 
-		// Format: "  123\tAuthor Name"
 		parts := strings.SplitN(line, "\t", 2)
 		if len(parts) != 2 {
 			continue
@@ -229,9 +229,104 @@ func parseAuthorsOutput(output string) []Author {
 		counts[name] += count
 	}
 
-	result := make([]Author, 0, len(counts))
+	// Phase 2: group similar names
+	return groupAuthors(counts)
+}
+
+// normalizeAuthor strips spaces, hyphens, underscores, dots and lowercases
+// for fuzzy author comparison.
+func normalizeAuthor(name string) string {
+	var sb strings.Builder
+	sb.Grow(len(name))
+	for _, r := range strings.ToLower(name) {
+		switch r {
+		case ' ', '-', '_', '.':
+			continue
+		default:
+			sb.WriteRune(r)
+		}
+	}
+	return sb.String()
+}
+
+// bestDisplayName picks the most human-readable name from a set of variants.
+// Prefers names with spaces (real names) over usernames, then longest.
+func bestDisplayName(names []string) string {
+	best := names[0]
+	for _, n := range names[1:] {
+		nHasSpace := strings.Contains(n, " ")
+		bestHasSpace := strings.Contains(best, " ")
+		if nHasSpace && !bestHasSpace {
+			best = n
+		} else if nHasSpace == bestHasSpace && len(n) > len(best) {
+			best = n
+		}
+	}
+	return best
+}
+
+// groupAuthors merges author name variants into single entries.
+// Groups names where their normalized forms (lowercase, no separators) match
+// or one is a prefix of another (minimum 3 chars).
+func groupAuthors(counts map[string]int) []Author {
+	type entry struct {
+		name  string
+		norm  string
+		count int
+		group int
+	}
+
+	entries := make([]entry, 0, len(counts))
 	for name, count := range counts {
-		result = append(result, Author{Name: name, Count: count})
+		entries = append(entries, entry{
+			name:  name,
+			norm:  normalizeAuthor(name),
+			count: count,
+			group: -1,
+		})
+	}
+
+	// Sort by normalized length descending so longer names come first
+	slices.SortFunc(entries, func(a, b entry) int {
+		return len(b.norm) - len(a.norm)
+	})
+
+	// Assign groups: each entry joins the first group whose normalized name
+	// matches or is a prefix/suffix relationship.
+	var groups [][]int // group index -> entry indices
+	for i := range entries {
+		matched := -1
+		for gi, members := range groups {
+			rep := entries[members[0]].norm
+			if entriesMatch(entries[i].norm, rep) {
+				matched = gi
+				break
+			}
+		}
+		if matched >= 0 {
+			entries[i].group = matched
+			groups[matched] = append(groups[matched], i)
+		} else {
+			entries[i].group = len(groups)
+			groups = append(groups, []int{i})
+		}
+	}
+
+	// Merge groups into final authors
+	result := make([]Author, 0, len(groups))
+	for _, members := range groups {
+		var (
+			totalCount int
+			names      = make([]string, 0, len(members))
+		)
+		for _, idx := range members {
+			totalCount += entries[idx].count
+			names = append(names, entries[idx].name)
+		}
+		result = append(result, Author{
+			Name:  bestDisplayName(names),
+			Count: totalCount,
+		})
 	}
 
 	slices.SortFunc(result, func(a, b Author) int {
@@ -242,6 +337,19 @@ func parseAuthorsOutput(output string) []Author {
 	})
 
 	return result
+}
+
+// entriesMatch returns true if two normalized names should be grouped.
+// Matches on equality, or prefix with minimum 3 chars.
+func entriesMatch(a, b string) bool {
+	if a == b {
+		return true
+	}
+	short, long := a, b
+	if len(short) > len(long) {
+		short, long = long, short
+	}
+	return len(short) >= 3 && strings.HasPrefix(long, short)
 }
 
 // parseChurn runs the git command and parses output.

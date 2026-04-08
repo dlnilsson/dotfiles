@@ -191,6 +191,37 @@ func TestParseAuthorsOutput(t *testing.T) {
 		}
 	})
 
+	t.Run("groups name variants", func(t *testing.T) {
+		t.Parallel()
+		// "jane", "janedoe", "Jane Doe" should merge
+		var input = "   200\tjanedoe\n   100\tjane\n    50\tJane Doe\n    10\tAlice\n"
+
+		result := parseAuthorsOutput(input)
+
+		if len(result) != 2 {
+			t.Fatalf("expected 2 entries, got %d: %+v", len(result), result)
+		}
+		// Grouped entry should use the real name and have combined count
+		if result[0].Name != "Jane Doe" {
+			t.Fatalf("expected display name 'Jane Doe', got %q", result[0].Name)
+		}
+		if result[0].Count != 350 {
+			t.Fatalf("expected combined count 350, got %d", result[0].Count)
+		}
+	})
+
+	t.Run("does not group short names", func(t *testing.T) {
+		t.Parallel()
+		// "ab" is too short to prefix-match "abcdef"
+		var input = "   50\tab\n    30\tabcdef\n"
+
+		result := parseAuthorsOutput(input)
+
+		if len(result) != 2 {
+			t.Fatalf("expected 2 entries (no grouping for 2-char prefix), got %d", len(result))
+		}
+	})
+
 	t.Run("empty input", func(t *testing.T) {
 		t.Parallel()
 		result := parseAuthorsOutput("")
