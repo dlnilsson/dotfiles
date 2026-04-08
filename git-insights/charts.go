@@ -21,7 +21,9 @@ var (
 	helpStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
 	hashStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
 	subjectStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
-	emptyStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Italic(true)
+	emptyStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Italic(true)
+	searchStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
+	searchCursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("214")).Blink(true)
 )
 
 // barChartEntry represents one row in a bar chart.

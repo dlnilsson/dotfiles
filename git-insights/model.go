@@ -1,6 +1,7 @@
 package main
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -48,6 +49,9 @@ type model struct {
 
 	width  int
 	height int
+
+	searching bool
+	filter    string
 }
 
 func newModel() model {
@@ -121,9 +125,37 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	case tea.KeyMsg:
+		if m.searching {
+			switch msg.String() {
+			case "esc":
+				m.searching = false
+				m.filter = ""
+				m.scrollOffset = 0
+			case "enter":
+				m.searching = false
+			case "backspace":
+				if len(m.filter) > 0 {
+					m.filter = m.filter[:len(m.filter)-1]
+					m.scrollOffset = 0
+				}
+			case "ctrl+c":
+				return m, tea.Quit
+			default:
+				if len(msg.Runes) > 0 {
+					m.filter += string(msg.Runes)
+					m.scrollOffset = 0
+				}
+			}
+			return m, nil
+		}
+
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
+		case "/":
+			m.searching = true
+			m.filter = ""
+			m.scrollOffset = 0
 		case "left", "h":
 			if m.activeTab > 0 {
 				m.activeTab--
@@ -207,31 +239,61 @@ func (m model) View() string {
 		}
 	}
 
-	// Footer
+	// Search bar or footer
 	out.WriteByte('\n')
-	out.WriteString(renderFooter(m.width))
+	if m.searching {
+		out.WriteString(searchStyle.Render("  /"+m.filter) + searchCursorStyle.Render("_"))
+	} else if m.filter != "" {
+		out.WriteString(searchStyle.Render("  filter: "+m.filter) + helpStyle.Render("  (/ to edit, esc to clear)"))
+	} else {
+		out.WriteString(renderFooter(m.width))
+	}
 
 	return out.String()
 }
 
-// renderAnalysis dispatches to the correct renderer based on analysis ID.
+// renderAnalysis dispatches to the correct renderer based on analysis ID,
+// applying the current filter if set.
 func (m model) renderAnalysis(r *resultMsg) string {
 	switch r.id {
 	case analysisBugClusters:
-		return renderBugClusters(r.bugClusters, m.width)
+		return renderBugClusters(filterBy(r.bugClusters, m.filter, func(e BugCluster) string { return e.File }), m.width)
 	case analysisActivity:
-		return renderActivity(r.activity, m.width)
+		return renderActivity(filterBy(r.activity, m.filter, func(e ActivityMonth) string { return e.Month }), m.width)
 	case analysisFirefighting:
-		return renderFirefighting(r.firefighting, m.width)
+		return renderFirefighting(filterBy(r.firefighting, m.filter, func(e FirefightEntry) string { return e.Hash + " " + e.Subject }), m.width)
 	case analysisAuthors:
-		return renderAuthors(r.authors, m.width)
+		return renderAuthors(filterBy(r.authors, m.filter, func(e Author) string { return e.Name }), m.width)
 	case analysisChurn:
-		return renderChurn(r.churn, m.width)
+		return renderChurn(filterBy(r.churn, m.filter, func(e ChurnFile) string { return e.File }), m.width)
 	case analysisFrequency:
-		return renderFrequency(r.frequency, m.width)
+		return renderFrequency(filterBy(r.frequency, m.filter, func(e FrequencyFile) string { return e.File }), m.width)
 	default:
 		return ""
 	}
+}
+
+// filterBy returns items whose label matches the query regex (case-insensitive).
+// Falls back to substring match if the regex is invalid.
+// Returns the original slice when query is empty.
+func filterBy[T any](items []T, query string, label func(T) string) []T {
+	if query == "" {
+		return items
+	}
+	re, err := regexp.Compile("(?i)" + query)
+	result := make([]T, 0, len(items))
+	for _, item := range items {
+		text := label(item)
+		if err != nil {
+			// Invalid regex, fall back to substring
+			if strings.Contains(strings.ToLower(text), query) {
+				result = append(result, item)
+			}
+		} else if re.MatchString(text) {
+			result = append(result, item)
+		}
+	}
+	return result
 }
 
 // applyScroll returns the visible window of content lines.
