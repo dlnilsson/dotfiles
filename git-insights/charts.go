@@ -187,10 +187,6 @@ func renderFooter(_ int) string {
 	return helpStyle.Render("  ←/→ or 1-6: tabs  j/k: scroll  q: quit")
 }
 
-// renderLoading renders a loading indicator.
-func renderLoading() string {
-	return emptyStyle.Render("  Loading...")
-}
 
 // renderError renders an error message.
 func renderError(err error) string {

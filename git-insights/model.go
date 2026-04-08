@@ -3,7 +3,9 @@ package main
 import (
 	"strings"
 
+	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // analysisID identifies which analysis completed.
@@ -36,6 +38,7 @@ type model struct {
 	activeTab int
 	tabNames  [numAnalyses]string
 	scope     string // subdirectory scope (empty = repo root)
+	spinner   spinner.Model
 
 	results [numAnalyses]*resultMsg
 	loading [numAnalyses]bool
@@ -48,6 +51,9 @@ type model struct {
 }
 
 func newModel() model {
+	s := spinner.New()
+	s.Spinner = spinner.Dot
+	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("62"))
 	return model{
 		tabNames: [numAnalyses]string{
 			"Bugs",
@@ -59,11 +65,13 @@ func newModel() model {
 		},
 		loading: [numAnalyses]bool{true, true, true, true, true, true},
 		scope:   repoScope(),
+		spinner: s,
 	}
 }
 
 func (m model) Init() tea.Cmd {
 	return tea.Batch(
+		m.spinner.Tick,
 		fetchBugClusters,
 		fetchActivity,
 		fetchFirefighting,
@@ -154,6 +162,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.results[msg.id] = &msg
 		m.loading[msg.id] = false
 		return m, nil
+
+	case spinner.TickMsg:
+		// Only keep spinning if something is still loading
+		anyLoading := false
+		for _, l := range m.loading {
+			if l {
+				anyLoading = true
+				break
+			}
+		}
+		if anyLoading {
+			var cmd tea.Cmd
+			m.spinner, cmd = m.spinner.Update(msg)
+			return m, cmd
+		}
+		return m, nil
 	}
 
 	return m, nil
@@ -173,7 +197,7 @@ func (m model) View() string {
 
 	// Content area
 	if m.loading[m.activeTab] {
-		out.WriteString(renderLoading())
+		out.WriteString("  " + m.spinner.View() + " Loading...")
 	} else if r := m.results[m.activeTab]; r != nil {
 		if r.err != nil {
 			out.WriteString(renderError(r.err))
