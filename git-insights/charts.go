@@ -147,6 +147,15 @@ func renderChurn(files []ChurnFile, width int) string {
 	return renderBarChart(entries, width)
 }
 
+// renderFrequency renders the file revision frequency tab.
+func renderFrequency(files []FrequencyFile, width int) string {
+	entries := make([]barChartEntry, 0, len(files))
+	for _, f := range files {
+		entries = append(entries, barChartEntry{Label: f.File, Value: f.Count})
+	}
+	return renderBarChart(entries, width)
+}
+
 // renderTabBar renders the tab navigation bar.
 func renderTabBar(names []string, active int, _ int) string {
 	var out strings.Builder
@@ -175,7 +184,7 @@ func renderHeader(scope string) string {
 
 // renderFooter renders the keybinding help footer.
 func renderFooter(_ int) string {
-	return helpStyle.Render("  ←/→ or 1-5: tabs  j/k: scroll  q: quit")
+	return helpStyle.Render("  ←/→ or 1-6: tabs  j/k: scroll  q: quit")
 }
 
 // renderLoading renders a loading indicator.

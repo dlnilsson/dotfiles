@@ -41,6 +41,12 @@ type ChurnFile struct {
 	Count int
 }
 
+// FrequencyFile represents a file and how many distinct revisions it has.
+type FrequencyFile struct {
+	File  string
+	Count int
+}
+
 
 // runGit executes a git command and returns stdout as a string.
 func runGit(args ...string) (string, error) {
@@ -264,6 +270,51 @@ func parseChurnOutput(output string) []ChurnFile {
 	}
 
 	slices.SortFunc(result, func(a, b ChurnFile) int {
+		if a.Count != b.Count {
+			return b.Count - a.Count
+		}
+		return strings.Compare(a.File, b.File)
+	})
+
+	if len(result) > 20 {
+		result = result[:20]
+	}
+	return result
+}
+
+// parseFrequency runs git rev-list to count distinct object revisions per file.
+func parseFrequency() ([]FrequencyFile, error) {
+	output, err := runGit("rev-list", "--objects", "--all", "--", ".")
+	if err != nil {
+		return nil, err
+	}
+	return parseFrequencyOutput(output), nil
+}
+
+// parseFrequencyOutput parses git rev-list --objects output, counting
+// how many distinct blob revisions each file path has.
+func parseFrequencyOutput(output string) []FrequencyFile {
+	counts := make(map[string]int)
+	for line := range strings.SplitSeq(output, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+
+		// Format: "<hash> <path>" or just "<hash>" (for commits/trees without paths)
+		_, path, hasPath := strings.Cut(line, " ")
+		if !hasPath || path == "" {
+			continue
+		}
+		counts[path]++
+	}
+
+	result := make([]FrequencyFile, 0, len(counts))
+	for file, count := range counts {
+		result = append(result, FrequencyFile{File: file, Count: count})
+	}
+
+	slices.SortFunc(result, func(a, b FrequencyFile) int {
 		if a.Count != b.Count {
 			return b.Count - a.Count
 		}

@@ -246,3 +246,43 @@ func TestParseChurnOutput(t *testing.T) {
 		}
 	})
 }
+
+func TestParseFrequencyOutput(t *testing.T) {
+	t.Parallel()
+
+	t.Run("counts paths from rev-list objects", func(t *testing.T) {
+		t.Parallel()
+		var input = "abc1234 src/main.go\ndef5678 src/main.go\nghi9012 src/main.go\njkl3456 src/util.go\nmno7890 src/util.go\npqr1234\nstu5678 README.md\n"
+
+		result := parseFrequencyOutput(input)
+
+		if len(result) != 3 {
+			t.Fatalf("expected 3 entries, got %d", len(result))
+		}
+		if result[0].File != "src/main.go" || result[0].Count != 3 {
+			t.Fatalf("expected src/main.go with 3, got %s with %d", result[0].File, result[0].Count)
+		}
+		if result[1].File != "src/util.go" || result[1].Count != 2 {
+			t.Fatalf("expected src/util.go with 2, got %s with %d", result[1].File, result[1].Count)
+		}
+	})
+
+	t.Run("skips lines without paths", func(t *testing.T) {
+		t.Parallel()
+		var input = "abc1234\ndef5678\nghi9012 only-file.go\n"
+
+		result := parseFrequencyOutput(input)
+
+		if len(result) != 1 {
+			t.Fatalf("expected 1 entry, got %d", len(result))
+		}
+	})
+
+	t.Run("empty input", func(t *testing.T) {
+		t.Parallel()
+		result := parseFrequencyOutput("")
+		if len(result) != 0 {
+			t.Fatalf("expected 0 entries, got %d", len(result))
+		}
+	})
+}

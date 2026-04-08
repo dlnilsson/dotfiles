@@ -15,6 +15,7 @@ const (
 	analysisFirefighting
 	analysisAuthors
 	analysisChurn
+	analysisFrequency
 	numAnalyses
 )
 
@@ -28,6 +29,7 @@ type resultMsg struct {
 	firefighting []FirefightEntry
 	authors      []Author
 	churn        []ChurnFile
+	frequency    []FrequencyFile
 }
 
 type model struct {
@@ -53,8 +55,9 @@ func newModel() model {
 			"Firefighting",
 			"Authors",
 			"Churn",
+			"Frequency",
 		},
-		loading: [numAnalyses]bool{true, true, true, true, true},
+		loading: [numAnalyses]bool{true, true, true, true, true, true},
 		scope:   repoScope(),
 	}
 }
@@ -66,6 +69,7 @@ func (m model) Init() tea.Cmd {
 		fetchFirefighting,
 		fetchAuthors,
 		fetchChurn,
+		fetchFrequency,
 	)
 }
 
@@ -92,6 +96,11 @@ func fetchAuthors() tea.Msg {
 func fetchChurn() tea.Msg {
 	files, err := parseChurn()
 	return resultMsg{id: analysisChurn, err: err, churn: files}
+}
+
+func fetchFrequency() tea.Msg {
+	files, err := parseFrequency()
+	return resultMsg{id: analysisFrequency, err: err, frequency: files}
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -123,7 +132,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "shift+tab":
 			m.activeTab = (m.activeTab - 1 + int(numAnalyses)) % int(numAnalyses)
 			m.scrollOffset = 0
-		case "1", "2", "3", "4", "5":
+		case "1", "2", "3", "4", "5", "6":
 			m.activeTab = int(msg.Runes[0]-'0') - 1
 			m.scrollOffset = 0
 		case "j", "down":
@@ -194,6 +203,8 @@ func (m model) renderAnalysis(r *resultMsg) string {
 		return renderAuthors(r.authors, m.width)
 	case analysisChurn:
 		return renderChurn(r.churn, m.width)
+	case analysisFrequency:
+		return renderFrequency(r.frequency, m.width)
 	default:
 		return ""
 	}
