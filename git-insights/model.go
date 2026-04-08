@@ -52,6 +52,9 @@ type model struct {
 
 	searching bool
 	filter    string
+
+	cursor      int
+	selectedSHA string // set on enter in firefighting tab, triggers quit
 }
 
 func newModel() model {
@@ -152,6 +155,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
+		case "enter":
+			if m.activeTab == int(analysisFirefighting) {
+				if sha := m.selectedFirefightSHA(); sha != "" {
+					m.selectedSHA = sha
+					return m, tea.Quit
+				}
+			}
 		case "/":
 			m.searching = true
 			m.filter = ""
@@ -160,33 +170,53 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.activeTab > 0 {
 				m.activeTab--
 				m.scrollOffset = 0
+				m.cursor = 0
 			}
 		case "right", "l":
 			if m.activeTab < int(numAnalyses)-1 {
 				m.activeTab++
 				m.scrollOffset = 0
+				m.cursor = 0
 			}
 		case "tab":
 			m.activeTab = (m.activeTab + 1) % int(numAnalyses)
 			m.scrollOffset = 0
+			m.cursor = 0
 		case "shift+tab":
 			m.activeTab = (m.activeTab - 1 + int(numAnalyses)) % int(numAnalyses)
 			m.scrollOffset = 0
+			m.cursor = 0
 		case "1", "2", "3", "4", "5", "6":
 			m.activeTab = int(msg.Runes[0]-'0') - 1
 			m.scrollOffset = 0
+			m.cursor = 0
 		case "j", "down":
-			if ms := m.maxScroll(); m.scrollOffset < ms {
+			if m.activeTab == int(analysisFirefighting) {
+				m.cursor = min(m.cursor+1, m.firefightCount()-1)
+				// Auto-scroll to keep cursor visible
+				if m.cursor >= m.scrollOffset+m.visibleRows {
+					m.scrollOffset = m.cursor - m.visibleRows + 1
+				}
+			} else if ms := m.maxScroll(); m.scrollOffset < ms {
 				m.scrollOffset++
 			}
 		case "k", "up":
-			if m.scrollOffset > 0 {
+			if m.activeTab == int(analysisFirefighting) {
+				m.cursor = max(0, m.cursor-1)
+				if m.cursor < m.scrollOffset {
+					m.scrollOffset = m.cursor
+				}
+			} else if m.scrollOffset > 0 {
 				m.scrollOffset--
 			}
 		case "g", "home":
 			m.scrollOffset = 0
+			m.cursor = 0
 		case "G", "end":
 			m.scrollOffset = m.maxScroll()
+			if m.activeTab == int(analysisFirefighting) {
+				m.cursor = m.firefightCount() - 1
+			}
 		}
 		return m, nil
 
@@ -246,7 +276,7 @@ func (m model) View() string {
 	} else if m.filter != "" {
 		out.WriteString(searchStyle.Render("  filter: "+m.filter) + helpStyle.Render("  (/ to edit, esc to clear)"))
 	} else {
-		out.WriteString(renderFooter(m.width))
+		out.WriteString(renderFooter(m.activeTab))
 	}
 
 	return out.String()
@@ -261,7 +291,7 @@ func (m model) renderAnalysis(r *resultMsg) string {
 	case analysisActivity:
 		return renderActivity(filterBy(r.activity, m.filter, func(e ActivityMonth) string { return e.Month }), m.width)
 	case analysisFirefighting:
-		return renderFirefighting(filterBy(r.firefighting, m.filter, func(e FirefightEntry) string { return e.Hash + " " + e.Subject }), m.width)
+		return renderFirefighting(filterBy(r.firefighting, m.filter, func(e FirefightEntry) string { return e.Hash + " " + e.Subject }), m.cursor, m.width)
 	case analysisAuthors:
 		return renderAuthors(filterBy(r.authors, m.filter, func(e Author) string { return e.Name }), m.width)
 	case analysisChurn:
@@ -320,4 +350,27 @@ func (m model) maxScroll() int {
 	content := m.renderAnalysis(r)
 	lines := strings.Split(content, "\n")
 	return max(0, len(lines)-m.visibleRows)
+}
+
+// filteredFirefighting returns the current filtered firefighting entries.
+func (m model) filteredFirefighting() []FirefightEntry {
+	r := m.results[analysisFirefighting]
+	if r == nil || r.err != nil {
+		return nil
+	}
+	return filterBy(r.firefighting, m.filter, func(e FirefightEntry) string { return e.Hash + " " + e.Subject })
+}
+
+// firefightCount returns the number of visible firefighting entries.
+func (m model) firefightCount() int {
+	return max(1, len(m.filteredFirefighting()))
+}
+
+// selectedFirefightSHA returns the SHA of the currently highlighted entry.
+func (m model) selectedFirefightSHA() string {
+	entries := m.filteredFirefighting()
+	if m.cursor >= 0 && m.cursor < len(entries) {
+		return entries[m.cursor].Hash
+	}
+	return ""
 }

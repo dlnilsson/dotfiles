@@ -97,7 +97,7 @@ func TestRenderFirefighting(t *testing.T) {
 			{Hash: "def5678", Subject: "HOTFIX: patch crash"},
 		}
 
-		result := renderFirefighting(entries, 80)
+		result := renderFirefighting(entries, 0, 80)
 
 		if !strings.Contains(result, "abc1234") {
 			t.Fatalf("expected hash abc1234 in output, got %q", result)
@@ -109,7 +109,7 @@ func TestRenderFirefighting(t *testing.T) {
 
 	t.Run("empty entries", func(t *testing.T) {
 		t.Parallel()
-		result := renderFirefighting(nil, 80)
+		result := renderFirefighting(nil, 0, 80)
 		if !strings.Contains(result, "No firefighting") {
 			t.Fatalf("expected empty message, got %q", result)
 		}

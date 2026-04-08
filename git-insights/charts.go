@@ -11,19 +11,20 @@ import (
 const barChar = "▇"
 
 var (
-	titleStyle       = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("15"))
-	activeTabStyle   = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("15")).Background(lipgloss.Color("62"))
-	inactiveTabStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("245"))
-	barStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("62"))
-	labelStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
-	countStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color("245"))
-	errorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("196"))
-	helpStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
-	hashStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
-	subjectStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
+	titleStyle        = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("15"))
+	activeTabStyle    = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("15")).Background(lipgloss.Color("62"))
+	inactiveTabStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("245"))
+	barStyle          = lipgloss.NewStyle().Foreground(lipgloss.Color("62"))
+	labelStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
+	countStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("245"))
+	errorStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("196"))
+	helpStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("241"))
+	hashStyle         = lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
+	subjectStyle      = lipgloss.NewStyle().Foreground(lipgloss.Color("252"))
 	emptyStyle        = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Italic(true)
 	searchStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color("214"))
 	searchCursorStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("214")).Blink(true)
+	cursorStyle       = lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Bold(true)
 )
 
 // barChartEntry represents one row in a bar chart.
@@ -105,8 +106,8 @@ func renderActivity(months []ActivityMonth, width int) string {
 	return renderBarChart(entries, width)
 }
 
-// renderFirefighting renders the firefighting commits tab as a list.
-func renderFirefighting(entries []FirefightEntry, width int) string {
+// renderFirefighting renders the firefighting commits tab as a selectable list.
+func renderFirefighting(entries []FirefightEntry, cursor int, width int) string {
 	if len(entries) == 0 {
 		return emptyStyle.Render("  No firefighting commits found in the past year")
 	}
@@ -114,8 +115,12 @@ func renderFirefighting(entries []FirefightEntry, width int) string {
 	var out strings.Builder
 	out.Grow(len(entries) * 80)
 
-	for _, e := range entries {
-		out.WriteString("  ")
+	for i, e := range entries {
+		if i == cursor {
+			out.WriteString(cursorStyle.Render("▸ "))
+		} else {
+			out.WriteString("  ")
+		}
 		out.WriteString(hashStyle.Render(e.Hash))
 		out.WriteString(" ")
 
@@ -124,7 +129,11 @@ func renderFirefighting(entries []FirefightEntry, width int) string {
 		if maxSubject > 0 && len(subject) > maxSubject {
 			subject = subject[:maxSubject-1] + "~"
 		}
-		out.WriteString(subjectStyle.Render(subject))
+		if i == cursor {
+			out.WriteString(cursorStyle.Render(subject))
+		} else {
+			out.WriteString(subjectStyle.Render(subject))
+		}
 		out.WriteByte('\n')
 	}
 
@@ -185,10 +194,13 @@ func renderHeader(scope string) string {
 }
 
 // renderFooter renders the keybinding help footer.
-func renderFooter(_ int) string {
-	return helpStyle.Render("  ←/→ or 1-6: tabs  j/k: scroll  q: quit")
+func renderFooter(activeTab int) string {
+	base := "  ←/→ or 1-6: tabs  j/k: scroll  /: filter  q: quit"
+	if activeTab == int(analysisFirefighting) {
+		base += "  enter: git show"
+	}
+	return helpStyle.Render(base)
 }
-
 
 // renderError renders an error message.
 func renderError(err error) string {

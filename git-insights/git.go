@@ -47,7 +47,6 @@ type FrequencyFile struct {
 	Count int
 }
 
-
 // runGit executes a git command and returns stdout as a string.
 func runGit(args ...string) (string, error) {
 	cmd := exec.Command("git", args...)
