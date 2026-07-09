@@ -44,14 +44,13 @@ esac
 enabled="${1:-true}"
 
 if [[ "$enabled" == "true" ]]; then
-    hyprctl --batch "\
-        keyword decoration:blur:enabled 0 ; \
-        keyword decoration:rounding 0 ; \
-        keyword decoration:shadow:enabled 0 ; \
-        keyword general:gaps_out 0 ; \
-        keyword general:gaps_in 0 ; \
-        keyword general:border_size 0.25 ; \
-        keyword animations:enabled 0" &>/dev/null || true
+    hyprctl eval '
+        hl.config({
+            decoration = { blur = { enabled = false }, rounding = 0, shadow = { enabled = false } },
+            general    = { gaps_out = 0, gaps_in = 0, border_size = 0 },
+            animations = { enabled = false },
+        })
+    ' &>/dev/null || true
     set_kitty_opacity 1
     for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
         echo "powersave" > "$cpu/cpufreq/scaling_governor"
@@ -60,14 +59,13 @@ if [[ "$enabled" == "true" ]]; then
 	batch="$(hyprctl clients -j 2>/dev/null | jq -r '.[].address | "dispatch setprop address:\(.) rounding 0"' | paste -sd';' -)"
 	[[ -n "$batch" ]] && hyprctl --batch "$batch" &>/dev/null || true
 else
-    hyprctl --batch "\
-        keyword decoration:blur:enabled 1 ; \
-        keyword decoration:rounding 10; \
-        keyword decoration:shadow:enabled 1 ; \
-        keyword general:gaps_out 10 ; \
-        keyword general:gaps_in 5 ; \
-        keyword general:border_size 2 ; \
-        keyword animations:enabled 1" &>/dev/null || true
+    hyprctl eval '
+        hl.config({
+            decoration = { blur = { enabled = true }, rounding = 10, shadow = { enabled = true } },
+            general    = { gaps_out = 10, gaps_in = 5, border_size = 2 },
+            animations = { enabled = true },
+        })
+    ' &>/dev/null || true
     set_kitty_opacity 0.75
     for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
         echo "performance" > "$cpu/cpufreq/scaling_governor"

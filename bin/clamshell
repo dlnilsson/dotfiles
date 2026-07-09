@@ -17,17 +17,25 @@ maybe_reload_single_default() {
 
 external=$(hyprctl monitors -j | jq -r '.[] | select(.name | test("^DP-[0-9]+"))')
 
+enable_edp() {
+  hyprctl eval 'hl.monitor({ output = "eDP-1", mode = "highres", position = "auto", scale = 1.0, disabled = false })'
+}
+
+disable_edp() {
+  hyprctl eval 'hl.monitor({ output = "eDP-1", disabled = true })'
+}
+
 if [[ -n "$external" ]]; then
   if [[ $1 == "open" ]]; then
-    hyprctl keyword monitor "eDP-1,highres,auto,1"
+    enable_edp
     maybe_reload_single_default
   else
-    hyprctl keyword monitor "eDP-1,disable"
+    disable_edp
     res=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | "\(.width)x\(.height) at \(.refreshRate | floor)hz"')
     notify-send --transient "Running external" "$res" --expire-time=3000
   fi
 else
-  hyprctl keyword monitor "eDP-1,highres,auto,1"
+  enable_edp
   sleep 1
   res=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | "\(.width)x\(.height) at \(.refreshRate | floor)hz"')
   notify-send --transient "No external monitor detected" "running $res" --expire-time=3000
