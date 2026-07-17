@@ -12,8 +12,8 @@ ZSH_THEME_DOCKER_PROMPT_SHA_BEFORE="%{$white%}[%{$cyan%}"
 ZSH_THEME_DOCKER_PROMPT_SHA_AFTER="%{$white%}]"
 
 # PROMPT='$(_user_host)${_current_dir}$(git_prompt_info)
-# PROMPT='${_current_dir}$(git_prompt_info)
-PROMPT='${_current_dir}$(_wt_statusline)
+# PROMPT='${_current_dir}$(_wt_statusline)
+PROMPT='${_current_dir}$(git_prompt_info)
 %{$white%}>%{$reset_color%} '
 PROMPT2='%{$grey%}◀%{$reset_color%} '
 #RPROMPT='$(_vi_status)%{$(echotc UP 1)%}$(_docker_info)$(_kubectl_ctx)$(git_remote_status) $(git_prompt_short_sha) ${_return_status} %{$white%}%T%{$(echotc DO 1)%}%{$reset_color%}'
@@ -47,7 +47,7 @@ _docker_info() {
             ;;
     esac
     if [ ! -z $SSH_CLIENT ]; then
-      VAL="SSH: $(hostname)"
+      VAL="SSH: ${HOST}"
     fi
     if [[ ! -z $VAL ]]; then
         echo "$ZSH_THEME_DOCKER_PROMPT_SHA_BEFORE$VAL$ZSH_THEME_DOCKER_PROMPT_SHA_AFTER"
