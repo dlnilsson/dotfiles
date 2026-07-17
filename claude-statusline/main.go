@@ -142,7 +142,7 @@ func main() {
 	out.WriteString(green(displayCWD))
 	out.WriteByte(' ')
 
-	if branch, dirty, ok := gitStatus(cwd); ok && branch != "" {
+	if branch, dirty, ok := cachedGitStatus(cwd, sessionID); ok && branch != "" {
 		indicator := green("✔")
 		if dirty {
 			indicator = red("✗")
@@ -271,6 +271,54 @@ func shortenHome(path string) string {
 		return "~" + strings.TrimPrefix(path, home)
 	}
 	return path
+}
+
+const gitCacheMaxAge = 5 * time.Second
+
+// cachedGitStatus wraps gitStatus with a temp-file cache so frequent status
+// line invocations don't rerun git. The cache file is keyed by session_id:
+// stable across invocations within a session, unique across sessions.
+// See: https://code.claude.com/docs/en/statusline#cache-expensive-operations
+func cachedGitStatus(dir, sessionID string) (branch string, dirty bool, ok bool) {
+	if sessionID == "" {
+		return gitStatus(dir)
+	}
+
+	cacheFile := filepath.Join(os.TempDir(), "claude-statusline-git-cache-"+sessionID)
+	if info, err := os.Stat(cacheFile); err == nil && time.Since(info.ModTime()) <= gitCacheMaxAge {
+		if data, err := os.ReadFile(cacheFile); err == nil {
+			if branch, dirty, ok, valid := parseGitCache(string(data)); valid {
+				return branch, dirty, ok
+			}
+		}
+	}
+
+	branch, dirty, ok = gitStatus(dir)
+	if err := os.WriteFile(cacheFile, []byte(formatGitCache(branch, dirty, ok)), 0o600); err != nil {
+		fmt.Fprintf(os.Stderr, "claude-statusline: write git cache: %v\n", err)
+	}
+	return branch, dirty, ok
+}
+
+// Cache format: dirty|ok|branch. Branch goes last since branch names may
+// contain the separator.
+func formatGitCache(branch string, dirty, ok bool) string {
+	return fmt.Sprintf("%s|%s|%s", boolToFlag(dirty), boolToFlag(ok), branch)
+}
+
+func parseGitCache(data string) (branch string, dirty, ok, valid bool) {
+	parts := strings.SplitN(data, "|", 3)
+	if len(parts) != 3 {
+		return "", false, false, false
+	}
+	return parts[2], parts[0] == "1", parts[1] == "1", true
+}
+
+func boolToFlag(b bool) string {
+	if b {
+		return "1"
+	}
+	return "0"
 }
 
 func gitStatus(dir string) (branch string, dirty bool, ok bool) {
