@@ -7,6 +7,16 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "cli_default_open_behavior": "new_window",
+  "outline_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "git_panel": {
+    "dock": "left"
+  },
   "colorize_brackets": true,
   "text_rendering_mode": "platform_default",
   "unnecessary_code_fade": 0.5,
@@ -57,10 +67,10 @@
     "show": true,
   },
   "title_bar": {
+    "show_branch_status_icon": true,
     "show_menus": false,
     "show_project_items": true,
     "show_branch_name": true,
-    "show_branch_icon": true,
   },
   "confirm_quit": true,
   "scroll_beyond_last_line": "off",
@@ -88,6 +98,7 @@
   },
   "helix_mode": true,
   "project_panel": {
+    "dock": "right",
     "button": true,
   },
   "status_bar": {
@@ -138,7 +149,26 @@
     "dark": "Catppuccin Frappé",
   },
   "agent_servers": {
+    "codex-acp": {
+      "default_config_options": {
+        "fast-mode": false
+      },
+      "favorite_config_option_values": {
+        "collaboration_mode": [
+          "plan"
+        ]
+      },
+      "type": "registry"
+    },
     "claude-acp": {
+      "default_config_options": {
+        "effort": "high",
+        "mode": "plan",
+        "model": "sonnet[1m]"
+      },
+      "env": {
+        "ANTHROPIC_CUSTOM_HEADERS": "Originator: zed-acp"
+      },
       "type": "registry"
     },
     "opencode": {
@@ -154,6 +184,7 @@
     },
   },
   "agent": {
+    "dock": "left",
     "favorite_models": [
       {
         "provider": "zed.dev",
