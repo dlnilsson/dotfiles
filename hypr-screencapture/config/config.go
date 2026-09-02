@@ -20,6 +20,13 @@ type Config struct {
 	WindowMatching WindowMatchingConfig
 	Positioning    PositioningConfig
 	Logging        LoggingConfig
+	Wallpaper      WallpaperConfig
+}
+
+type WallpaperConfig struct {
+	Enabled         bool
+	WallpaperDir    string
+	RefreshInterval time.Duration
 }
 
 type LoggingConfig struct {
@@ -105,6 +112,11 @@ func Default() *Config {
 		},
 		Logging: LoggingConfig{
 			Level: "DEBUG",
+		},
+		Wallpaper: WallpaperConfig{
+			Enabled:         false,
+			WallpaperDir:    filepath.Join(os.Getenv("HOME"), "Wallpapers"),
+			RefreshInterval: time.Hour,
 		},
 	}
 }
@@ -211,6 +223,9 @@ func (p *iniParser) apply(cfg *Config) error {
 		return err
 	}
 	if err := p.applyLogging(cfg); err != nil {
+		return err
+	}
+	if err := p.applyWallpaper(cfg); err != nil {
 		return err
 	}
 	return nil
@@ -355,6 +370,21 @@ func (p *iniParser) applyLogging(cfg *Config) error {
 		default:
 			return fmt.Errorf("invalid log_level: %q (must be one of: DEBUG, INFO, WARN, ERROR)", val)
 		}
+	}
+	return nil
+}
+
+func (p *iniParser) applyWallpaper(cfg *Config) error {
+	if val := p.getString("wallpaper", "enabled"); val != "" {
+		cfg.Wallpaper.Enabled = val == "true" || val == "1" || val == "yes"
+	}
+	if val := p.getString("wallpaper", "wallpaper_dir"); val != "" {
+		cfg.Wallpaper.WallpaperDir = val
+	}
+	if val, err := p.getDuration("wallpaper", "refresh_interval"); err != nil {
+		return fmt.Errorf("invalid refresh_interval: %w", err)
+	} else if val > 0 {
+		cfg.Wallpaper.RefreshInterval = val
 	}
 	return nil
 }

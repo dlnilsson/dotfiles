@@ -14,16 +14,30 @@ import (
 
 type ScreencastHandler struct {
 	event.DefaultEventHandler
-	ch     chan<- messages.Msg
-	Client *Client
-	cfgFn  func() *config.Config
+	ch          chan<- messages.Msg
+	Client      *Client
+	cfgFn       func() *config.Config
+	workspaceCh chan<- string
 }
 
-func NewScreencastHandler(ch chan<- messages.Msg, client *Client, cfgFn func() *config.Config) *ScreencastHandler {
+func NewScreencastHandler(ch chan<- messages.Msg, client *Client, cfgFn func() *config.Config, workspaceCh chan<- string) *ScreencastHandler {
 	return &ScreencastHandler{
-		ch:     ch,
-		Client: client,
-		cfgFn:  cfgFn,
+		ch:          ch,
+		Client:      client,
+		cfgFn:       cfgFn,
+		workspaceCh: workspaceCh,
+	}
+}
+
+func (h *ScreencastHandler) WorkspaceV2(w event.WorkspaceV2) {
+	slog.Debug("WorkspaceV2", "id", w.ID, "name", w.Name)
+	if h.workspaceCh == nil {
+		return
+	}
+	select {
+	case h.workspaceCh <- w.ID:
+	default:
+		slog.Debug("Workspace channel full, dropping event", "id", w.ID)
 	}
 }
 
@@ -148,10 +162,10 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 				}
 			}
 			DispatchCommands(h.Client, []string{
-				"tagwindow +starship",
-				fmt.Sprintf("setfloating %s", addr),
-				fmt.Sprintf("resizewindowpixel exact %d %d,%s", sw, sh, addr),
-				fmt.Sprintf("centerwindow %s", addr),
+				dspTag("+starship", addr),
+				dspFloat(addr),
+				dspResize(sw, sh, addr),
+				dspCenter(addr),
 			})
 		}
 	}
@@ -180,7 +194,7 @@ func (h *ScreencastHandler) handleHangoutWindow(win hyprland.Client) {
 	slog.Debug("handling hangout window", "address", address)
 
 	// resize before we calculate position
-	cmd := fmt.Sprintf("resizewindowpixel exact 512 360,%s", fmt.Sprintf("address:%s", address))
+	cmd := dspResize(512, 360, fmt.Sprintf("address:%s", address))
 	DispatchCommands(h.Client, []string{
 		cmd,
 	})
@@ -198,7 +212,7 @@ func (h *ScreencastHandler) handlePictureInPictureWindow(address string) {
 
 	position := GetMeetingPosition(h.Client, address, h.cfgFn())
 	DispatchCommands(h.Client, []string{
-		fmt.Sprintf("movewindowpixel exact %s,address:%s", position, address),
+		dspMove(position, fmt.Sprintf("address:%s", address)),
 	})
 }
 

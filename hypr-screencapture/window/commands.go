@@ -16,29 +16,64 @@ func NormalizeAddress(address string) string {
 	return address
 }
 
-func BuildCommands(win hyprland.Client, position string) []string {
+// Hyprland 0.56 replaced the plain string dispatchers with a Lua API: the IPC
+// wraps a "dispatch <args>" request into "return hl.dispatch(<args>)", so the
+// argument has to be a Lua dispatcher expression instead of a dispatcher name.
+func dspMoveOutOfGroup(addr string) string {
+	return fmt.Sprintf("hl.dsp.window.move({ out_of_group = true, window = %q })", addr)
+}
+
+func dspPin(addr string) string {
+	return fmt.Sprintf("hl.dsp.window.pin({ window = %q })", addr)
+}
+
+func dspFloat(addr string) string {
+	return fmt.Sprintf("hl.dsp.window.float({ action = \"on\", window = %q })", addr)
+}
+
+func dspMove(position Position, addr string) string {
+	return fmt.Sprintf("hl.dsp.window.move({ x = %d, y = %d, window = %q })", position.X, position.Y, addr)
+}
+
+func dspResize(width, height int, addr string) string {
+	return fmt.Sprintf("hl.dsp.window.resize({ x = %d, y = %d, window = %q })", width, height, addr)
+}
+
+func dspCenter(addr string) string {
+	return fmt.Sprintf("hl.dsp.window.center({ window = %q })", addr)
+}
+
+func dspTag(tag, addr string) string {
+	return fmt.Sprintf("hl.dsp.window.tag({ tag = %q, window = %q })", tag, addr)
+}
+
+func dspSetProp(prop, value, addr string) string {
+	return fmt.Sprintf("hl.dsp.window.set_prop({ prop = %q, value = %q, window = %q })", prop, value, addr)
+}
+
+func BuildCommands(win hyprland.Client, position Position) []string {
 	var (
 		commands = make([]string, 0, 18)
 		addr     = fmt.Sprintf("address:%s", NormalizeAddress(win.Address))
 	)
 	if len(win.Grouped) > 0 {
-		commands = append(commands, fmt.Sprintf("moveoutofgroup %s", addr))
+		commands = append(commands, dspMoveOutOfGroup(addr))
 	}
 	commands = append(commands,
-		fmt.Sprintf("pin %s", addr),
-		fmt.Sprintf("setfloating %s", addr),
-		fmt.Sprintf("movewindowpixel exact %s,%s", position, addr),
-		fmt.Sprintf("[[BATCH]]setprop %s rounding 1", addr),
-		fmt.Sprintf("[[BATCH]]setprop %s no_max_size 0", addr),
-		fmt.Sprintf("[[BATCH]]setprop %s opaque toggle", addr),
-		fmt.Sprintf("[[BATCH]]setprop %s immediate unset", addr),
-		fmt.Sprintf("[[BATCH]]setprop %s border_size relative -2", addr),
-		fmt.Sprintf("[[BATCH]]setprop %s rounding_power relative 0.1", addr),
-		fmt.Sprintf("[[BATCH]]setprop %s decorate 0", addr),
-		fmt.Sprintf("[[BATCH]]setprop %s no_shadow 1", addr),
-		fmt.Sprintf("[[BATCH]]setprop %s opacity 1.0 1.0", addr),
-		fmt.Sprintf("[[BATCH]]setprop %s no_blur 1", addr),
-		fmt.Sprintf("tagwindow +meeting %s", addr),
+		dspPin(addr),
+		dspFloat(addr),
+		dspMove(position, addr),
+		"[[BATCH]]"+dspSetProp("rounding", "1", addr),
+		"[[BATCH]]"+dspSetProp("no_max_size", "0", addr),
+		"[[BATCH]]"+dspSetProp("opaque", "toggle", addr),
+		"[[BATCH]]"+dspSetProp("immediate", "unset", addr),
+		"[[BATCH]]"+dspSetProp("border_size", "relative -2", addr),
+		"[[BATCH]]"+dspSetProp("rounding_power", "relative 0.1", addr),
+		"[[BATCH]]"+dspSetProp("decorate", "0", addr),
+		"[[BATCH]]"+dspSetProp("no_shadow", "1", addr),
+		"[[BATCH]]"+dspSetProp("opacity", "1.0 1.0", addr),
+		"[[BATCH]]"+dspSetProp("no_blur", "1", addr),
+		dspTag("+meeting", addr),
 	)
 
 	return commands
@@ -82,17 +117,17 @@ func DispatchCommands(c *Client, commands []string) {
 				)
 				return
 			}
-		if strings.Contains(msg, "empty response") {
-			slog.Debug("empty response, skipping",
-				"command", cmd,
-				"response", response,
-				"error", err,
-			)
-			return
-		}
-		if !strings.Contains(msg, "Window not found") {
-			break
-		}
+			if strings.Contains(msg, "empty response") {
+				slog.Debug("empty response, skipping",
+					"command", cmd,
+					"response", response,
+					"error", err,
+				)
+				return
+			}
+			if !strings.Contains(msg, "Window not found") {
+				break
+			}
 			slog.Debug("window not found, retrying", "command", cmd, "attempt", attempt+1)
 			time.Sleep(500 * time.Millisecond)
 		}

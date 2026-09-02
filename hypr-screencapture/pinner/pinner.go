@@ -125,7 +125,7 @@ func (p *Pinner) tryPinWindow(win hyprland.Client) bool {
 	position, err := window.CalculatePosition(p.Client, win, cfg)
 	if err != nil {
 		slog.Warn("failed to calculate window position, using default", "error", err)
-		position = cfg.Positioning.DefaultPosition
+		position = window.DefaultPosition(p.Client, cfg, win.Monitor)
 	}
 
 	pc := p.currentPinConfig()
@@ -147,7 +147,7 @@ func (p *Pinner) tryPinWindow(win hyprland.Client) bool {
 	return false
 }
 
-func (p *Pinner) executeWindowCommands(win hyprland.Client, position string) {
+func (p *Pinner) executeWindowCommands(win hyprland.Client, position window.Position) {
 	commands := window.BuildCommands(win, position)
 	window.DispatchCommands(p.Client, commands)
 }

@@ -3,15 +3,24 @@ package window
 import (
 	"fmt"
 	"log/slog"
+	"strconv"
+	"strings"
 
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/config"
 	"github.com/thiagokokada/hyprland-go"
 )
 
-func CalculatePosition(c *Client, window hyprland.Client, cfg *config.Config) (string, error) {
+// Position is a window position in global (layout) pixel coordinates. The Lua
+// dispatchers take absolute pixels only, so percentages from the config are
+// resolved against the target monitor before dispatching.
+type Position struct {
+	X, Y int
+}
+
+func CalculatePosition(c *Client, window hyprland.Client, cfg *config.Config) (Position, error) {
 	monitors, err := c.Monitors()
 	if err != nil {
-		return "", fmt.Errorf("failed to get monitors: %w", err)
+		return Position{}, fmt.Errorf("failed to get monitors: %w", err)
 	}
 
 	var monitor *hyprland.Monitor
@@ -23,7 +32,7 @@ func CalculatePosition(c *Client, window hyprland.Client, cfg *config.Config) (s
 	}
 
 	if monitor == nil {
-		return "", fmt.Errorf("monitor %d not found", window.Monitor)
+		return Position{}, fmt.Errorf("monitor %d not found", window.Monitor)
 	}
 
 	var (
@@ -33,30 +42,86 @@ func CalculatePosition(c *Client, window hyprland.Client, cfg *config.Config) (s
 		yPos         = cfg.Positioning.YPosition
 	)
 
-	xPos := monitorWidth - windowWidth - rightPadding
-	xPercent := int(float64(xPos) / float64(monitorWidth) * 100)
-	yPercent := max(int(float64(yPos)/float64(monitor.Height)*100), 2)
-
-	return fmt.Sprintf("%d%% %d%%", xPercent, yPercent), nil
+	return Position{
+		X: monitor.X + monitorWidth - windowWidth - rightPadding,
+		Y: monitor.Y + max(yPos, monitor.Height*2/100),
+	}, nil
 }
 
-func GetMeetingPosition(c *Client, addr string, cfg *config.Config) string {
+// DefaultPosition resolves the configured percentage based default position
+// (e.g. "74% 2%") into global pixel coordinates on the given monitor, falling
+// back to the focused monitor when that monitor is unknown.
+func DefaultPosition(c *Client, cfg *config.Config, monitorID int) Position {
+	monitors, err := c.Monitors()
+	if err != nil {
+		slog.Warn("Failed to get monitors while resolving default position", "error", err)
+		return Position{}
+	}
+
+	var monitor *hyprland.Monitor
+	for i := range monitors {
+		if monitors[i].Id == monitorID {
+			monitor = &monitors[i]
+			break
+		}
+		if monitors[i].Focused && monitor == nil {
+			monitor = &monitors[i]
+		}
+	}
+	if monitor == nil {
+		slog.Warn("No monitor to resolve default position against", "monitor", monitorID)
+		return Position{}
+	}
+
+	xPercent, yPercent, err := parsePercentPosition(cfg.Positioning.DefaultPosition)
+	if err != nil {
+		slog.Warn("Invalid default position", "position", cfg.Positioning.DefaultPosition, "error", err)
+		return Position{X: monitor.X, Y: monitor.Y}
+	}
+
+	return Position{
+		X: monitor.X + int(xPercent/100*float64(monitor.Width)),
+		Y: monitor.Y + int(yPercent/100*float64(monitor.Height)),
+	}
+}
+
+// parsePercentPosition parses a "74% 2%" style position into its two
+// percentage values.
+func parsePercentPosition(position string) (float64, float64, error) {
+	fields := strings.Fields(position)
+	if len(fields) != 2 {
+		return 0, 0, fmt.Errorf("expected two percentage values, got %q", position)
+	}
+
+	values := make([]float64, 2)
+	for i, field := range fields {
+		v, err := strconv.ParseFloat(strings.TrimSuffix(field, "%"), 64)
+		if err != nil {
+			return 0, 0, fmt.Errorf("invalid percentage %q: %w", field, err)
+		}
+		values[i] = v
+	}
+
+	return values[0], values[1], nil
+}
+
+func GetMeetingPosition(c *Client, addr string, cfg *config.Config) Position {
 	clients, err := c.Clients()
 	if err != nil {
 		slog.Warn("Failed to get clients during meeting position calculation", "error", err)
-		return cfg.Positioning.DefaultPosition
+		return DefaultPosition(c, cfg, -1)
 	}
 	for _, client := range clients {
 		if client.Address == addr {
 			p, err := CalculatePosition(c, client, cfg)
 			if err != nil {
 				slog.Warn("Using default position because failed to calculate position", "address", addr, "error", err)
-				return cfg.Positioning.DefaultPosition
+				return DefaultPosition(c, cfg, client.Monitor)
 			}
 			slog.Debug("Calculated position", "address", addr, "position", p)
 			return p
 		}
 	}
 	slog.Warn("Using default position because", "address", addr)
-	return cfg.Positioning.DefaultPosition
+	return DefaultPosition(c, cfg, -1)
 }

@@ -31,6 +31,7 @@ import (
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/notifier"
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/pinner"
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/pipewire"
+	"github.com/dlnilsson/dotfiles/hypr-screencapture/wallpaper"
 	"github.com/dlnilsson/dotfiles/hypr-screencapture/window"
 	"github.com/thiagokokada/hyprland-go"
 	"github.com/thiagokokada/hyprland-go/event"
@@ -138,6 +139,11 @@ func main() {
 		os.Exit(exit.CantCreat)
 	}
 
+	var workspaceCh chan string
+	if cfg.Wallpaper.Enabled {
+		workspaceCh = make(chan string, 4)
+	}
+
 	var (
 		socketStatus = &manager.SocketStatus{}
 		mgr          = manager.New(
@@ -156,7 +162,7 @@ func main() {
 		hc          = hyprland.MustClient()
 
 		windowClient = window.NewClient(hc)
-		handler      = window.NewScreencastHandler(ch, windowClient, currentConfig)
+		handler      = window.NewScreencastHandler(ch, windowClient, currentConfig, workspaceCh)
 	)
 
 	mgr.WriteStatus(false)
@@ -211,6 +217,7 @@ func main() {
 			event.EventMonitorRemoved,
 			event.EventFocusedMonitorV2,
 			event.EventMonitorAddedV2,
+			event.EventWorkspaceV2,
 		}
 		slog.Debug("Subscribing to events", "events", events)
 		if err := cli.Subscribe(ctx, handler, events...); err != nil && ctx.Err() == nil {
@@ -287,6 +294,11 @@ func main() {
 
 	p := pinner.New(windowClient, currentConfig)
 	go p.Run(ctx, pinWindowCh)
+
+	if workspaceCh != nil {
+		wp := wallpaper.New(currentConfig)
+		go wp.Run(ctx, workspaceCh)
+	}
 
 	<-ctx.Done()
 	time.Sleep(50 * time.Millisecond)
