@@ -240,6 +240,14 @@ hl.window_rule({
 })
 
 hl.window_rule({
+    name        = "openlogi-action-ring",
+    match       = { class = "^(openlogi-action-ring)$" },
+    float       = true,
+    border_size = 0,
+    center = true,
+})
+
+hl.window_rule({
     name  = "tag-browser",
     match = { class = "^(zen|chromium|Chromium|firefox|Opera|vivaldi-stable)$" },
     tag   = "browser",
