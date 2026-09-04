@@ -163,8 +163,8 @@
     "claude-acp": {
       "default_config_options": {
         "effort": "high",
-        "mode": "plan",
-        "model": "sonnet[1m]"
+        "mode": "auto",
+        "model": "opus[1m]"
       },
       "env": {
         "ANTHROPIC_CUSTOM_HEADERS": "Originator: zed-acp"
@@ -221,7 +221,7 @@
     "ss08": true,
     "ss09": true,
   },
-  "theme": "Nord Dark",
+  "theme": "Nordfox - opaque",
   "theme_overrides": {
     "Nord Dark": {
       "background.appearance": "blurred",
