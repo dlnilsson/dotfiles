@@ -240,6 +240,13 @@ hl.window_rule({
 })
 
 hl.window_rule({
+    name  = "openwave-float",
+    match = { class = "^(com\\.github\\.openwave)$" },
+    float = true,
+    center = true,
+})
+
+hl.window_rule({
     name        = "openlogi-action-ring",
     match       = { class = "^(openlogi-action-ring)$" },
     float       = true,
