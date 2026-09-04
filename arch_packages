@@ -14,6 +14,7 @@ bind
 bitwarden
 blueman
 bluez
+bluez-utils
 btop
 btrfs-progs
 caddy
@@ -38,6 +39,7 @@ docker
 docker-buildx
 docker-compose
 dolphin
+duckdb
 dunst
 dysk
 efibootmgr
@@ -68,6 +70,7 @@ gnome-keyring
 gnome-themes-extra
 go
 golangci-lint
+goreleaser
 go-yq
 graphviz
 grim
@@ -110,6 +113,7 @@ mitmproxy
 mkcert
 msedit
 mtr
+namcap
 nano
 nano-syntax-highlighting
 nautilus
@@ -127,6 +131,7 @@ nwg-displays
 nwg-look
 obsidian
 openssh
+pacman-contrib
 papirus-icon-theme
 parallel
 pavucontrol
@@ -193,6 +198,7 @@ waybar
 wev
 wget
 whois
+wireguard-tools
 wireless-regdb
 wireless_tools
 wl-clipboard
@@ -216,6 +222,7 @@ yubikey-touch-detector
 zathura
 zathura-pdf-poppler
 zed
+zig
 zip
 zoxide
 zram-generator
