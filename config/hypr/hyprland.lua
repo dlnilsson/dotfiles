@@ -499,9 +499,10 @@ hl.layer_rule({
 hl.config({
     dwindle = {
         preserve_split              = true,
-        smart_split                 = false,
+        smart_split                 = true,
         permanent_direction_override = true,
-        split_width_multiplier       = 3.0,
+        split_width_multiplier       = 2.0,
+        force_split = 2
     },
 
     master = {
