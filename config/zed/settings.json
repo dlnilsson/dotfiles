@@ -151,6 +151,8 @@
   "agent_servers": {
     "codex-acp": {
       "default_config_options": {
+        "reasoning_effort": "xhigh",
+        "model": "gpt-6-astra",
         "fast-mode": false
       },
       "favorite_config_option_values": {
@@ -184,6 +186,9 @@
     },
   },
   "agent": {
+    "expand_terminal_card": false,
+    "expand_edit_card": false,
+    "show_turn_stats": true,
     "dock": "left",
     "favorite_models": [
       {
