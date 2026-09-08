@@ -101,12 +101,9 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 	)
 	cfg := h.cfgFn()
 	slog.Debug("active Window starship", "is_starship", IsStarShipWindow(w.Title, cfg))
-	getSiblingsAndWindows := func() ([]hyprland.Client, int, int) {
+	getSiblingsAndWindows := func() ([]hyprland.Client, int) {
 		clients, err := h.Client.Clients()
-		var (
-			siblings  []hyprland.Client
-			sameClass int
-		)
+		var siblings []hyprland.Client
 		if err == nil {
 			slog.Debug("lookup siblings", "workspace", activeWindow.Workspace.Id, "class", activeWindow.Class)
 			for _, client := range clients {
@@ -114,7 +111,6 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 					continue
 				}
 				if client.Class == activeWindow.Class {
-					sameClass++
 					continue
 				}
 				slog.Debug("Other client", "title", client.Title, "addr", client.Address, "size", client.Size)
@@ -130,47 +126,32 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 				}
 			}
 		}
-		return siblings, sameClass, windows
+		return siblings, windows
 	}
-	if IsStarShipWindow(w.Title, cfg) {
-		// The only way to reliably detect if it's a popup (starship)
-		// is to rely on user behavior: the browser is the only window in the workspace.
-		time.Sleep(100 * time.Millisecond)
-		_, sameClass, windows := getSiblingsAndWindows()
-		slog.Debug("active window size initial size",
-			"title", w.Title,
-			"size", activeWindow.Size,
-			"same_class", sameClass,
-			"workspace", activeWindow.Workspace.Id,
-			"workspace_windows", windows,
-			"has", hasAnyTag(activeWindow.Tags, cfg.WindowMatching.ExcludeFromStarship...),
-			"full", sameClass > 1 && !hasAnyTag(activeWindow.Tags, cfg.WindowMatching.ExcludeFromStarship...),
+	if IsStarShipWindow(w.Title, cfg) &&
+		!hasAnyTag(activeWindow.Tags, cfg.WindowMatching.ExcludeFromStarship...) {
+		var (
+			sw = 900
+			sh = 825
 		)
-		if sameClass > 1 &&
-			!hasAnyTag(activeWindow.Tags, cfg.WindowMatching.ExcludeFromStarship...) {
-			var (
-				sw = 900
-				sh = 825
-			)
-			monitors, err := h.Client.Monitors()
-			if err == nil {
-				for _, m := range monitors {
-					if m.Id == activeWindow.Monitor {
-						sw, sh = StarshipSize(m)
-						break
-					}
+		monitors, err := h.Client.Monitors()
+		if err == nil {
+			for _, m := range monitors {
+				if m.Id == activeWindow.Monitor {
+					sw, sh = StarshipSize(m)
+					break
 				}
 			}
-			DispatchCommands(h.Client, []string{
-				dspTag("+starship", addr),
-				dspFloat(addr),
-				dspResize(sw, sh, addr),
-				dspCenter(addr),
-			})
 		}
+		DispatchCommands(h.Client, []string{
+			dspTag("+starship", addr),
+			dspFloat(addr),
+			dspResize(sw, sh, addr),
+			dspCenter(addr),
+		})
 	}
 	if IsHangoutTitle(w.Title, cfg) {
-		siblings, _, windows := getSiblingsAndWindows()
+		siblings, windows := getSiblingsAndWindows()
 		slog.Debug("hangout window context",
 			"title", w.Title,
 			"siblings", len(siblings),

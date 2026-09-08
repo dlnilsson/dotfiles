@@ -28,7 +28,7 @@ func dspPin(addr string) string {
 }
 
 func dspFloat(addr string) string {
-	return fmt.Sprintf("hl.dsp.window.float({ action = \"on\", window = %q })", addr)
+	return fmt.Sprintf("hl.dsp.window.float({ action = \"set\", window = %q })", addr)
 }
 
 func dspMove(position Position, addr string) string {
