@@ -12,7 +12,6 @@ ZSH_THEME_DOCKER_PROMPT_SHA_BEFORE="%{$white%}[%{$cyan%}"
 ZSH_THEME_DOCKER_PROMPT_SHA_AFTER="%{$white%}]"
 
 # PROMPT='$(_user_host)${_current_dir}$(git_prompt_info)
-# PROMPT='${_current_dir}$(_wt_statusline)
 PROMPT='${_current_dir}$(git_prompt_info)
 %{$white%}>%{$reset_color%} '
 PROMPT2='%{$grey%}◀%{$reset_color%} '
@@ -53,51 +52,6 @@ _docker_info() {
         echo "$ZSH_THEME_DOCKER_PROMPT_SHA_BEFORE$VAL$ZSH_THEME_DOCKER_PROMPT_SHA_AFTER"
     fi
 }
-
-typeset -g _wt_prompt=""
-typeset -g _wt_async_pid=0
-
-function _wt_statusline() {
-  printf '%s' "$_wt_prompt"
-}
-
-function _wt_async_start() {
-  if (( _wt_async_pid != 0 )); then
-    kill -9 "$_wt_async_pid" 2>/dev/null
-    _wt_async_pid=0
-  fi
-
-  local tmpfile="${TMPDIR:-/tmp}/zsh-wt-prompt-$$"
-  setopt local_options no_monitor
-  {
-    local json branch statusline extra result=""
-    json=$(wt list --format=json 2>/dev/null)
-    if [[ $? -eq 0 ]]; then
-      branch=$(jq -r '.[] | select(.is_current) | .branch' <<< "$json")
-      if [[ -n "$branch" ]]; then
-        statusline=$(jq -r '.[] | select(.is_current) | .statusline' <<< "$json")
-        extra="${statusline#"$branch"}"
-        result=$(printf '\033[37mon \033[34m%s\033[0m%b ' "$branch" "$extra")
-      fi
-    fi
-    print -n "$result" > "$tmpfile"
-    kill -USR1 $$ 2>/dev/null
-  } &!
-  _wt_async_pid=$!
-}
-
-function TRAPUSR1() {
-  local tmpfile="${TMPDIR:-/tmp}/zsh-wt-prompt-$$"
-  if [[ -f "$tmpfile" ]]; then
-    _wt_prompt=$(<"$tmpfile")
-    rm -f "$tmpfile"
-  fi
-  _wt_async_pid=0
-  zle && zle reset-prompt
-}
-
-autoload -Uz add-zsh-hook
-add-zsh-hook precmd _wt_async_start
 
 function _vi_status() {
   if {echo $fpath | grep -q "plugins/vi-mode"}; then
