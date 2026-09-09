@@ -556,8 +556,10 @@ hl.device({ name = "dygma-defy-keyboard-1", kb_layout = "eu" })
 local mainMod = "SUPER"
 
 -- Scrolling layout binds
-hl.bind(mainMod .. " + period",         hl.dsp.layout("move +col"))
-hl.bind(mainMod .. " + comma",          hl.dsp.layout("move -col"))
+-- hl.bind(mainMod .. " + period",         hl.dsp.layout("move +col"))
+hl.bind(mainMod .. " + period",         hl.dsp.layout("togglesplit"))
+-- hl.bind(mainMod .. " + comma",          hl.dsp.layout("move -col"))
+hl.bind(mainMod .. " + comma",          hl.dsp.layout("swapsplit"))
 hl.bind(mainMod .. " + SHIFT + period", hl.dsp.layout("swapcol r"))
 hl.bind(mainMod .. " + SHIFT + comma",  hl.dsp.layout("swapcol l"))
 
