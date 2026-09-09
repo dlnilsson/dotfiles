@@ -598,8 +598,8 @@ hl.bind(mainMod .. " + code:108",     hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/c
 hl.bind(mainMod .. " + code:34",      hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/clamshell"))
 
 -- Lid switch
-hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/clamshell open"),  { locked = true })
-hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/clamshell close"), { locked = true })
+hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/clamshell"), { locked = true })
+hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/clamshell"), { locked = true })
 
 -- Move focus with arrow keys
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))

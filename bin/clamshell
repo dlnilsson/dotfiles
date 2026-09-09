@@ -1,21 +1,11 @@
 #!/usr/bin/env bash
 # See: https://bobbys.zone/guides/hyprland-clamshell
 
-# Reload Hyprland if only the built-in panel is active to re-apply monitor keywords cleanly.
-maybe_reload_single_default() {
-  if hyprctl monitors all -j | jq -e '
-    [.[] | select(.disabled != true)] as $enabled
-    | $enabled
-    | select(length == 1)
-    | .[0]
-    | select(.name == "eDP-1")
-  ' >/dev/null; then
-    hyprctl reload
-  fi
+has_external_monitor() {
+  hyprctl monitors -j | jq -e '
+    any(.[]; .disabled != true and .name != "eDP-1")
+  ' >/dev/null
 }
-
-
-external=$(hyprctl monitors -j | jq -r '.[] | select(.name | test("^DP-[0-9]+"))')
 
 enable_edp() {
   hyprctl eval 'hl.monitor({ output = "eDP-1", mode = "highres", position = "auto", scale = 1.0, disabled = false })'
@@ -25,15 +15,10 @@ disable_edp() {
   hyprctl eval 'hl.monitor({ output = "eDP-1", disabled = true })'
 }
 
-if [[ -n "$external" ]]; then
-  if [[ $1 == "open" ]]; then
-    enable_edp
-    maybe_reload_single_default
-  else
-    disable_edp
-    res=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | "\(.width)x\(.height) at \(.refreshRate | floor)hz"')
-    notify-send --transient "Running external" "$res" --expire-time=3000
-  fi
+if has_external_monitor; then
+  disable_edp
+  res=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | "\(.width)x\(.height) at \(.refreshRate | floor)hz"')
+  notify-send --transient "Running external" "$res" --expire-time=3000
 else
   enable_edp
   sleep 1
