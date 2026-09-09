@@ -64,6 +64,9 @@
 	autocrlf = input
 	pager = delta
 [alias]
+	pd = pull-default
+	# Fetch origin, then pull its advertised default branch into the current branch.
+	pull-default = "!f() { if [ -t 1 ] && command -v gum >/dev/null 2>&1; then gum spin --spinner dot --title 'Fetching origin...' --show-output --show-error -- git fetch origin; else git fetch origin; fi && head=$(git ls-remote --symref origin HEAD) || return; branch=$(printf '%s\\n' \"$head\" | sed -n 's@^ref: refs/heads/\\(.*\\)[[:space:]]HEAD$@\\1@p'); if [ -z \"$branch\" ]; then echo 'origin did not advertise a default branch' >&2; return 1; fi; git pull \"$@\" origin \"$branch\"; }; f"
 	# git fixup, but fuzzy find commit
 	fuzzup = !git commit --fixup $(git log --no-merges --oneline origin/main..HEAD | fzf --height 40% | cut -d' ' -f1)
 	undo = reset HEAD~1 --mixed
