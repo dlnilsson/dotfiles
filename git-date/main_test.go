@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 	"time"
 
@@ -13,7 +14,7 @@ func TestPickerConfirmAndCancel(t *testing.T) {
 		model := newPickerModel()
 		model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 		_, command := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
-		if !model.confirmed || model.cancelled || command == nil {
+		if model.state != pickerConfirmed || command == nil {
 			t.Fatal("second enter should confirm the selection")
 		}
 	})
@@ -21,10 +22,65 @@ func TestPickerConfirmAndCancel(t *testing.T) {
 	t.Run("cancel", func(t *testing.T) {
 		model := newPickerModel()
 		_, command := model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("q")})
-		if !model.cancelled || model.confirmed || command == nil {
+		if model.state != pickerCancelled || command == nil {
 			t.Fatal("q should cancel the selection")
 		}
 	})
+}
+
+func TestPickerAcceptsTypedTime(t *testing.T) {
+	tests := []struct {
+		input      string
+		wantHour   int
+		wantMinute int
+		wantSecond int
+	}{
+		{input: "10:00", wantHour: 10},
+		{input: "23:59:58", wantHour: 23, wantMinute: 59, wantSecond: 58},
+	}
+
+	for _, test := range tests {
+		t.Run(test.input, func(t *testing.T) {
+			model := newPickerModel()
+			model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+			model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(test.input)})
+			model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+			selected := model.Time()
+			if selected.Hour() != test.wantHour || selected.Minute() != test.wantMinute || selected.Second() != test.wantSecond {
+				t.Fatalf("selected time is %s, want %02d:%02d:%02d", selected.Format("15:04:05"), test.wantHour, test.wantMinute, test.wantSecond)
+			}
+		})
+	}
+}
+
+func TestPickerRejectsInvalidTypedTime(t *testing.T) {
+	model := newPickerModel()
+	model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("25:00")})
+	model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+
+	if model.state == pickerConfirmed {
+		t.Fatal("invalid time should keep the time input open")
+	}
+	if model.validationErr == nil {
+		t.Fatal("invalid time should show a validation error")
+	}
+}
+
+func TestPickerShowsControlsForEachStep(t *testing.T) {
+	model := newPickerModel()
+	if view := model.View(); !strings.Contains(view, "enter set time") {
+		t.Fatalf("date view does not show how to continue:\n%s", view)
+	}
+
+	model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	view := model.View()
+	for _, text := range []string{"Time (HH:MM or HH:MM:SS)", "enter confirm", "esc back to date"} {
+		if !strings.Contains(view, text) {
+			t.Fatalf("time view does not contain %q:\n%s", text, view)
+		}
+	}
 }
 
 func TestCommandWithDate(t *testing.T) {
