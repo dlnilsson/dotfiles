@@ -54,6 +54,7 @@ flameshot
 font-manager
 fprintd
 fuse2
+fwupd
 fzf
 gdb
 gedit
@@ -148,6 +149,7 @@ python-pip
 qt5-wayland
 qt6ct
 qt6-wayland
+quickshell
 r
 radeontop
 reflector
