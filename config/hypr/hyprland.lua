@@ -269,7 +269,7 @@ hl.window_rule({
 
 hl.window_rule({
     name  = "starship",
-    match = { tag = "^(starship)$" },
+    match = { tag = "starship" },
     float           = true,
     center          = true,
     no_screen_share = true,
