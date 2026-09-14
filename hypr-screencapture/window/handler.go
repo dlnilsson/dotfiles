@@ -130,25 +130,30 @@ func (h *ScreencastHandler) ActiveWindow(w event.ActiveWindow) {
 	}
 	if IsStarShipWindow(w.Title, cfg) &&
 		!hasAnyTag(activeWindow.Tags, cfg.WindowMatching.ExcludeFromStarship...) {
-		var (
-			sw = 900
-			sh = 825
-		)
-		monitors, err := h.Client.Monitors()
-		if err == nil {
-			for _, m := range monitors {
-				if m.Id == activeWindow.Monitor {
-					sw, sh = StarshipSize(m)
-					break
+		_, windows := getSiblingsAndWindows()
+		if windows > 1 {
+			var (
+				sw = 900
+				sh = 825
+			)
+			monitors, err := h.Client.Monitors()
+			if err == nil {
+				for _, m := range monitors {
+					if m.Id == activeWindow.Monitor {
+						sw, sh = StarshipSize(m)
+						break
+					}
 				}
 			}
+			// hl.dsp.window.float is a toggle; the action argument is ignored,
+			// so only dispatch it when the window is not already floating.
+			commands := []string{dspTag("+starship", addr)}
+			if !activeWindow.Floating {
+				commands = append(commands, dspFloat(addr))
+			}
+			commands = append(commands, dspResize(sw, sh, addr), dspCenter(addr))
+			DispatchCommands(h.Client, commands)
 		}
-		DispatchCommands(h.Client, []string{
-			dspTag("+starship", addr),
-			dspFloat(addr),
-			dspResize(sw, sh, addr),
-			dspCenter(addr),
-		})
 	}
 	if IsHangoutTitle(w.Title, cfg) {
 		siblings, windows := getSiblingsAndWindows()
@@ -241,6 +246,25 @@ func (e *ScreencastHandler) MonitorAddedV2(m event.MonitorAddedV2) {
 		"monitor_name", m.Name,
 		"monitor_description", m.Description,
 	)
+
+	monitors, err := e.Client.Monitors()
+	if err != nil {
+		slog.Error("Failed to get monitors after monitor added", "error", err)
+		return
+	}
+	for _, monitor := range monitors {
+		if monitor.Name != string(m.Name) || !shouldEnableAddedMonitor(monitor) {
+			continue
+		}
+		slog.Warn("added external monitor has no active mode, enabling monitor",
+			"monitor", monitor.Name,
+			"width", monitor.Width,
+			"height", monitor.Height,
+			"disabled", monitor.Disabled,
+		)
+		e.enableMonitor(monitor.Name)
+		return
+	}
 }
 
 func (e *ScreencastHandler) MonitorRemoved(m event.MonitorName) {
@@ -252,51 +276,39 @@ func (e *ScreencastHandler) MonitorRemoved(m event.MonitorName) {
 		slog.Error("Failed to get monitors", "error", err)
 		return
 	}
-	if !allMonitorsDisabled(monitors) {
+	if !needsMonitorRecovery(monitors) {
 		return
 	}
 
-	var (
-		monitorName string
-		lowestID    int
-		found       bool
-	)
+	slog.Warn("all monitors disabled, enabling monitor", "monitor", "eDP-1")
+	e.enableMonitor("eDP-1")
+}
 
-	for _, monitor := range monitors {
-		if !monitor.Disabled {
-			continue
-		}
-		if !found || monitor.Id < lowestID {
-			lowestID = monitor.Id
-			monitorName = monitor.Name
-			found = true
-		}
-	}
-
-	if !found {
-		slog.Error("no disabled monitors found")
-		return
-	}
-
-	keyword := fmt.Sprintf("monitor %s,highres,auto,1", monitorName)
-	slog.Warn("all monitors disabled, enabling monitor", "monitor", monitorName, "id", lowestID)
-	response, err := e.Client.Keyword(keyword)
-	slog.Debug(keyword, "response", response)
+func (e *ScreencastHandler) enableMonitor(name string) {
+	response, err := e.Client.EnableMonitor(name)
+	slog.Debug("enable monitor response", "monitor", name, "response", response)
 	if err != nil {
 		slog.Error("Failed to enable monitor", "error", err)
 	}
-	r, err := e.Client.Reload()
-	if err != nil {
-		slog.Error("Failed to reload", "error", err)
-	}
-	slog.Debug("Reload response", "response", r)
 }
 
-func allMonitorsDisabled(monitors []hyprland.Monitor) bool {
+func shouldEnableAddedMonitor(monitor hyprland.Monitor) bool {
+	if monitor.Name == "eDP-1" || monitor.Name == "FALLBACK" {
+		return false
+	}
+	return monitor.Disabled || monitor.Width == 0 || monitor.Height == 0
+}
+
+func needsMonitorRecovery(monitors []hyprland.Monitor) bool {
+	realMonitors := 0
 	for _, monitor := range monitors {
+		if monitor.Name == "FALLBACK" {
+			continue
+		}
+		realMonitors++
 		if !monitor.Disabled {
 			return false
 		}
 	}
-	return true
+	return realMonitors > 0
 }

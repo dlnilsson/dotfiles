@@ -1,6 +1,7 @@
 package window
 
 import (
+	"fmt"
 	"log/slog"
 	"strings"
 	"sync"
@@ -22,6 +23,22 @@ func NewClient(hc *hyprland.RequestClient) *Client {
 		handledAddresses: make(map[string]bool),
 		RequestClient:    hc,
 	}
+}
+
+func (c *Client) EnableMonitor(name string) (hyprland.Response, error) {
+	expression := fmt.Sprintf(
+		`hl.monitor({ output = %q, mode = "highres", position = "auto", scale = 1.0, disabled = false })`,
+		name,
+	)
+	raw, err := c.RawRequest(hyprland.RawRequest("eval " + expression))
+	response := hyprland.Response(strings.TrimSpace(string(raw)))
+	if err != nil {
+		return response, fmt.Errorf("enable monitor %q: %w", name, err)
+	}
+	if response != "ok" {
+		return response, fmt.Errorf("enable monitor %q: %s", name, response)
+	}
+	return response, nil
 }
 
 func (c *Client) MarkHandled(address string) bool {
