@@ -12,6 +12,9 @@ import (
 	"github.com/thiagokokada/hyprland-go/event"
 )
 
+// fallbackMonitor is enabled whenever no real monitor is left enabled.
+const fallbackMonitor = "eDP-1"
+
 type ScreencastHandler struct {
 	event.DefaultEventHandler
 	ch          chan<- messages.Msg
@@ -265,12 +268,20 @@ func (e *ScreencastHandler) MonitorAddedV2(m event.MonitorAddedV2) {
 		e.enableMonitor(monitor.Name)
 		return
 	}
+
+	e.EnsureMonitorEnabled()
 }
 
 func (e *ScreencastHandler) MonitorRemoved(m event.MonitorName) {
 	slog.Debug("MonitorRemoved", "monitor", m)
 	// sleep if multiple monitors are removed at once. give it a second to detect
 	time.Sleep(7 * time.Second)
+	e.EnsureMonitorEnabled()
+}
+
+// EnsureMonitorEnabled enables the builtin display when no real monitor is
+// left enabled, so we never end up with every monitor disabled.
+func (e *ScreencastHandler) EnsureMonitorEnabled() {
 	monitors, err := e.Client.Monitors()
 	if err != nil {
 		slog.Error("Failed to get monitors", "error", err)
@@ -280,8 +291,8 @@ func (e *ScreencastHandler) MonitorRemoved(m event.MonitorName) {
 		return
 	}
 
-	slog.Warn("all monitors disabled, enabling monitor", "monitor", "eDP-1")
-	e.enableMonitor("eDP-1")
+	slog.Warn("no enabled monitor left, enabling monitor", "monitor", fallbackMonitor)
+	e.enableMonitor(fallbackMonitor)
 }
 
 func (e *ScreencastHandler) enableMonitor(name string) {
@@ -293,22 +304,25 @@ func (e *ScreencastHandler) enableMonitor(name string) {
 }
 
 func shouldEnableAddedMonitor(monitor hyprland.Monitor) bool {
-	if monitor.Name == "eDP-1" || monitor.Name == "FALLBACK" {
+	if monitor.Name == fallbackMonitor || monitor.Name == "FALLBACK" {
 		return false
 	}
 	return monitor.Disabled || monitor.Width == 0 || monitor.Height == 0
 }
 
 func needsMonitorRecovery(monitors []hyprland.Monitor) bool {
-	realMonitors := 0
+	// An empty list means hyprctl told us nothing, not that every monitor is
+	// disabled, so leave that state alone.
+	if len(monitors) == 0 {
+		return false
+	}
 	for _, monitor := range monitors {
 		if monitor.Name == "FALLBACK" {
 			continue
 		}
-		realMonitors++
 		if !monitor.Disabled {
 			return false
 		}
 	}
-	return realMonitors > 0
+	return true
 }

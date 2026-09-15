@@ -202,7 +202,11 @@ func TestNeedsMonitorRecovery(t *testing.T) {
 			},
 			want: true,
 		},
-		{name: "only Hyprland fallback returned", monitors: []hyprland.Monitor{{Name: "FALLBACK"}}},
+		{
+			name:     "only Hyprland fallback returned",
+			monitors: []hyprland.Monitor{{Name: "FALLBACK"}},
+			want:     true,
+		},
 		{name: "no monitors returned"},
 	}
 

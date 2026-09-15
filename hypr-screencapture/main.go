@@ -226,6 +226,8 @@ func main() {
 		}
 	}()
 
+	handler.EnsureMonitorEnabled()
+
 	slog.Debug("Environment variables",
 		"XDG_RUNTIME_DIR", os.Getenv("XDG_RUNTIME_DIR"),
 		"HYPRLAND_INSTANCE_SIGNATURE", os.Getenv("HYPRLAND_INSTANCE_SIGNATURE"),
