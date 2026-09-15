@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# glab hangs forever when the keyring collection is locked; bail out instead.
+"$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/glab-keyring-check" || exit 0
+
 # Waybar custom module: unapproved open MRs where I am a reviewer.
 # Uses GraphQL to get approval status in a single request.
 # Output: {"text": "...", "alt": "...", "tooltip": "...", "class": "...", "percentage": N}

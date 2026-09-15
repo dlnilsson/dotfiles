@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Exit 0 when glab can safely reach the Secret Service, 1 when it would hang.
+#
+# go-keyring (vendored by glab) always unlocks the hardcoded collection
+# /org/freedesktop/secrets/collection/login before searching for an item.
+# If that collection is locked and no prompter answers, go-keyring's
+# handlePrompt blocks on a channel with no timeout and glab hangs forever,
+# ignoring SIGTERM. Reading the Locked property is cheap and never prompts.
+
+COLLECTION=/org/freedesktop/secrets/collection/login
+
+if [[ -z ${DBUS_SESSION_BUS_ADDRESS:-} ]]; then
+  exit 0 # no session bus: go-keyring fails fast instead of prompting
+fi
+
+if ! command -v busctl >/dev/null; then
+  echo "glab-keyring-check: busctl not found; keyring state unverified" >&2
+  exit 0
+fi
+
+# Query failure means the collection or the service is absent, which go-keyring
+# reports as an error instead of a prompt. Not a hang risk.
+locked=$(timeout -k 2 5 busctl --user get-property org.freedesktop.secrets "$COLLECTION" \
+  org.freedesktop.Secret.Collection Locked 2>/dev/null) || exit 0
+
+if [[ ${locked##* } == "true" ]]; then
+  echo "glab-keyring-check: collection 'login' is locked; glab would hang" >&2
+  echo "unlock with:" >&2
+  echo "  busctl --user call org.freedesktop.secrets /org/freedesktop/secrets \\" >&2
+  echo "    org.freedesktop.Secret.Service Unlock ao 1 $COLLECTION" >&2
+  exit 1
+fi
+
+exit 0

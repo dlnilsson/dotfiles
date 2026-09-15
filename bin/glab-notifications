@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# glab hangs forever when the keyring collection is locked; bail out instead.
+"$(dirname "$(readlink -f "${BASH_SOURCE[0]:-$0}")")/glab-keyring-check" || exit 1
+
 # deps: glab, jq, fzf, base64  (optional: gum or bat for pretty markdown preview)
 
 TMP_DIR="${TMPDIR:-/tmp}/glab-todo"
