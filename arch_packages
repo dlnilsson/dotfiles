@@ -87,6 +87,7 @@ hyprlock
 hyprpaper
 hyprpicker
 hyprpolkitagent
+hyprshutdown
 hyprsunset
 imagemagick
 imwheel
@@ -122,6 +123,7 @@ nautilus
 ncdu
 neovim
 nix
+nmap
 nodejs-lts-iron
 noto-fonts
 noto-fonts-cjk
