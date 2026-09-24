@@ -588,6 +588,7 @@ hl.bind(mainMod .. " + T",            hl.dsp.exec_cmd("sleep 0.1 && swaync-clien
 hl.bind(mainMod .. " + D",            hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P",            hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + E",            hl.dsp.layout("togglesplit"))
+hl.bind(mainMod .. " + C",            hl.dsp.layout("togglecenter"))
 
 hl.bind(mainMod .. " + R",            hl.dsp.exec_cmd("/home/dln/go/bin/hyprtabs"))
 

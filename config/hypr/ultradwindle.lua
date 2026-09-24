@@ -9,14 +9,15 @@
 --
 -- layoutmsg commands (same as dwindle, plus movewindow):
 --   togglesplit, swapsplit, rotatesplit [angle], movetoroot [window] [unstable],
---   preselect <u|d|l|r>, splitratio <delta> [exact], movewindow <u|d|l|r>
+--   preselect <u|d|l|r>, splitratio <delta> [exact], movewindow <u|d|l|r>,
+--   togglecenter (lone window: centered SINGLE_WINDOW_ASPECT box <-> full area)
 
 -- Per-workspace state. The provider table is shared by every workspace using
 -- the layout, while C++ dwindle gets one algorithm instance per workspace.
 local spaces = {}
 
 -- A lone tiled window gets a centered box of this aspect ratio (width / height)
--- instead of the whole area. Only shrinks width, so non-ultrawide monitors are unaffected.
+-- instead of the whole area. Toggle per workspace with the "togglecenter" layoutmsg. Only shrinks width, so non-ultrawide monitors are unaffected.
 local SINGLE_WINDOW_ASPECT = 16 / 9
 
 local function clamp(x, lo, hi)
@@ -93,7 +94,7 @@ local function space_for(ctx)
     local sp = spaces[key]
     if not sp then
         -- leaves: id -> leaf node, order: ids in ctx.targets order (for swap detection)
-        sp = { root = nil, leaves = {}, order = {}, last_active = nil, override_dir = nil }
+        sp = { root = nil, leaves = {}, order = {}, last_active = nil, override_dir = nil, center_single = true }
         spaces[key] = sp
     end
     return sp
@@ -147,7 +148,7 @@ end
 -- is centered on the monitor, so it lines up with a centered bar of the same width
 -- (e.g. waybar "width": 2560 on 3440x1440) instead of shrinking by the bar's reserved area.
 local function root_box(sp, area)
-    if sp.root.children then
+    if sp.root.children or not sp.center_single then
         return copy_box(area)
     end
 
@@ -632,6 +633,8 @@ hl.layout.register("ultradwindle", {
             local exact = args[3] ~= nil and args[3]:sub(1, 5) == "exact"
             local ratio = exact and delta or (node.parent.ratio + delta)
             node.parent.ratio = clamp(ratio, 0.1, 1.9)
+        elseif command == "togglecenter" then
+            sp.center_single = not sp.center_single
         elseif command == "movewindow" then
             local dir = parse_dir(args[2])
             if not dir then
