@@ -78,8 +78,6 @@ hl.permission("^(video-bus|power-button|sleep-button|dp-1|dp-2)$", "keyboard", "
 -- Anything else (not currently plugged in) will prompt
 hl.permission(".*", "keyboard", "ask")
 
-require("ultradwindle")
-
 hl.config({
     cursor = {
         hide_on_key_press = true,
@@ -100,7 +98,12 @@ hl.config({
 
         resize_on_border = true,
         allow_tearing = false,
-        layout = "lua:ultradwindle",
+        layout = "dwindle",
+    },
+
+    layout = {
+        single_window_aspect_ratio = { 16, 9 },
+        single_window_aspect_ratio_tolerance = 0.0
     },
 
     group = {
@@ -588,7 +591,16 @@ hl.bind(mainMod .. " + T",            hl.dsp.exec_cmd("sleep 0.1 && swaync-clien
 hl.bind(mainMod .. " + D",            hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P",            hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + E",            hl.dsp.layout("togglesplit"))
-hl.bind(mainMod .. " + C",            hl.dsp.layout("togglecenter"))
+hl.bind(mainMod .. " + C", function()
+    local ratio = hl.get_config("layout:single_window_aspect_ratio")
+    local enabled = ratio and ratio[2] ~= 0
+
+    hl.config({
+        layout = {
+            single_window_aspect_ratio = enabled and { 0, 0 } or { 16, 9 },
+        },
+    })
+end)
 
 hl.bind(mainMod .. " + R",            hl.dsp.exec_cmd("/home/dln/go/bin/hyprtabs"))
 

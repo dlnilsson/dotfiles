@@ -1,0 +1,275 @@
+{
+   "layer": "top", // Waybextar at top layer
+   "position": "top", //
+   //  Waybar position (top|bottom|left|right)
+    // "height": 36, // Waybar height (to be removed for auto height)
+    // Archived modules
+    // "custom/gpu", "bluetooth",  "custom/weather", "temperature", "sway/window"
+    // Choose the order of the modules
+    // , "idle_inhibitor"
+            // "custom/hyprWindowMode",
+    "modules-left": ["hyprland/window"],
+    "modules-center": ["clock"],
+    "modules-right": [
+        "custom/camera",
+        "custom/recording",
+        "privacy",
+        "custom/vpn",
+        "custom/glab",
+        //"ext/workspaces",
+        "hyprland/workspaces",
+        "custom/powermode",
+        "tray",
+        "custom/swaync",
+        "battery",
+        "pulseaudio",
+        "custom/wlogout"
+    ],
+    //  "pulseaudio", "bluetooth", "network","hyprland/language",
+    // "modules-right": [
+    //     "custom/wlogout"
+    // ],
+    "privacy": {
+        "icon-spacing": 4,
+        "icon-size": 18,
+        "transition-duration": 250,
+        "modules": [
+            {
+                "type": "screenshare",
+                "tooltip": true,
+                "tooltip-icon-size": 24
+            },
+            {
+                "type": "audio-out",
+                "tooltip": true,
+                "tooltip-icon-size": 24
+            },
+            {
+                "type": "audio-in",
+                "tooltip": true,
+                "tooltip-icon-size": 24
+            }
+        ],
+        "ignore-monitor": true,
+        "ignore": [
+            {
+                "type": "audio-in",
+                "name": "cava"
+            },
+            {
+                "type": "screenshare",
+                "name": "obs"
+            }
+        ]
+    },
+    "custom/vpn": {
+        "exec": "/home/dln/.dotfiles/bin/vpn-status",
+        "return-type": "json",
+        "format": "{text}",
+        "tooltip": true,
+        "interval": 15
+    },
+    "custom/recording": {
+        "exec": "/home/dln/go/bin/hypr-screencapture status -subscribe",
+        "format": "{}",
+        "tooltip": false,
+        "on-click": "/home/dln/.dotfiles/bin/screen-recorder"
+    },
+    "custom/powermode": {
+        "exec": "$HOME/.dotfiles/bin/power_saver --status",
+        "return-type": "json",
+        "interval": 120,
+        "format": "{text}",
+        "tooltip": true,
+        "on-click": "$HOME/.dotfiles/bin/power_saver --toggle"
+    },
+    "custom/glab": {
+        "exec": "$HOME/.dotfiles/bin/glab-my-reviews",
+        "return-type": "json",
+        "interval": 120,
+        "format": "{icon} {text}",
+        "format-icons": {
+            "pending": "\uf296",
+            "error": "\uf071",
+            "none": "0"
+        },
+        "tooltip": true,
+        "on-click": "xdg-open https://gitlab.com/dashboard/merge_requests"
+    },
+    "custom/camera": {
+        "exec": "/home/dln/.dotfiles/bin/check-camera",
+        "interval": 3,
+        "format": "{}",
+        "tooltip": false
+    },
+    // Modules configuration
+    "ext/workspaces": {
+        "on-click": "activate",
+        "move-to-monitor": true,
+        "format": "{name}",
+        "format-icons": {
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "urgent": "",
+            "active": "",
+            "default": ""
+        },
+        "all-outputs": true,
+        "active-only": false,
+        "sort-by-number": true,
+        "sort-by-id": true,
+        "sort-by-name": false,
+        "ignore-hidden": false,
+        "persistent-workspaces": {
+                "1": [],
+                "2": [],
+                "3": [],
+                "4": [],
+                "5": [],
+                "6": [],
+                "7": [],
+                "8": [],
+                "9": []
+        }
+    },
+    "hyprland/submap": {
+        "format": "<span style=\"italic\">{}</span>"
+    },
+    "battery": {
+        "interval": 60,
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{capacity}% {icon}",
+        "format-icons": ["", "", "", "", ""],
+        "max-length": 25
+    },
+    "pulseaudio": {
+        "format": "{volume}% {icon}",
+        "format-bluetooth": "{volume}% {icon}",
+        "format-muted": "",
+        "format-icons": {
+            "alsa_output.pci-0000_00_1f.3.analog-stereo": "",
+            "alsa_output.pci-0000_00_1f.3.analog-stereo-muted": "",
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "phone-muted": "",
+            "portable": "",
+            "car": "",
+            "default": ["", ""]
+        },
+        "scroll-step": 1,
+        "on-click": "pavucontrol",
+        "ignored-sinks": ["Easy Effects Sink"]
+    },
+    "wlr/taskbar": {
+        "all-outputs": true,
+        "format": "{icon}   {title:.25}",
+        "markup": true,
+        "icon-size": 20,
+        "on-click": "activate"
+    },
+    "hyprland/window": {
+        "format": "{}",
+        "icon": false,
+        "rewrite": {
+            "(.*) — Zen Browser": " $1",
+            "(.*) — Code - OSS": "$1",
+            "(.*) - Visual Studio Code": "$1",
+            "(.*) - Slack.*": " $1",
+            "(.*) - Discord": "$1",
+            "(.*) - Cursor": "$1",
+            "(.*) - Chromium": "$1",
+            "(.*) - Free Version": "$1"
+        },
+        "separate-outputs": true
+    },
+    "custom/swaync": {
+        "tooltip": true,
+        "tooltip-format": "Left Click: Launch Notification Center\nRight Click: Do not Disturb",
+        "format": "{} {icon} ",
+        "format-icons": {
+            "notification": "<span foreground='red'><sup></sup></span>",
+            "none": "",
+            "dnd-notification": "<span foreground='red'><sup></sup></span>",
+            "dnd-none": "",
+            "inhibited-notification": "<span foreground='red'><sup></sup></span>",
+            "inhibited-none": "",
+            "dnd-inhibited-notification": "<span foreground='red'><sup></sup></span>",
+            "dnd-inhibited-none": ""
+        },
+        "return-type": "json",
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb",
+        "on-click": "sleep 0.1 && swaync-client -t -sw",
+        "on-click-right": "swaync-client -d -sw",
+        "escape": true
+    },
+    "custom/hyprWindowMode": {
+        "exec": "/home/dln/.dotfiles/bin/hypr-window-mode",
+        "return-type": "json",
+        "format": "{}",
+        "on-click": "/home/dln/.dotfiles/bin/hypr-window-mode toggle",
+        "tooltip": true
+    },
+    "custom/wlogout": {
+        "format": " ⏻ ",
+        "tooltip": false,
+        "on-click": "wlogout --protocol layer-shell"
+    },
+    "bluetooth": {
+        "interval": 30,
+        "format": "{icon}",
+        // "format-alt": "{status}",
+        "format-icons": {
+            "enabled": "",
+            "disabled": ""
+        },
+        "on-click": "blueberry"
+    },
+    "hyprland/language": {
+        "format": " {}",
+        "max-length": 20,
+        "min-length": 15
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        },
+        "tooltip": "true"
+    },
+    "tray": {
+        //"icon-size": 11,
+        "spacing": 5
+    },
+    "clock": {
+        //"format": "  {:%H:%M   %e %b}",
+	//"format": "{%Y-%M-%d :%H:%M}",
+	"format": "{:%Y-%m-%d %H:%M}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "today-format": "<b>{}</b>",
+        "on-click": "gnome-calendar"
+    },
+    "network": {
+        // "interface": "wlan0", // (Optional) To force the use of this interface,
+        "format-wifi": "  {essid}",
+        "format-ethernet": "{ifname}: {ipaddr}/{cidr} ",
+        "format-linked": "{ifname} (No IP) ",
+        "format-disconnected": "",
+        "format-alt": "{ifname}: {ipaddr}/{cidr}",
+        "family": "ipv4",
+        "tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\n {bandwidthUpBits}  {bandwidthDownBits}",
+        "tooltip-format-ethernet": " {ifname}\nIP: {ipaddr}\n {bandwidthUpBits}  {bandwidthDownBits}"
+    }
+}
