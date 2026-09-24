@@ -78,6 +78,7 @@ hl.permission("^(video-bus|power-button|sleep-button|dp-1|dp-2)$", "keyboard", "
 -- Anything else (not currently plugged in) will prompt
 hl.permission(".*", "keyboard", "ask")
 
+require("ultradwindle")
 
 hl.config({
     cursor = {
@@ -99,7 +100,7 @@ hl.config({
 
         resize_on_border = true,
         allow_tearing = false,
-        layout = "dwindle",
+        layout = "lua:ultradwindle",
     },
 
     group = {

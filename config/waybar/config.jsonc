@@ -1,6 +1,7 @@
 {
-    "layer": "top", // Waybar at top layer
-    "position": "top", // Waybar position (top|bottom|left|right)
+   "layer": "top", // Waybextar at top layer
+   "position": "top", //
+   //  Waybar position (top|bottom|left|right)
     // "height": 36, // Waybar height (to be removed for auto height)
     // Archived modules
     // "custom/gpu", "bluetooth",  "custom/weather", "temperature", "sway/window"
@@ -15,6 +16,7 @@
         "privacy",
         "custom/vpn",
         "custom/glab",
+        //"ext/workspaces",
         "hyprland/workspaces",
         "custom/powermode",
         "tray",
@@ -101,7 +103,9 @@
         "tooltip": false
     },
     // Modules configuration
-    "hyprland/workspaces": {
+    "ext/workspaces": {
+        "on-click": "activate",
+        "move-to-monitor": true,
         "format": "{name}",
         "format-icons": {
             "1": "1",
@@ -116,8 +120,12 @@
             "active": "",
             "default": ""
         },
-        "all-outputs": false,
+        "all-outputs": true,
+        "active-only": false,
         "sort-by-number": true,
+        "sort-by-id": true,
+        "sort-by-name": false,
+        "ignore-hidden": false,
         "persistent-workspaces": {
                 "1": [],
                 "2": [],
@@ -243,8 +251,7 @@
     },
     "tray": {
         //"icon-size": 11,
-        "spacing": 5,
-        "icon-theme": "Nordzy"
+        "spacing": 5
     },
     "clock": {
         //"format": "  {:%H:%M   %e %b}",
