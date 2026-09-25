@@ -478,3 +478,14 @@ label:focus {
 #custom-vpn.disconnected {
     color: @nord-grey4;
 }
+
+/* ef token usage today */
+#custom-ef-usage {
+    margin: 0 5px;
+    padding: 0 8px;
+    color: @nord-frost3;
+}
+
+#custom-ef-usage:hover {
+    background-color: @nord-grey3;
+}

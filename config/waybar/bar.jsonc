@@ -11,6 +11,7 @@
     "modules-left": ["hyprland/window"],
     "modules-center": ["clock"],
     "modules-right": [
+        "custom/ef-usage",
         "custom/codex",
         "custom/camera",
         "custom/recording",
@@ -62,6 +63,14 @@
                 "name": "obs"
             }
         ]
+    },
+    "custom/ef-usage": {
+        "exec": "/home/dln/.dotfiles/bin/waybar-ef-usage",
+        "return-type": "json",
+        "interval": 60,
+        "format": "󰚩  {}",
+        "tooltip": true,
+        "on-click": "kitty -e sh -c 'ef usage today; read'"
     },
     "custom/vpn": {
         "exec": "/home/dln/.dotfiles/bin/vpn-status",

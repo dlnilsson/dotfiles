@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Waybar custom module: today's token usage from ef, total + per-provider tooltip
+ef usage today --json | jq -c '
+  def h:
+    if . >= 1e9 then "\(./1e9*10|round/10)B"
+    elif . >= 1e6 then "\(./1e6*10|round/10)M"
+    elif . >= 1e3 then "\(./1e3*10|round/10)k"
+    else tostring end;
+  {
+    text: (map(.Total) | add // 0 | h),
+    tooltip: (group_by(.Provider) | map("\(.[0].Provider): \(map(.Total) | add | h)") | join("\n"))
+  }'
