@@ -2,7 +2,7 @@
 
 # Check tailscale
 if tailscale status &>/dev/null; then
-    tn=$(tailscale status --json | jq -r '.CurrentTailnet.Name // "unknown"')
+    tn=$(tailscale status --json | jq -r '.Self.CapMap."tailnet-display-name" | first // "Unkown"')
     echo '{"text":"tailscale","tooltip":"Tailscale: '"$tn"'","class":"tailscale"}'
     exit 0
 fi
