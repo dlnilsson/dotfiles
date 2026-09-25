@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """Forward Zed's codex-acp traffic and expose pending-prompt counts."""
 
+# Update the Zed-installed codex-acp package used by this tap:
+#   acp_dir="$HOME/.local/share/zed/external_agents/registry/npx/codex-acp"
+#   npm install --prefix "$acp_dir" --save-exact @agentclientprotocol/codex-acp@latest
+#   npm ls --prefix "$acp_dir" @agentclientprotocol/codex-acp --depth=0
+# Start a new Codex session in Zed to use the updated package.
+
 import json
 import os
 import shutil
