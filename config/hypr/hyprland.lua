@@ -6,6 +6,7 @@ hl.monitor({ output = "desc:Dell Inc. DELL P2717H 4P9HC84RB85S", mode = "1920x10
 hl.monitor({ output = "desc:LG Electronics LG ULTRAGEAR 011NTLE3V064", mode = "3440x1440@99.99", position = "0x0", scale = 1.0 })
 hl.monitor({ output = "desc:Lenovo Group Limited 0x403D", mode = "highres", position = "auto", scale = 1.0 })
 hl.monitor({ output = "desc:AOC CU34E4CV ZO0RBHA000849", mode = "3440x1440@100.00", position = "0x0", scale = 1.0 })
+hl.monitor({ output = "desc:AOC CU34E4CV ZO0RBHA000861", mode = "3440x1440@100.00", position = "0x0", scale = 1.0 })
 
 
 local terminal = "kitty"
@@ -177,6 +178,7 @@ hl.curve("easeInOutElasticApprox",    { type = "bezier", points = { { 0.68, -0.5
 hl.animation({ leaf = "global",        enabled = true,  speed = 10,   bezier = "default" })
 hl.animation({ leaf = "border",        enabled = true,  speed = 5.39, bezier = "easeOutQuint" })
 hl.animation({ leaf = "windows",       enabled = true,  speed = 1.79, bezier = "easeOutQuint" })
+hl.animation({ leaf = "windowsMove",   enabled = true,  speed = 2.5,  bezier = "easeInOutCubic" })
 hl.animation({ leaf = "windowsIn",     enabled = true,  speed = 1.5,  bezier = "easeOutQuint",    style = "gnomed" })
 hl.animation({ leaf = "windowsOut",    enabled = true,  speed = 1.5,  bezier = "easeInOutCubic",  style = "gnomed" })
 hl.animation({ leaf = "fadeIn",        enabled = true,  speed = 0.73, bezier = "almostLinear" })
