@@ -11,6 +11,7 @@
     "modules-left": ["hyprland/window"],
     "modules-center": ["clock"],
     "modules-right": [
+        "custom/codex",
         "custom/camera",
         "custom/recording",
         "privacy",
@@ -102,7 +103,13 @@
         "format": "{}",
         "tooltip": false
     },
-    // Modules configuration
+    "custom/codex": {
+        "exec": "/home/dln/.dotfiles/bin/codex-status",
+        "return-type": "json",
+        "interval": 10,
+        "format": "{}",
+        "tooltip": true
+    },
     "ext/workspaces": {
         "on-click": "activate",
         "move-to-monitor": true,

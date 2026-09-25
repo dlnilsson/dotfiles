@@ -423,6 +423,27 @@ label:focus {
     color: #7cb342;
 }
 
+/* Codex sessions waiting for input */
+#custom-codex {
+    margin: 0 5px;
+    padding: 0 8px;
+    border-radius: 4px;
+    color: @nord-frost2;
+}
+
+#custom-codex.action-required {
+    background-color: @nord-yellow;
+    color: @nord-grey1;
+    font-weight: bold;
+}
+
+#custom-codex.idle,
+#custom-codex.unavailable {
+    margin: 0;
+    padding: 0;
+    background-color: transparent;
+}
+
 /* glab reviews */
 #custom-glab {
     margin: 0 5px;

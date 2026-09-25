@@ -8,7 +8,7 @@
     {
         // External monitors: 2560px (16:9 at 1440p) centered bar
         "output": "!eDP-1",
-        "width": 2518,
+        "width": 2525,
         "include": ["~/.config/waybar/bar.jsonc"]
     }
 ]
