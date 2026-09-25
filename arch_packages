@@ -52,10 +52,12 @@ fd
 feh
 firefox
 flameshot
+flatpak
 font-manager
 fprintd
 fuse2
 fwupd
+fx
 fzf
 gdb
 gedit
@@ -94,6 +96,7 @@ imwheel
 inotify-tools
 intel-media-driver
 ipython
+ironbar
 iwd
 jdk-openjdk
 jq
@@ -211,6 +214,7 @@ woff2-font-awesome
 wofi
 wpa_supplicant
 wtype
+xan
 xdg-desktop-portal-gtk
 xdg-desktop-portal-hyprland
 xdg-utils
