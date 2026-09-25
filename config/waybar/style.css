@@ -423,22 +423,25 @@ label:focus {
     color: #7cb342;
 }
 
-/* Codex sessions waiting for input */
-#custom-codex {
+/* Codex and Claude sessions waiting for input */
+#custom-codex,
+#custom-claude {
     margin: 0 5px;
     padding: 0 8px;
     border-radius: 4px;
     color: @nord-frost2;
 }
 
-#custom-codex.action-required {
+#custom-codex.action-required,
+#custom-claude.action-required {
     background-color: @nord-yellow;
     color: @nord-grey1;
     font-weight: bold;
 }
 
 #custom-codex.idle,
-#custom-codex.unavailable {
+#custom-codex.unavailable,
+#custom-claude.idle {
     margin: 0;
     padding: 0;
     background-color: transparent;

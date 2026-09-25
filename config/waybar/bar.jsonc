@@ -13,6 +13,7 @@
     "modules-right": [
         "custom/ef-usage",
         "custom/codex",
+        "custom/claude",
         "custom/camera",
         "custom/recording",
         "privacy",
@@ -118,6 +119,13 @@
     },
     "custom/codex": {
         "exec": "/home/dln/.dotfiles/bin/codex-status",
+        "return-type": "json",
+        "interval": 10,
+        "format": "{}",
+        "tooltip": true
+    },
+    "custom/claude": {
+        "exec": "/home/dln/.dotfiles/bin/claude-status",
         "return-type": "json",
         "interval": 10,
         "format": "{}",
