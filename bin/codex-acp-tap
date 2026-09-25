@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""Forward Zed's codex-acp traffic and expose pending-prompt counts."""
+
+import json
+import os
+import shutil
+import subprocess
+import sys
+import threading
+from pathlib import Path
+
+PROMPT_METHODS = {"session/request_permission", "elicitation/create"}
+
+
+def main():
+    default_acp = (Path.home() / ".local/share/zed/external_agents/registry/npx/codex-acp"
+                   / "node_modules/@agentclientprotocol/codex-acp/dist/index.js")
+    codex_acp = os.environ.get("CODEX_ACP_PATH", str(default_acp))
+    node = shutil.which("node") or str(max(
+        (Path.home() / ".local/share/zed/node").glob("node-v*/bin/node"), default="node"
+    ))
+
+    codex_home = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex"))
+    status_dir = codex_home / "acp-status"
+    status_file = status_dir / f"{os.getpid()}.json"
+    start = Path(f"/proc/{os.getpid()}/stat").read_text().rsplit(") ", 1)[1].split()[19]
+    pending = set()
+    lock = threading.Lock()
+
+    def publish():
+        try:
+            status_dir.mkdir(mode=0o700, exist_ok=True)
+            temporary = status_file.with_suffix(".tmp")
+            temporary.write_text(json.dumps({"start": start, "pending": len(pending)}))
+            os.chmod(temporary, 0o600)
+            temporary.replace(status_file)
+        except OSError:
+            pass  # Status reporting must not interrupt the ACP connection.
+
+    def update(add=None, remove=None):
+        with lock:
+            before = len(pending)
+            if add is not None:
+                pending.add(add)
+            pending.discard(remove)
+            if len(pending) != before:
+                publish()
+
+    def observe_agent(line):
+        try:
+            message = json.loads(line)
+            method = message.get("method")
+            if method in PROMPT_METHODS and "id" in message:
+                update(add=message["id"])
+            elif method == "$/cancel_request":
+                update(remove=message["params"]["requestId"])
+        except (ValueError, KeyError, TypeError, AttributeError):
+            pass  # Forward every protocol message, even if its shape is unfamiliar.
+
+    def observe_client(line):
+        try:
+            message = json.loads(line)
+            if "method" not in message and "id" in message:
+                update(remove=message["id"])
+        except (ValueError, KeyError, TypeError, AttributeError):
+            pass
+
+    publish()
+    try:
+        with subprocess.Popen([node, codex_acp, *sys.argv[1:]], stdin=subprocess.PIPE,
+                              stdout=subprocess.PIPE) as child:
+            def forward_input():
+                try:
+                    for line in sys.stdin.buffer:
+                        child.stdin.write(line)
+                        child.stdin.flush()
+                        observe_client(line)
+                except BrokenPipeError:
+                    pass
+                finally:
+                    child.stdin.close()
+
+            threading.Thread(target=forward_input, daemon=True).start()
+            for line in child.stdout:
+                sys.stdout.buffer.write(line)
+                sys.stdout.buffer.flush()
+                observe_agent(line)
+            return child.wait()
+    finally:
+        try:
+            status_file.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+if __name__ == "__main__":
+    sys.exit(main())

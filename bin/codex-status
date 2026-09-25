@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""Print a Waybar status for Codex sessions waiting on a person."""
+
+import base64
+import json
+import os
+import socket
+from pathlib import Path
+
+
+def read_exact(stream, size):
+    data = stream.read(size)
+    if len(data) != size:
+        raise ConnectionError("Codex closed the connection")
+    return data
+
+
+def send_frame(connection, payload):
+    mask = os.urandom(4)
+    size = len(payload)
+    header = bytes([0x81, 0x80 | size]) if size < 126 else bytes([
+        0x81, 0x80 | 126, size >> 8, size & 255
+    ])
+    connection.sendall(header + mask + bytes(
+        byte ^ mask[index % 4] for index, byte in enumerate(payload)
+    ))
+
+
+def read_frame(stream):
+    first, second = read_exact(stream, 2)
+    size = second & 0x7f
+    if size == 126:
+        size = int.from_bytes(read_exact(stream, 2), "big")
+    elif size == 127:
+        size = int.from_bytes(read_exact(stream, 8), "big")
+    if first & 0x0f == 8:
+        raise ConnectionError("Codex closed the connection")
+    if first & 0x0f != 1 or second & 0x80:
+        raise ValueError("Unexpected WebSocket frame")
+    return read_exact(stream, size)
+
+
+def acp_pending(codex_home):
+    total = 0
+    for status_file in (codex_home / "acp-status").glob("*.json"):
+        try:
+            pid = int(status_file.stem)
+            start = Path(f"/proc/{pid}/stat").read_text().rsplit(") ", 1)[1].split()[19]
+            state = json.loads(status_file.read_text())
+            if state["start"] == start:
+                total += state["pending"]
+        except (OSError, ValueError, KeyError, IndexError):
+            continue
+    return total
+
+
+def main():
+    codex_home = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex"))
+    socket_path = codex_home / "app-server-control" / "app-server-control.sock"
+    pending = 0
+
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+            connection.settimeout(2)
+            connection.connect(str(socket_path))
+            stream = connection.makefile("rb")
+            key = base64.b64encode(os.urandom(16)).decode()
+            connection.sendall((
+                "GET / HTTP/1.1\r\nHost: localhost\r\nUpgrade: websocket\r\n"
+                "Connection: Upgrade\r\nSec-WebSocket-Version: 13\r\n"
+                f"Sec-WebSocket-Key: {key}\r\n\r\n"
+            ).encode())
+            if b" 101 " not in stream.readline():
+                raise ConnectionError("Codex rejected the WebSocket connection")
+            while True:
+                line = stream.readline()
+                if not line:
+                    raise ConnectionError("Codex closed the connection")
+                if line == b"\r\n":
+                    break
+
+            request_id = 0
+
+            def call(method, params=None):
+                nonlocal request_id
+                request_id += 1
+                request = {"id": request_id, "method": method}
+                if params is not None:
+                    request["params"] = params
+                send_frame(connection, json.dumps(request).encode())
+                while True:
+                    response = json.loads(read_frame(stream))
+                    if response.get("id") == request_id:
+                        if "error" in response:
+                            raise RuntimeError(response["error"])
+                        return response["result"]
+
+            call("initialize", {"clientInfo": {
+                "name": "codex_waybar", "title": "Codex Waybar status", "version": "1"
+            }})
+            send_frame(connection, b'{"method":"initialized"}')
+
+            cursor = None
+            while True:
+                page = call("thread/loaded/list", {"cursor": cursor} if cursor else {})
+                for thread_id in page["data"]:
+                    try:
+                        status = call("thread/read", {"threadId": thread_id})["thread"]["status"]
+                    except RuntimeError:
+                        continue  # A thread may unload between the list and the read.
+                    if status["type"] == "active" and set(status["activeFlags"]) & {
+                        "waitingOnApproval", "waitingOnUserInput"
+                    }:
+                        pending += 1
+                cursor = page.get("nextCursor")
+                if not cursor:
+                    break
+    except (OSError, ValueError, KeyError, RuntimeError):
+        daemon_available = False
+        pending = 0
+    else:
+        daemon_available = True
+
+    cli_pending = pending
+    acp_count = acp_pending(codex_home)
+    pending += acp_count
+    sources = ", ".join(f"{name}: {count}" for name, count in (
+        ("CLI", cli_pending), ("ACP", acp_count)
+    ) if count)
+    if pending:
+        status_class = "action-required"
+        tooltip = f"Action required ({sources})"
+        if not daemon_available:
+            tooltip += "; CLI status unavailable"
+    elif daemon_available:
+        status_class = "idle"
+        tooltip = "Codex: no action required"
+    else:
+        status_class = "unavailable"
+        tooltip = "Codex status unavailable"
+
+    print(json.dumps({
+        "text": f"Codex: {pending}" if pending else "",
+        "class": status_class,
+        "tooltip": tooltip,
+    }))
+
+
+if __name__ == "__main__":
+    main()
