@@ -262,6 +262,14 @@ hl.window_rule({
 })
 
 hl.window_rule({
+    name   = "ef-usage",
+    match  = { class = "^(ef-usage)$" },
+    float  = true,
+    center = true,
+    size   = "1386 749",
+})
+
+hl.window_rule({
     name  = "tag-browser",
     match = { class = "^(zen|chromium|Chromium|firefox|Opera|vivaldi-stable)$" },
     tag   = "browser",

@@ -59,6 +59,10 @@
                 "name": "cava"
             },
             {
+                "type": "audio-in",
+                "name": "pw-cat"
+            },
+            {
                 "type": "screenshare",
                 "name": "obs"
             }
@@ -70,7 +74,7 @@
         "interval": 60,
         "format": "󰚩  {}",
         "tooltip": true,
-        "on-click": "kitty -e sh -c 'ef usage today; read'"
+        "on-click": "kitty --class ef-usage -o background_opacity=1.0 -e sh -c 'ef usage today; read'"
     },
     "custom/vpn": {
         "exec": "/home/dln/.dotfiles/bin/vpn-status",
