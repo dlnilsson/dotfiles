@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Capture QR Code
+Comment=Select a screen region and copy its QR code to the clipboard
+Path=/home/dln/.dotfiles/bin/
+Exec=/home/dln/.dotfiles/bin/capture-qr
+Terminal=false
+Categories=Utility;
+Keywords=qr;code;clipboard;wayland;

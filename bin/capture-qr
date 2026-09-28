@@ -1,0 +1,46 @@
+#!/bin/bash
+# See: https://raw.githubusercontent.com/omacom/omarchy/324f0ba5e6c99de26a685106919f7123ecc5f7f0/bin/omarchy-capture-qr
+#
+
+wait_for_rofi_to_close() {
+  # Wait up to ~2 seconds for the rofi layer to disappear
+  for _ in {1..40}; do
+    if ! hyprctl -j layers 2>/dev/null \
+      | jq -e '
+        to_entries[]
+        | .value.levels
+        | to_entries[]
+        | .value[]
+        | select(.namespace == "rofi")
+      ' >/dev/null 2>&1; then
+      # Small extra delay to let fade-out finish
+      sleep 0.25
+      return
+    fi
+    sleep 0.05
+  done
+}
+
+wait_for_rofi_to_close
+
+cleanup_freeze() {
+  [[ -n $PID ]] && kill $PID 2>/dev/null
+}
+trap cleanup_freeze EXIT
+
+hyprpicker -r -z >/dev/null 2>&1 &
+PID=$!
+sleep .1
+SELECTION=$(slurp 2>/dev/null)
+
+[[ -z $SELECTION ]] && exit 0
+
+RESULT=$(grim -g "$SELECTION" - | zbarimg -q --raw -Sdisable -Sqrcode.enable - 2>/dev/null)
+
+if [[ -z $RESULT ]]; then
+  notify-send  -u critical "No QR code found" "Select a region containing a QR code"
+  exit 1
+fi
+
+printf '%s' "$RESULT" | wl-copy --sensitive
+notify-send  "QR code copied to clipboard"

@@ -20,7 +20,7 @@ wait_for_rofi_to_close() {
         | select(.namespace == "rofi")
       ' >/dev/null 2>&1; then
       # Small extra delay to let fade-out finish
-      sleep 0.05
+      sleep 0.25
       return
     fi
     sleep 0.05
