@@ -26,6 +26,48 @@ hl.on("hyprland.start", function()
     hl.exec_cmd([[gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"]])
 end)
 
+local browsers = {
+    { class = "firefox", initial_title = "Mozilla Firefox" },
+    { class = "zen", initial_title = "Zen Browser" },
+}
+
+hl.on("window.open", function(w)
+    local browser
+    for _, candidate in ipairs(browsers) do
+        if w.class == candidate.class and w.initial_title == candidate.initial_title then
+            browser = candidate
+            break
+        end
+    end
+    if not browser then return end
+
+    local browser_windows = hl.get_windows({ class = browser.class })
+    if #browser_windows <= 1 then return end
+
+    hl.dispatch(hl.dsp.window.float({ action = "set", window = w }))
+
+    local sub
+    sub = hl.on("window.title", function(tw)
+        if tw.address ~= w.address then return end
+        if tw.title == ""
+            or tw.title == browser.initial_title
+            or tw.title == "about:blank"
+            or (tw.title:match("^about:")
+                and tw.title:sub(-#browser.initial_title) == browser.initial_title) then return end
+
+        sub:remove()
+
+        if tw.title:match("^Extension:") then
+            hl.dispatch(hl.dsp.window.resize({ x = 800, y = 600, window = tw }))
+            hl.dispatch(hl.dsp.window.center({ window = tw }))
+            hl.dispatch(hl.dsp.focus({ window = tw }))
+        else
+            hl.dispatch(hl.dsp.window.float({ action = "unset", window = tw }))
+        end
+    end)
+end)
+
+
 
 local path = os.getenv("PATH") or ""
 local gobin = os.getenv("HOME") .. "/go/bin"
