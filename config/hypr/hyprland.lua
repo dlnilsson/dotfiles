@@ -26,6 +26,22 @@ hl.on("hyprland.start", function()
     hl.exec_cmd([[gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"]])
 end)
 
+
+local path = os.getenv("PATH") or ""
+local gobin = os.getenv("HOME") .. "/go/bin"
+if not path:find(gobin, 1, true) then
+  hl.env("PATH", gobin .. ":" .. path)
+end
+
+local secrets = io.open(os.getenv("HOME") .. "/.secrets")
+  if secrets then
+      for line in secrets:lines() do
+          local k, v = line:match("^export%s+(EF_[%w_]+)=[\"']?(.-)[\"']?$")
+          if k then hl.env(k, v) end
+      end
+      secrets:close()
+  end
+
 -- Runs on every reload
 hl.exec_cmd("pkill waybar; waybar &")
 
