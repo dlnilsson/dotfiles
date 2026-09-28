@@ -7,6 +7,7 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "proxy": "",
   "cli_default_open_behavior": "new_window",
   "outline_panel": {
     "dock": "left"
@@ -38,7 +39,7 @@
     "gopls": {
       "initialization_options": {
         "hints": {
-          "assignVariableTypes": true,
+          "assignVariableTypes": false,
           "compositeLiteralFields": true,
           "compositeLiteralTypes": true,
           "constantValues": true,
@@ -150,7 +151,12 @@
   },
   "agent_servers": {
     "codex-acp": {
+      "type": "custom",
+      "command": "/home/dln/.dotfiles/bin/codex-acp-tap",
+      "args": [],
+      "env": {},
       "default_config_options": {
+        "collaboration_mode": "plan",
         "reasoning_effort": "xhigh",
         "model": "gpt-6-astra",
         "fast-mode": false
@@ -159,14 +165,13 @@
         "collaboration_mode": [
           "plan"
         ]
-      },
-      "type": "registry"
+      }
     },
     "claude-acp": {
       "default_config_options": {
         "effort": "high",
         "mode": "auto",
-        "model": "opus[1m]"
+        "model": "claude-fable-5-1[1m]"
       },
       "env": {
         "ANTHROPIC_CUSTOM_HEADERS": "Originator: zed-acp"
