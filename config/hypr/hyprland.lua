@@ -66,7 +66,7 @@ hl.env("XDG_SESSION_DESKTOP", "Hyprland")
 hl.config({
     ecosystem = {
         no_donation_nag = true,
-        enforce_permissions = 1,
+        enforce_permissions = true,
     },
 })
 
@@ -90,6 +90,7 @@ hl.permission("^thinkpad-extra-buttons$", "keyboard", "allow")
 hl.permission("^logitech-usb-receiver(-consumer-control|-system-control)?$", "keyboard", "allow")
 hl.permission("^ktmicro-kt-usb-audio(-consumer-control)?$", "keyboard", "allow")
 hl.permission("^keyd-virtual-keyboard$", "keyboard", "allow")
+hl.permission("^logitech-wireless-mouse-mx-master-3$", "keyboard", "allow")
 hl.permission("^logiops-virtual-input$", "keyboard", "allow")
 hl.permission("^(video-bus|power-button|sleep-button|dp-1|dp-2)$", "keyboard", "allow")
 -- Anything else (not currently plugged in) will prompt
