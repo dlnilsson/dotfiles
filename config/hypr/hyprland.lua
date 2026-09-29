@@ -13,7 +13,27 @@ local terminal = "kitty"
 local menu = [[rofi -show drun -display-drun  -run-shell-command '{terminal} -e \" {cmd}; read -n 1 -s\"']]
 
 
+local function load_env()
+    local path = os.getenv("PATH") or ""
+    local gobin = os.getenv("HOME") .. "/go/bin"
+    if not path:find(gobin, 1, true) then
+        hl.env("PATH", gobin .. ":" .. path)
+    end
+
+    local secrets = io.open(os.getenv("HOME") .. "/.secrets")
+    if secrets then
+        for line in secrets:lines() do
+            local k, v = line:match("^export%s+(EF_[%w_]+)=[\"']?(.-)[\"']?$")
+            if k then hl.env(k, v) end
+        end
+        secrets:close()
+    end
+end
+
+load_env()
+
 hl.on("hyprland.start", function()
+    load_env()
     hl.exec_cmd("QT_QPA_PLATFORM=xcb copyq --start-server")
     hl.exec_cmd("blueman-applet")
     hl.exec_cmd("flameshot")
@@ -69,20 +89,6 @@ end)
 
 
 
-local path = os.getenv("PATH") or ""
-local gobin = os.getenv("HOME") .. "/go/bin"
-if not path:find(gobin, 1, true) then
-  hl.env("PATH", gobin .. ":" .. path)
-end
-
-local secrets = io.open(os.getenv("HOME") .. "/.secrets")
-  if secrets then
-      for line in secrets:lines() do
-          local k, v = line:match("^export%s+(EF_[%w_]+)=[\"']?(.-)[\"']?$")
-          if k then hl.env(k, v) end
-      end
-      secrets:close()
-  end
 
 -- Runs on every reload
 hl.exec_cmd("pkill waybar; waybar &")
