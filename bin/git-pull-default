@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# Fetch origin, then pull its advertised default branch into the current branch.
+if [ -t 1 ] && command -v gum >/dev/null 2>&1; then
+    gum spin --spinner dot --title 'Fetching origin...' --show-output --show-error -- git fetch origin
+else
+    git fetch origin
+fi || exit $?
+
+head=$(git ls-remote --symref origin HEAD) || exit $?
+branch=$(printf '%s\n' "$head" | sed -n 's@^ref: refs/heads/\(.*\)[[:space:]]HEAD$@\1@p')
+if [ -z "$branch" ]; then
+    echo 'origin did not advertise a default branch' >&2
+    exit 1
+fi
+
+if [ -t 1 ] && command -v gum >/dev/null 2>&1; then
+    gum spin --spinner dot --title "Pulling origin/$branch..." --show-output --show-error -- git pull "$@" origin "$branch"
+else
+    git pull "$@" origin "$branch"
+fi
