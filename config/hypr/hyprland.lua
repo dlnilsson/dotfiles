@@ -34,6 +34,7 @@ load_env()
 
 hl.on("hyprland.start", function()
     load_env()
+    hl.exec_cmd("pkill waybar; waybar &")
     hl.exec_cmd("QT_QPA_PLATFORM=xcb copyq --start-server")
     hl.exec_cmd("blueman-applet")
     hl.exec_cmd("flameshot")
