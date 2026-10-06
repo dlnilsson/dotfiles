@@ -36,7 +36,6 @@ hl.on("hyprland.start", function()
     load_env()
     -- hl.exec_cmd("pkill waybar; waybar &")
     hl.exec_cmd("noctalia")
-    hl.exec_cmd("QT_QPA_PLATFORM=xcb copyq --start-server")
     hl.exec_cmd("blueman-applet")
     hl.exec_cmd("flameshot")
     hl.exec_cmd("hyprpm reload --notify")
@@ -359,23 +358,6 @@ hl.window_rule({
 })
 
 hl.window_rule({
-    name  = "copyq",
-    match = { class = "^(copyq)$" },
-    float          = true,
-    center         = true,
-    no_blur        = true,
-    no_dim         = true,
-    no_screen_share = true,
-    dim_around     = true,
-    suppress_event = "fullscreen",
-    opacity        = "0.95 0.95",
-    animation      = "popin 85%",
-    rounding       = 10,
-    border_size    = 0,
-    stay_focused   = true,
-})
-
-hl.window_rule({
     name    = "zed",
     match   = { class = "^(dev\\.zed\\.Zed)$" },
     opacity = "0.98 0.98",
@@ -653,11 +635,6 @@ hl.bind("SUPER + SHIFT + Q",          hl.dsp.window.close())
 -- Kitty quick-access terminal
 hl.bind(mainMod .. " + TAB",          hl.dsp.exec_cmd("kitten quick-access-terminal"))
 
--- CopyQ: pass keys when CopyQ is focused
-hl.bind(mainMod .. " + V",            hl.dsp.pass({ window = "class:^(copyq)$" }))
-hl.bind(mainMod .. " + F",            hl.dsp.pass({ window = "class:^(copyq)$" }))
-
--- Normal behavior for non-CopyQ windows
 hl.bind(mainMod .. " + B",            hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F",            hl.dsp.window.fullscreen())
 
@@ -684,7 +661,7 @@ hl.bind(mainMod .. " + R",            hl.dsp.exec_cmd("/home/dln/go/bin/hyprtabs
 
 hl.bind(mainMod .. " + L",            hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/lock"))
 hl.bind(mainMod .. " + O",            hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/wofi-ykman"))
-hl.bind("SUPER + SHIFT + V",          hl.dsp.exec_cmd("QT_QPA_PLATFORM=xcb copyq show"))
+hl.bind("SUPER + SHIFT + V",          hl.dsp.exec_cmd("noctalia msg panel-toggle clipboard"))
 hl.bind("Print",                       hl.dsp.exec_cmd("sh -c 'flameshot gui --clipboard'"))
 hl.bind(mainMod .. " + Y",            hl.dsp.window.pin())
 
