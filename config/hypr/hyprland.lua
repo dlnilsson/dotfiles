@@ -101,7 +101,6 @@ hl.env("QT_QPA_PLATFORM", "wayland;xcb")
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 hl.env("CLUTTER_BACKEND", "wayland")
 hl.env("GTK_THEME", "Nord")
-hl.env("QT_STYLE_OVERRIDE", "kvantum")
 hl.env("SDL_VIDEODRIVER", "wayland")
 hl.env("MOZ_ENABLE_WAYLAND", "1")
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "wayland")
@@ -414,7 +413,6 @@ hl.window_rule({
     name  = "flameshot",
     match = { class = "flameshot" },
     float       = true,
-    monitor     = 0,
     move        = "0 0",
     no_anim     = true,
     border_size = 0,
