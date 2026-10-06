@@ -58,6 +58,15 @@ id = "active-window"
 entry = "active-window.luau"
 
 [[panel]]
+id = "agent-usage"
+entry = "agent-usage.luau"
+width = 480
+height = 360
+placement = "attached"
+position = "auto"
+open_near_click = true
+
+[[panel]]
 id = "tailscale-services"
 entry = "tailscale-services.luau"
 width = 360
