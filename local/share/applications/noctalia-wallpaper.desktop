@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Wallpaper
+Comment=Toggle noctalia wallpaper panel
+Exec=noctalia msg panel-toggle wallpaper
+Terminal=false
+Categories=Utility;
+Keywords=wallpaper;background;noctalia;
+Icon=preferences-desktop-wallpaper

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Noctalia Settings
+Comment=Open noctalia settings
+Exec=noctalia msg settings-open
+Terminal=false
+Categories=Utility;
+Keywords=settings;preferences;config;noctalia;
+Icon=preferences-system

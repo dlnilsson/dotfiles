@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Clipboard
+Comment=Toggle noctalia clipboard history panel
+Exec=noctalia msg panel-toggle clipboard
+Terminal=false
+Categories=Utility;
+Keywords=clipboard;history;paste;noctalia;
+Icon=edit-paste

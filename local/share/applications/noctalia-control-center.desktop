@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Control Center
+Comment=Toggle noctalia control center panel
+Exec=noctalia msg panel-toggle control-center
+Terminal=false
+Categories=Utility;
+Keywords=control;center;settings;noctalia;
+Icon=preferences-system
