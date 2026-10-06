@@ -29,6 +29,14 @@ entry = "vpn.luau"
 id = "glab"
 entry = "glab.luau"
 
+[[widget]]
+id = "powermode"
+entry = "powermode.luau"
+
+[[service]]
+id = "powermode-feed"
+entry = "powermode-service.luau"
+
 [[service]]
 id = "recording-feed"
 entry = "recording-service.luau"

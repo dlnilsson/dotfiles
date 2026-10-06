@@ -5,6 +5,8 @@ local function attach(source, glyph, onClick)
         disconnected = "#4c566a",
         unavailable = "#bf616a",
         pending = "#d08770",
+        performance = "#ffb000",
+        powersave = "#7cb342",
     }
     local function render(data)
         local visible = data ~= nil and data.text ~= ""

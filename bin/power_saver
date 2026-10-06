@@ -12,6 +12,16 @@ set_kitty_opacity() {
     sed -i "s/^background_opacity.*/background_opacity $opacity/" ~/.config/kitty/background.conf
 }
 
+set_noctalia_animations() {
+    local dropin="$HOME/.config/noctalia/power_saver.toml"
+    if [[ "$1" == "off" ]]; then
+        printf '[shell.animation]\nenabled = false\n\n[wallpaper]\ntransition_duration = 0\n' > "$dropin"
+    else
+        rm -f "$dropin"
+    fi
+    noctalia msg config-reload &>/dev/null || true
+}
+
 get_status() {
     if [[ -f "$STATE_FILE" ]]; then
         cat "$STATE_FILE"
@@ -52,6 +62,7 @@ if [[ "$enabled" == "true" ]]; then
         })
     ' &>/dev/null || true
     set_kitty_opacity 1
+    set_noctalia_animations off
     for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
         echo "powersave" > "$cpu/cpufreq/scaling_governor"
     done
@@ -67,6 +78,7 @@ else
         })
     ' &>/dev/null || true
     set_kitty_opacity 0.75
+    set_noctalia_animations on
     for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
         echo "performance" > "$cpu/cpufreq/scaling_governor"
     done

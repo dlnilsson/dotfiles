@@ -174,7 +174,6 @@ type = "dln/status:claude"
 [widget.vpn]
 type = "dln/status:vpn"
 
-# Remaining custom modules keep their existing click actions.
 [widget.recording]
 type = "dln/status:recording"
 
@@ -182,12 +181,7 @@ type = "dln/status:recording"
 type = "dln/status:glab"
 
 [widget.powermode]
-type = "custom_button"
-glyph = "leaf"
-tooltip = "Toggle power mode. This button does not show the current mode."
-
-[widget.powermode.actions]
-left = "exec ~/.dotfiles/bin/power_saver --toggle"
+type = "dln/status:powermode"
 
 [widget.swaync]
 type = "custom_button"
