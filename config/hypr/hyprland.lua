@@ -654,7 +654,7 @@ hl.bind(mainMod .. " + TAB",          hl.dsp.exec_cmd("kitten quick-access-termi
 hl.bind(mainMod .. " + B",            hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F",            hl.dsp.window.fullscreen())
 
-hl.bind("ALT + TAB",                  hl.dsp.focus({ urgent_or_last = true }))
+hl.bind("ALT + TAB",                  hl.dsp.exec_cmd("noctalia msg window-switcher"))
 
 hl.bind(mainMod .. " + K",            hl.dsp.exec_cmd([[swayosd-client --custom-message="$(date '+%H:%M %A')"]]))
 hl.bind(mainMod .. " + T",            hl.dsp.exec_cmd("sleep 0.1 && swaync-client -t -sw"))
