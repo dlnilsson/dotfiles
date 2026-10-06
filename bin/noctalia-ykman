@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# See: https://github.com/jocelynthode/wofi-ykman/blob/970b1db0078e6c2293166e2ba63c6483236d21ce/wofi-ykman
+#
+# noctalia-ykman (wofi-ykman using noctalia dmenu)
+# YubiKey OATH utility
+
+#2019 nukeop
+
+print_usage() {
+  echo "Usage: noctalia-ykman [command]"
+  echo
+  echo "Commands:"
+  echo "  clipboard   Copy the code to the clipboard. (default)"
+  echo "  type        Type the code."
+  echo
+}
+
+choose_yubikey() {
+  yubikeys=$(ykman list)
+
+  if [[ "$yubikeys" = "" ]]; then
+    if hash notify-send 2>/dev/null; then
+      notify-send --transient "noctalia-ykman" "YubiKey not detected." -a "noctalia-ykman"
+    fi
+    return 1
+  fi
+
+  if [[ $(wc -l <<<"$yubikeys") > 1 ]]; then
+    yubikey=$(echo "$yubikeys" | noctalia dmenu -p "Select YubiKey")
+    if [ $? -ne 0 ] || [ -z "$yubikey" ]; then
+      return 2
+    fi
+  else
+    yubikey=$yubikeys
+  fi
+  serial=$(echo "$yubikey" | grep -oP 'Serial: \K\d+')
+  echo "$serial"
+}
+
+clipboard() {
+  if [ "$XDG_SESSION_TYPE" == "wayland" ]; then
+    wl-copy
+  else
+    xclip -selection clipboard
+  fi
+}
+
+type() {
+  if [ "$XDG_SESSION_TYPE" == "wayland" ]; then
+    wtype -
+  else
+    xargs xdotool type
+  fi
+}
+
+main() {
+  serial=$1
+  accounts=$(ykman --device $serial oath accounts list)
+  prompt="YubiKey OATH"
+
+  account=$(echo "${accounts/, TOTP/\n}" | noctalia dmenu -p "$prompt")
+  if [ $? -ne 0 ] || [ -z "$account" ]; then
+    exit
+  fi
+  # noctalia dmenu returns free-typed text; only accept listed accounts
+  if ! grep -Fxq -- "$account" <<<"$accounts"; then
+    notify-send --transient "noctalia-ykman" "Account not found: $account" -a "noctalia-ykman"
+    exit 1
+  fi
+  command=$default_command
+
+  code=$(ykman --device "$serial" oath accounts code "$account")
+  IFS=', ' read -r -a code <<<"$code"
+
+  case $command in
+  clipboard) echo -n "${code[-1]}" | clipboard && swayosd-client --custom-message="$account copied to clipboard" ;;
+  type) echo -n "${code[-1]}" | type ;;
+  esac
+}
+
+default_command="${1:-clipboard}"
+
+case $default_command in
+clipboard | type) ;;
+*)
+  print_usage
+  exit 1
+  ;;
+esac
+
+serial=$(choose_yubikey)
+case $? in
+1) exit 1 ;;
+2) exit ;;
+esac
+main "$serial"

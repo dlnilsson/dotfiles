@@ -676,7 +676,7 @@ end)
 hl.bind(mainMod .. " + R",            hl.dsp.exec_cmd("/home/dln/go/bin/hyprtabs"))
 
 hl.bind(mainMod .. " + L",            hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/lock"))
-hl.bind(mainMod .. " + O",            hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/wofi-ykman"))
+hl.bind(mainMod .. " + O",            hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/noctalia-ykman"))
 hl.bind("SUPER + SHIFT + V",          hl.dsp.exec_cmd("noctalia msg panel-toggle clipboard"))
 hl.bind("Print",                       hl.dsp.exec_cmd("sh -c 'flameshot gui --clipboard'"))
 hl.bind(mainMod .. " + Y",            hl.dsp.window.pin())
