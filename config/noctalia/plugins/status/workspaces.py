@@ -8,8 +8,9 @@ import socket
 import subprocess
 import sys
 import time
-import tomllib
 from pathlib import Path
+
+import tomllib
 
 
 def load_rules():
