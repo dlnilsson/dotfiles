@@ -9,7 +9,12 @@ setup_wizard_enabled = false
 mic_filter_regex = "cava|pw-cat"
 screen_filter_regex = "obs|OBS"
 
-# Used by weather. An address avoids IP geolocation, which a VPN exit can skew.
+[shell.launcher]
+categories = false
+compact = true
+show_icons = true
+show_app_origin_indicator = false
+
 [location]
 address = "Gothenburg, Sweden"
 
