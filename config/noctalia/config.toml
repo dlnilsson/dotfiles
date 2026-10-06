@@ -23,9 +23,16 @@ mode = "dark"
 source = "builtin"
 builtin = "Nord"
 
-# Keep the existing wallpaper, SwayNC, and SwayOSD services during migration.
 [wallpaper]
-enabled = false
+enabled = true
+directory = "/home/dln/Wallpapers"
+fill_mode = "crop"
+
+[wallpaper.automation]
+enabled = true
+interval_seconds = 3600
+order = "random"
+recursive = false
 
 [notification]
 enable_daemon = false
