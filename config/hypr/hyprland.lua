@@ -308,6 +308,12 @@ hl.window_rule({
 })
 
 hl.window_rule({
+    match = { class = "dev.noctalia.Noctalia" },
+    float = true,
+    size = { 1080, 920 },
+})
+
+hl.window_rule({
     name  = "system-utils-float",
     match = { class = "^(org.twosheds.iwgtk|blueman-manager|com.saivert.pwvucontrol|org.pulseaudio.pavucontrol|iwgtk)$" },
     float = true,
@@ -522,6 +528,16 @@ hl.window_rule({
     center = true,
 })
 
+hl.layer_rule({
+  name = "noctalia",
+  match = {
+    namespace = "^noctalia-(bar-.+|notification|dock|panel|attached-panel|osd|window-switcher)$",
+  },
+  no_anim = true,
+  ignore_alpha = 0.5,
+  blur = true,
+  blur_popups = true,
+})
 
 hl.layer_rule({
     name  = "swaync-control-center",
