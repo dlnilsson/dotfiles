@@ -56,3 +56,12 @@ entry = "workspaces.luau"
 [[widget]]
 id = "active-window"
 entry = "active-window.luau"
+
+[[panel]]
+id = "tailscale-services"
+entry = "tailscale-services.luau"
+width = 360
+height = 480
+placement = "attached"
+position = "auto"
+open_near_click = true
