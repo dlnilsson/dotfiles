@@ -1,0 +1,195 @@
+# Noctalia v5+. https://docs.noctalia.dev/noctalia/configuration/
+# https://docs.noctalia.dev/noctalia/bar/
+
+[shell]
+setup_wizard_enabled = false
+
+# Privacy ignore list: cava and pw-cat microphone use, OBS screen sharing.
+[shell.privacy]
+mic_filter_regex = "cava|pw-cat"
+screen_filter_regex = "obs|OBS"
+
+# Used by weather. An address avoids IP geolocation, which a VPN exit can skew.
+[location]
+address = "Gothenburg, Sweden"
+
+[theme]
+mode = "dark"
+source = "builtin"
+builtin = "Nord"
+
+# Keep the existing wallpaper, SwayNC, and SwayOSD services during migration.
+[wallpaper]
+enabled = false
+
+[notification]
+enable_daemon = false
+
+[osd]
+enabled = false
+
+[dock]
+enabled = false
+
+[plugins]
+enabled = ["dln/status"]
+
+[[plugins.source]]
+name = "dotfiles"
+kind = "path"
+location = "~/.dotfiles/config/noctalia/plugins"
+enabled = true
+
+[bar.default]
+position = "top"
+layer = "top"
+enabled = true
+auto_hide = false
+reserve_space = true
+thickness = 30
+margin_edge = 0
+margin_ends = 0
+padding = 10
+widget_spacing = 5
+background_opacity = 1.0
+compositor_blur = false
+shadow = false
+radius = 1
+radius_top_left = 1
+radius_top_right = 1
+radius_bottom_left = 1
+radius_bottom_right = 1
+concave_edge_corners = false
+capsule = false
+font_weight = 400
+color = "#d8dee9"
+start = ["active_window"]
+center = ["clock"]
+end = [
+    "ef-usage",
+    "codex",
+    "claude",
+    "recording",
+    "privacy",
+    "vpn",
+    "glab",
+    "workspaces",
+    "powermode",
+    "tray",
+    "swaync",
+    "battery",
+    "volume",
+    "wlogout",
+]
+
+# 3440px ultrawides: 2506px centered, matching Hyprland 16:9 single window (1410px tall).
+# Laptop and 1920px displays keep the full-width default.
+[bar.default.monitor.lg]
+match = "LG ULTRAGEAR"
+margin_ends = 467
+
+[bar.default.monitor.aoc]
+match = "AOC CU34E4CV"
+margin_ends = 467
+
+[widget.active_window]
+type = "dln/status:active-window"
+
+[widget.clock]
+format = "{:%Y-%m-%d %H:%M}"
+tooltip_format = "{:%A, %Y-%m-%d}"
+anchor = true
+
+[widget.clock.actions]
+left = "exec gnome-calendar"
+
+[widget.workspaces]
+type = "dln/status:workspaces"
+
+[widget.privacy]
+hide_inactive = true
+icon_spacing = 4
+active_color = "#a3be8c"
+
+# hyprlock (bin/lock, via hypridle) is the screen locker. Noctalia also locks on
+# logind Lock and before suspend; racing hyprlock for the session lock crashes it
+# with a Wayland protocol error after unlock.
+[lockscreen]
+enabled = false
+
+[battery]
+warning_threshold = 30
+
+[widget.battery]
+display_mode = "glyph"
+show_label = true
+label_content = "percent"
+warning_color = "#bf616a"
+
+[widget.volume]
+device = "output"
+show_label = true
+
+[widget.volume.actions]
+left = "exec pavucontrol"
+scroll_up = "volume-up 1%"
+scroll_down = "volume-down 1%"
+
+[widget.tray]
+drawer = false
+hide_passive = false
+# Noctalia probes both /StatusNotifierItem and /org/ayatana/NotificationItem for
+# each tray app. dygmate-tray answers on every path, so it would appear twice.
+# Hiding the bare Ayatana path drops the copy; /org/ayatana/NotificationItem/<app>
+# items such as caffeine use a longer path and stay visible.
+hidden = ["/org/ayatana/NotificationItem"]
+
+# Status scripts share one polling service across monitors.
+[widget.ef-usage]
+type = "dln/status:ef-usage"
+color = "#81a1c1"
+
+[widget.ef-usage.actions]
+left = "exec kitty --class ef-usage -o background_opacity=1.0 -e sh -c 'ef usage today; read'"
+right = "exec python3 ~/.config/waybar/agent-usage-menu.py"
+
+[widget.codex]
+type = "dln/status:codex"
+
+[widget.claude]
+type = "dln/status:claude"
+
+[widget.vpn]
+type = "dln/status:vpn"
+
+# Remaining custom modules keep their existing click actions.
+[widget.recording]
+type = "dln/status:recording"
+
+[widget.glab]
+type = "dln/status:glab"
+
+[widget.powermode]
+type = "custom_button"
+glyph = "leaf"
+tooltip = "Toggle power mode. This button does not show the current mode."
+
+[widget.powermode.actions]
+left = "exec ~/.dotfiles/bin/power_saver --toggle"
+
+[widget.swaync]
+type = "custom_button"
+glyph = "bell"
+tooltip = "Notifications. Right-click toggles Do Not Disturb."
+
+[widget.swaync.actions]
+left = "exec swaync-client -t -sw"
+right = "exec swaync-client -d -sw"
+
+[widget.wlogout]
+type = "custom_button"
+glyph = "power"
+tooltip = "Session menu"
+
+[widget.wlogout.actions]
+left = "exec wlogout --protocol layer-shell"

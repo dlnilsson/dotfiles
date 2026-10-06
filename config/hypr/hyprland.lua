@@ -10,7 +10,7 @@ hl.monitor({ output = "desc:AOC CU34E4CV ZO0RBHA000861", mode = "3440x1440@100.0
 
 
 local terminal = "kitty"
-local menu = [[rofi -show drun -display-drun  -run-shell-command '{terminal} -e \" {cmd}; read -n 1 -s\"']]
+local menu = "noctalia msg panel-toggle launcher"
 
 
 local function load_env()
@@ -34,7 +34,8 @@ load_env()
 
 hl.on("hyprland.start", function()
     load_env()
-    hl.exec_cmd("pkill waybar; waybar &")
+    -- hl.exec_cmd("pkill waybar; waybar &")
+    hl.exec_cmd("noctalia")
     hl.exec_cmd("QT_QPA_PLATFORM=xcb copyq --start-server")
     hl.exec_cmd("blueman-applet")
     hl.exec_cmd("flameshot")
@@ -92,7 +93,7 @@ end)
 
 
 -- Runs on every reload
-hl.exec_cmd("pkill waybar; waybar &")
+-- hl.exec_cmd("pkill waybar; waybar &")
 
 
 hl.env("XCURSOR_SIZE", "24")
@@ -139,6 +140,7 @@ hl.permission("^thinkpad-extra-buttons$", "keyboard", "allow")
 hl.permission("^logitech-usb-receiver(-consumer-control|-system-control)?$", "keyboard", "allow")
 hl.permission("^ktmicro-kt-usb-audio(-consumer-control)?$", "keyboard", "allow")
 hl.permission("^keyd-virtual-keyboard$", "keyboard", "allow")
+hl.permission("^hl-virtual-keyboard-noctalia$", "keyboard", "allow")
 hl.permission("^logitech-wireless-mouse-mx-master-3$", "keyboard", "allow")
 hl.permission("^logiops-virtual-input$", "keyboard", "allow")
 hl.permission("^openlogi-action-injector$", "keyboard", "allow")
@@ -700,6 +702,11 @@ hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
+
+-- Keep every numbered bar workspace visible even while empty.
+for i = 1, 9 do
+    hl.workspace_rule({ workspace = tostring(i), persistent = true })
+end
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]

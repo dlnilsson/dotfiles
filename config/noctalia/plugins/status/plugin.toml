@@ -1,0 +1,50 @@
+id = "dln/status"
+name = "Status bar widgets"
+version = "1.0.0"
+plugin_api = 24
+author = "dln"
+description = "Status scripts, window-title rewrites, and numbered workspaces with an active underline."
+
+[[service]]
+id = "status"
+entry = "service.luau"
+
+[[widget]]
+id = "ef-usage"
+entry = "ef-usage.luau"
+
+[[widget]]
+id = "codex"
+entry = "codex.luau"
+
+[[widget]]
+id = "claude"
+entry = "claude.luau"
+
+[[widget]]
+id = "vpn"
+entry = "vpn.luau"
+
+[[widget]]
+id = "glab"
+entry = "glab.luau"
+
+[[service]]
+id = "recording-feed"
+entry = "recording-service.luau"
+
+[[widget]]
+id = "recording"
+entry = "recording.luau"
+
+[[service]]
+id = "workspace-feed"
+entry = "workspace-service.luau"
+
+[[widget]]
+id = "workspaces"
+entry = "workspaces.luau"
+
+[[widget]]
+id = "active-window"
+entry = "active-window.luau"

@@ -1,0 +1,10 @@
+# Regex rules. The first matching rule wins; $1 keeps capture group 1.
+[rewrite]
+'(.*) — Zen Browser' = ' $1'
+'(.*) — Code - OSS' = '$1'
+'(.*) - Visual Studio Code' = '$1'
+'(.*) - Slack.*' = ' $1'
+'(.*) - Discord' = '$1'
+'(.*) - Cursor' = '$1'
+'(.*) - Chromium' = '$1'
+'(.*) - Free Version' = '$1'
