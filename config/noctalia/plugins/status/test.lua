@@ -29,7 +29,7 @@ local host = {
             recordingCallback = callback
             return true
         end
-        assert(command:find("workspaces.py", 1, true))
+        assert(command == "~/.dotfiles/noctalia-workspaces-zig/zig-out/bin/noctalia-workspaces")
         streams = streams + 1
         streamCallback = callback
         return true

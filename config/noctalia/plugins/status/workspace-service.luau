@@ -6,7 +6,7 @@ function update()
         return
     end
     started = noctalia.runStream(
-        "python3 ~/.dotfiles/config/noctalia/plugins/status/workspaces.py",
+        "~/.dotfiles/noctalia-workspaces-zig/zig-out/bin/noctalia-workspaces",
         function(line)
             local data = noctalia.json.decode(line)
             if type(data) == "table" and type(data.active) == "table"
