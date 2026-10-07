@@ -128,11 +128,139 @@ hide_inactive = true
 icon_spacing = 4
 active_color = "#a3be8c"
 
-# hyprlock (bin/lock, via hypridle) is the screen locker. Noctalia also locks on
-# logind Lock and before suspend; racing hyprlock for the session lock crashes it
-# with a Wayland protocol error after unlock.
 [lockscreen]
-enabled = false
+enabled = true
+lock_before_suspend = true
+fingerprint = false
+allow_empty_password = false
+
+[lockscreen_widgets]
+enabled = true
+
+[lockscreen_widgets.widget."lockscreen-login-box@DP-1"]
+type = "login_box"
+output = "DP-1"
+
+[lockscreen_widgets.widget."lockscreen-login-box@DP-1".settings]
+show_session_buttons = false
+show_weather = false
+
+[lockscreen_widgets.widget."lockscreen-login-box@DP-2"]
+type = "login_box"
+output = "DP-2"
+
+[lockscreen_widgets.widget."lockscreen-login-box@DP-2".settings]
+show_session_buttons = false
+show_weather = false
+
+[lockscreen_widgets.widget."lockscreen-login-box@eDP-1"]
+type = "login_box"
+output = "eDP-1"
+
+[lockscreen_widgets.widget."lockscreen-login-box@eDP-1".settings]
+show_session_buttons = false
+show_weather = false
+
+[lockscreen_widgets.widget."lockscreen-login-box@FALLBACK"]
+type = "login_box"
+output = "FALLBACK"
+
+[lockscreen_widgets.widget."lockscreen-login-box@FALLBACK".settings]
+show_session_buttons = false
+show_weather = false
+
+[lockscreen_widgets.widget."lockscreen-clock@DP-1"]
+type = "clock"
+output = "DP-1"
+cx = 1720.0
+cy = 160.0
+box_width = 420.0
+box_height = 120.0
+placement_width = 3440.0
+placement_height = 1440.0
+
+[lockscreen_widgets.widget."lockscreen-clock@DP-1".settings]
+format = "{:%H:%M}"
+center_text = true
+background = false
+shadow = true
+
+[lockscreen_widgets.widget."lockscreen-clock@DP-2"]
+type = "clock"
+output = "DP-2"
+cx = 1720.0
+cy = 160.0
+box_width = 420.0
+box_height = 120.0
+placement_width = 3440.0
+placement_height = 1440.0
+
+[lockscreen_widgets.widget."lockscreen-clock@DP-2".settings]
+format = "{:%H:%M}"
+center_text = true
+background = false
+shadow = true
+
+[lockscreen_widgets.widget."lockscreen-clock@eDP-1"]
+type = "clock"
+output = "eDP-1"
+cx = 960.0
+cy = 160.0
+box_width = 420.0
+box_height = 120.0
+placement_width = 1920.0
+placement_height = 1200.0
+
+[lockscreen_widgets.widget."lockscreen-clock@eDP-1".settings]
+format = "{:%H:%M}"
+center_text = true
+background = false
+shadow = true
+
+[lockscreen_widgets.widget."lockscreen-clock@FALLBACK"]
+type = "clock"
+output = "FALLBACK"
+cx = 960.0
+cy = 160.0
+box_width = 420.0
+box_height = 120.0
+placement_width = 1920.0
+placement_height = 1080.0
+
+[lockscreen_widgets.widget."lockscreen-clock@FALLBACK".settings]
+format = "{:%H:%M}"
+center_text = true
+background = false
+shadow = true
+
+[hooks]
+session_locked = "bw lock >/dev/null 2>&1"
+
+[idle]
+behavior_order = ["lock", "screen-off", "suspend"]
+pre_action_fade_seconds = 0
+
+# The helper preserves the LG/tardis exception and retries it every 30 seconds.
+[idle.behavior.lock]
+enabled = true
+timeout = 300
+action = "command"
+command = "~/.dotfiles/bin/noctalia-idle lock idle"
+resume_command = "~/.dotfiles/bin/noctalia-idle lock resume"
+
+[idle.behavior.screen-off]
+enabled = true
+timeout = 1800
+action = "command"
+command = "~/.dotfiles/bin/noctalia-idle screen-off idle"
+resume_command = "~/.dotfiles/bin/noctalia-idle screen-off resume"
+
+[idle.behavior.suspend]
+enabled = true
+timeout = 10800
+action = "command"
+command = "~/.dotfiles/bin/noctalia-idle suspend idle"
+resume_command = "~/.dotfiles/bin/noctalia-idle suspend resume"
 
 [battery]
 warning_threshold = 30

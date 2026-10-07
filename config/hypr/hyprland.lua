@@ -118,11 +118,10 @@ hl.config({
 })
 
 hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
+hl.permission("^/usr/bin/noctalia$", "screencopy", "allow")
 hl.permission("/usr/(lib|libexec|lib64)/xdg-desktop-portal-hyprland", "screencopy", "ask")
 hl.permission("/usr/(bin|local/bin)/hyprpm", "plugin", "allow")
-hl.permission("/usr/(bin|local/bin)/hyprlock", "screencopy", "allow")
 hl.permission("/usr/bin/swaylock", "screencopy", "allow")
-hl.permission("/usr/bin/hyprlock", "screencopy", "allow")
 hl.permission("/usr/bin/hyprpicker", "screencopy", "allow")
 hl.permission("/usr/bin/hyprland-preview-share-picker", "screencopy", "allow")
 hl.permission("^omkbd-ergodash-rev1\\.2$", "keyboard", "allow")
