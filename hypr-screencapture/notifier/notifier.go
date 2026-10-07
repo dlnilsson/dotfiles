@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sync"
 	"time"
 )
@@ -111,8 +112,13 @@ func bytesToFilename(data []byte) (string, error) {
 }
 
 func ToggleNotificationInhibitor(add bool) error {
-	if add {
-		return exec.Command("swaync-client", "--inhibitor-add", "xdg-desktop-portal-hyprland").Run()
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
 	}
-	return exec.Command("swaync-client", "--inhibitor-remove", "xdg-desktop-portal-hyprland").Run()
+	action := "remove"
+	if add {
+		action = "add"
+	}
+	return exec.Command(filepath.Join(home, ".dotfiles", "bin", "noctalia-notification-inhibit"), action, "hyprland").Run()
 }
