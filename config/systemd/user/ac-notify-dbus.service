@@ -2,10 +2,10 @@
 Description=Notify on charger connect/disconnect via UPower (battery state)
 BindsTo=graphical-session.target
 After=graphical-session.target
-Wants=swaync.service
-After=swaync.service
 
 [Service]
+ExecStartPre=/bin/sh -c 'until /usr/bin/hyprctl monitors -j >/dev/null 2>&1 && /usr/bin/noctalia msg status >/dev/null 2>&1; do sleep 0.2; done'
+TimeoutStartSec=30s
 ExecStart=%h/.dotfiles/bin/ac-notify
 Restart=on-failure
 Environment=XDG_RUNTIME_DIR=%t
@@ -13,4 +13,3 @@ Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=%t/bus
 
 [Install]
 WantedBy=graphical-session.target
-

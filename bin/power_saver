@@ -43,10 +43,10 @@ case "${1:-}" in
     --toggle)
         if [[ "$(get_status)" == "powersave" ]]; then
             set -- false
-			swayosd-client --custom-message="performance"
+			noctalia msg notification-show "performance"
         else
             set -- true
-			swayosd-client --custom-message="powersave"
+			noctalia msg notification-show "powersave"
         fi
         ;;
 esac
@@ -89,4 +89,3 @@ fi
 
 batch="$(hyprctl clients -j 2>/dev/null | jq -r '.[].address | "dispatch setprop address:\(.) opaque toggle"' | paste -sd';' -)"
 [[ -n "$batch" ]] && hyprctl --batch "$batch" &>/dev/null || true
-

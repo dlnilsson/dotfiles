@@ -40,10 +40,14 @@ order = "random"
 recursive = false
 
 [notification]
-enable_daemon = false
+enable_daemon = true
 
 [osd]
-enabled = false
+enabled = true
+follow_focused_output = true
+
+[brightness]
+enable_ddcutil = true
 
 [dock]
 enabled = false
@@ -93,7 +97,7 @@ end = [
     "workspaces",
     "powermode",
     "tray",
-    "swaync",
+    "notifications",
     "battery",
     "volume",
     "wlogout",
@@ -314,15 +318,6 @@ type = "dln/status:glab"
 
 [widget.powermode]
 type = "dln/status:powermode"
-
-[widget.swaync]
-type = "custom_button"
-glyph = "bell"
-tooltip = "Notifications. Right-click toggles Do Not Disturb."
-
-[widget.swaync.actions]
-left = "exec swaync-client -t -sw"
-right = "exec swaync-client -d -sw"
 
 [widget.wlogout]
 type = "custom_button"

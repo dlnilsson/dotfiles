@@ -1,4 +1,2 @@
-#!/usr/bin/env bash
-
-locker="$HOME/.dotfiles/bin/lock"
-systemctl suspend && $locker
+#!/bin/sh
+exec noctalia msg session lock-and-suspend

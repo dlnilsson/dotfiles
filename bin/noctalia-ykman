@@ -129,7 +129,7 @@ main() {
   IFS=', ' read -r -a code <<<"$code"
 
   case $command in
-  clipboard) echo -n "${code[-1]}" | clipboard && swayosd-client --custom-message="$account copied to clipboard" ;;
+  clipboard) echo -n "${code[-1]}" | clipboard && noctalia msg notification-show "$account copied to clipboard" ;;
   type) echo -n "${code[-1]}" | type ;;
   esac
 }
