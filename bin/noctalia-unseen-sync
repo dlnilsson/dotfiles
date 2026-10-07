@@ -1,0 +1,20 @@
+#!/bin/sh
+# Keep lockscreen "unseen" clock widgets in sync with unseen notification count.
+# Plugin widgets are unsupported on the lockscreen, so a clock widget with a
+# literal format string shows the count.
+hist="$HOME/.local/state/noctalia/notification_history.json"
+settings="$HOME/.local/state/noctalia/settings.toml"
+last=""
+while :; do
+  n=$(jq '[.entries[] | select(.seen==false)] | length' "$hist" 2>/dev/null) || n=0
+  if [ "$n" != "$last" ]; then
+    if [ "$n" -gt 0 ]; then text="$n unseen"; else text=" "; fi
+    awk -v text="$text" '
+      /^ *\[lockscreen_widgets\.widget\."lockscreen-unseen@[^"]*"\.settings\]/ { inu=1; print; next }
+      /^ *\[/ { inu=0 }
+      inu && /^ *format = / { sub(/format = .*/, "format = \"" text "\""); }
+      { print }' "$settings" > "$settings.tmp" && mv "$settings.tmp" "$settings"
+    last=$n
+  fi
+  sleep 10
+done
