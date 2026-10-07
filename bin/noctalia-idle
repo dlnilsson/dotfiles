@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+"""Run Noctalia idle actions with the LG/tardis exception and cancellable retries."""
+
+import argparse
+import os
+from pathlib import Path
+import subprocess
+import time
+import uuid
+
+
+ACTIONS = {
+    "lock": ["noctalia", "msg", "session", "lock"],
+    "screen-off": ["noctalia", "msg", "dpms-off"],
+    "suspend": ["noctalia", "msg", "session", "lock-and-suspend"],
+}
+CONDITION = Path(__file__).resolve().with_name("not-using-lg-monitor.sh")
+
+
+def is_pending(marker, token):
+    try:
+        return marker.read_text() == token
+    except FileNotFoundError:
+        return False
+
+
+def run_idle(action, marker):
+    token = uuid.uuid4().hex
+    marker.write_text(token)
+    try:
+        while is_pending(marker, token):
+            if subprocess.run([str(CONDITION)], check=False).returncode == 0:
+                if is_pending(marker, token):
+                    return subprocess.run(ACTIONS[action], check=False).returncode
+                return 0
+            # Cancel promptly on activity, but retry the condition every 30 seconds.
+            for _ in range(30):
+                time.sleep(1)
+                if not is_pending(marker, token):
+                    return 0
+        return 0
+    finally:
+        if is_pending(marker, token):
+            marker.unlink(missing_ok=True)
+
+
+def resume(action, marker):
+    marker.unlink(missing_ok=True)
+    if action == "screen-off":
+        result = subprocess.run(["noctalia", "msg", "dpms-on"], check=False)
+        subprocess.run(["brightnessctl", "-r"], check=False)
+        return result.returncode
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("action", choices=ACTIONS)
+    parser.add_argument("event", choices=("idle", "resume"))
+    args = parser.parse_args()
+    runtime = Path(os.environ["XDG_RUNTIME_DIR"]) / "noctalia-idle"
+    runtime.mkdir(mode=0o700, exist_ok=True)
+    marker = runtime / args.action
+    if args.event == "resume":
+        return resume(args.action, marker)
+    return run_idle(args.action, marker)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
