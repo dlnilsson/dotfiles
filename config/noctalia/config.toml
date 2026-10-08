@@ -137,6 +137,10 @@ enabled = true
 lock_before_suspend = true
 fingerprint = false
 allow_empty_password = false
+transition            = ["fade", "wipe", "disc", "stripes", "zoom", "honeycomb"]
+transition_duration   = 750     # lock/unlock animation length in milliseconds
+blurred_desktop = true
+
 
 [lockscreen_widgets]
 enabled = true
