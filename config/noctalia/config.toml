@@ -41,6 +41,9 @@ recursive = false
 
 [notification]
 enable_daemon = true
+background_opacity = 1.0
+scale = 1.25
+width = 425
 
 [osd]
 enabled = true
@@ -100,6 +103,7 @@ end = [
     "notifications",
     "battery",
     "volume",
+    "mic",
     "wlogout",
 ]
 
@@ -121,11 +125,19 @@ format = "{:%Y-%m-%d %H:%M}"
 tooltip_format = "{:%A, %Y-%m-%d}"
 anchor = true
 
-[widget.clock.actions]
-left = "exec gnome-calendar"
+# [widget.clock.actions]
+# left = "exec gnome-calendar"
 
 [widget.workspaces]
-type = "dln/status:workspaces"
+style = "regular"
+focused_color = "#a3be8c"  # Nord green for active
+occupied_color = "#81a1c1" # Nord blue for occupied
+
+active_pill_size = 1.0
+show_labels = true
+focused_output_only = true
+labels_only_when_occupied = false
+# type = "dln/status:workspaces"
 
 [widget.privacy]
 hide_inactive = true
@@ -338,3 +350,9 @@ tooltip = "Session menu"
 
 [widget.wlogout.actions]
 left = "exec wlogout --protocol layer-shell"
+
+[widget.mic]
+type = "volume"
+device = "input"
+show_label = false # icon only; set to true to also show the mic level
+mute_color = "#bf616a"    # Nord red, same as battery warning_color
