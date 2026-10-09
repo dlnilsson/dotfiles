@@ -56,6 +56,7 @@ alias dia="docker images -a"
 alias dsl='docker service ls'
 
 alias ag='rg'
+alias hg="kitten hyperlinked-grep"
 
 info_msg() {
 	local green=$(tput setaf 2)
