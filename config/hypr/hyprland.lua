@@ -549,6 +549,12 @@ hl.layer_rule({
     dim_around = true,
 })
 
+hl.layer_rule({
+    name = "kitty-quick-access",
+    match = { namespace = "^kitty-quick-access$" },
+    animation = "slide top",
+})
+
 
 -- Plugin config (uncomment when plugins are loaded)
 -- hl.config({
@@ -640,7 +646,12 @@ hl.bind(mainMod .. " + Return",       hl.dsp.exec_cmd(terminal))
 hl.bind("SUPER + SHIFT + Q",          hl.dsp.window.close())
 
 -- Kitty quick-access terminal
-hl.bind(mainMod .. " + TAB",          hl.dsp.exec_cmd("kitten quick-access-terminal"))
+hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd(
+    "kitten panel --toggle-visibility --single-instance --instance-group=quick-access " ..
+    "--edge=top --layer=overlay --lines=25 --app-id=kitty-quick-access " ..
+    "--focus-policy=exclusive --exclusive-zone=-1 --override-exclusive-zone " ..
+    "--override=background_opacity=1.0"
+))
 
 hl.bind(mainMod .. " + B",            hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + F",            hl.dsp.window.fullscreen())
