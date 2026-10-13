@@ -47,6 +47,28 @@ hl.on("hyprland.start", function()
     hl.exec_cmd([[gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"]])
 end)
 
+local login_window_titles = {
+    ["Google accounts"] = true,
+    ["Google accounts — Zen Browser"] = true,
+    ["Google Accounts"] = true,
+    ["Google Accounts — Zen Browser"] = true,
+    ["Google Accounts - Chromium"] = true,
+    ["Google accounts - Chromium"] = true,
+    ["Sign in – Google accounts"] = true,
+    ["Sign in – Google Accounts"] = true,
+    ["Sign in – Google accounts — Zen Browser"] = true,
+    ["Sign in - Google Accounts — Zen Browser"] = true,
+    ["Sign in - Google Accounts - Chromium"] = true,
+    ["Sign in – Google accounts - Chromium"] = true,
+}
+
+hl.on("window.open", function(w)
+    if not login_window_titles[w.title] then return end
+
+    hl.dispatch(hl.dsp.window.float({ action = "set", window = w }))
+    hl.dispatch(hl.dsp.window.center({ window = w }))
+end)
+
 local browsers = {
     { class = "firefox", initial_title = "Mozilla Firefox" },
     { class = "zen", initial_title = "Zen Browser" },
@@ -82,6 +104,8 @@ hl.on("window.open", function(w)
             hl.dispatch(hl.dsp.window.resize({ x = 800, y = 600, window = tw }))
             hl.dispatch(hl.dsp.window.center({ window = tw }))
             hl.dispatch(hl.dsp.focus({ window = tw }))
+        elseif login_window_titles[tw.title] then
+            hl.dispatch(hl.dsp.window.center({ window = tw }))
         else
             hl.dispatch(hl.dsp.window.float({ action = "unset", window = tw }))
         end
