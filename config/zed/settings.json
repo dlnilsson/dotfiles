@@ -7,6 +7,9 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "markdown_preview": {
+    "limit_content_width": false
+  },
   "proxy": "",
   "cli_default_open_behavior": "new_window",
   "outline_panel": {
@@ -121,6 +124,7 @@
     "ignore": ["copyright"],
     "terraform": ["*.hcl"],
     "html": ["*.tmpl"],
+    "Lua": ["*.luau"],
   },
   "ensure_final_newline_on_save": true,
   "edit_predictions": {
@@ -171,7 +175,7 @@
       "default_config_options": {
         "effort": "high",
         "mode": "auto",
-        "model": "claude-fable-5-1[1m]"
+        "model": "opus"
       },
       "env": {
         "ANTHROPIC_CUSTOM_HEADERS": "Originator: zed-acp"
