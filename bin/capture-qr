@@ -38,9 +38,9 @@ SELECTION=$(slurp 2>/dev/null)
 RESULT=$(grim -g "$SELECTION" - | zbarimg -q --raw -Sdisable -Sqrcode.enable - 2>/dev/null)
 
 if [[ -z $RESULT ]]; then
-  notify-send  -u critical "No QR code found" "Select a region containing a QR code"
+  notify-send --app-name=capture-qr -u critical "No QR code found" "Select a region containing a QR code"
   exit 1
 fi
 
 printf '%s' "$RESULT" | wl-copy --sensitive
-notify-send  "QR code copied to clipboard"
+notify-send --app-name=capture-qr "QR code copied to clipboard"

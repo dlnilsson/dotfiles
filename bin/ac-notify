@@ -31,7 +31,7 @@ cooldown_passed() {
 
 send_notify() {
     if cooldown_passed; then
-        notify-send "$@"
+        notify-send --app-name=ac-notify "$@"
         last_notify_time="$(date +%s)"
     fi
 }
@@ -42,7 +42,7 @@ set_decorations() {
 
 state="$(get_state)"
 if [[ -z "$state" ]]; then
-    notify-send --expire-time=3000 --transient "Power" "Failed to read battery state"
+    notify-send --app-name=ac-notify --expire-time=3000 --transient "Power" "Failed to read battery state"
     exit 1
 fi
 
@@ -51,7 +51,7 @@ last_mode="$mode"
 
 icon="$(get_icon)"
 set_decorations "$([[ "$mode" == "bat" ]] && echo true || echo false)"
-notify-send -i "$icon" --expire-time=3000 --transient "Power" "Charger is $([[ "$mode" == "ac" ]] && echo connected || echo disconnected)"
+notify-send --app-name=ac-notify -i "$icon" --expire-time=3000 --transient "Power" "Charger is $([[ "$mode" == "ac" ]] && echo connected || echo disconnected)"
 last_notify_time="$(date +%s)"
 
 dbus-monitor --system \

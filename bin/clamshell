@@ -18,10 +18,10 @@ disable_edp() {
 if has_external_monitor; then
   disable_edp
   res=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | "\(.width)x\(.height) at \(.refreshRate | floor)hz"')
-  notify-send --transient "Running external" "$res" --expire-time=3000
+  notify-send --transient --app-name=clamshell --icon=video-display "Running external" "$res" --expire-time=3000
 else
   enable_edp
   sleep 1
   res=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | "\(.width)x\(.height) at \(.refreshRate | floor)hz"')
-  notify-send --transient "No external monitor detected" "running $res" --expire-time=3000
+  notify-send --transient --app-name=clamshell --icon=video-display "No external monitor detected" "running $res" --expire-time=3000
 fi

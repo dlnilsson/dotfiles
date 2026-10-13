@@ -65,7 +65,7 @@ createJSON() {
 	# test if $clientActive is reasonable
 	if [ -z "${clientActive}" ]; then
 		echo "${scriptName}: active window is empty: '${clientActive}'"
-		notify-send "${scriptName}: active window is empty: '${clientActive}'" &
+		notify-send -a ${scriptName} "${scriptName}: active window is empty: '${clientActive}'" &
 	fi
 	
 	textOutput="h"
