@@ -88,6 +88,30 @@ hl.on("window.open", function(w)
     end)
 end)
 
+-- Picture-in-Picture: move to top-right of its monitor. Float + pin come from
+-- the "pip" window rule. Replaces hypr-screencapture handlePictureInPictureWindow.
+local pip_right_padding = 2
+local pip_y_position = 20
+
+hl.on("window.open", function(w)
+    if not w.title:match("^Picture[- ]in[- ]Picture$") then return end
+    local m = w.monitor
+    if not m then return end
+
+    -- float/pin dispatchers toggle; guard so the "pip" rule's state is not undone
+    if not w.floating then
+        hl.dispatch(hl.dsp.window.float({ action = "set", window = w }))
+    end
+    if not w.pinned then
+        hl.dispatch(hl.dsp.window.pin({ window = w }))
+    end
+    hl.dispatch(hl.dsp.window.move({
+        x = m.x + m.width - w.size.x - pip_right_padding,
+        y = m.y + math.max(pip_y_position, math.floor(m.height * 2 / 100)),
+        window = w,
+    }))
+end)
+
 
 
 
