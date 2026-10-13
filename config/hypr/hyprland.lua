@@ -100,6 +100,8 @@ hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("GDK_BACKEND", "wayland,x11,*")
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
+-- hl.env("QT_QPA_PLATFORMTHEME", "xdgdesktopportal")
+-- hl.env("GTK_USE_PORTAL", "1")
 hl.env("CLUTTER_BACKEND", "wayland")
 hl.env("GTK_THEME", "Nord")
 hl.env("SDL_VIDEODRIVER", "wayland")
@@ -215,11 +217,11 @@ hl.config({
 
         blur = {
             enabled            = true,
-            size               = 1,
+            size               = 8,
             noise              = 0.0,
             vibrancy           = 0.1696,
             vibrancy_darkness  = 0.3,
-            passes             = 2,
+            passes             = 3,
             new_optimizations  = true,
             ignore_opacity     = true,
         },
@@ -290,6 +292,13 @@ hl.window_rule({
 
 -- Gromit-mpx annotation special workspace
 hl.workspace_rule({ workspace = "special:gromit", gaps_in = 0, gaps_out = 0, on_created_empty = "gromit-mpx -a" })
+
+
+hl.window_rule({
+  name    = "plezy-no-blur",
+  match   = { class = "^(com\\.edde746\\.plezy)$" },
+  no_blur = true,
+})
 
 
 hl.window_rule({
@@ -365,7 +374,8 @@ hl.window_rule({
 hl.window_rule({
     name    = "zed",
     match   = { class = "^(dev\\.zed\\.Zed)$" },
-    opacity = "0.98 0.98",
+    opacity = "1.0 1.0",
+    -- opacity = "0.98 0.98",
 })
 
 hl.window_rule({
