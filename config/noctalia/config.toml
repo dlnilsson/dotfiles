@@ -41,6 +41,7 @@ recursive = false
 
 [notification]
 enable_daemon = true
+position = "top_right"
 background_opacity = 1.0
 scale = 1.25
 width = 425
@@ -48,6 +49,10 @@ width = 425
 [osd]
 enabled = true
 follow_focused_output = true
+
+[osd.kinds]
+media = false
+
 
 [brightness]
 enable_ddcutil = true
@@ -91,13 +96,16 @@ start = ["active_window"]
 center = ["clock"]
 end = [
     "ef-usage",
+    "spacer",
     "codex",
     "claude",
     "recording",
     "privacy",
     "vpn",
+    "spacer",
     "glab",
     "workspaces",
+    "spacer",
     "powermode",
     "tray",
     "notifications",
@@ -119,6 +127,15 @@ margin_ends = 467
 
 [widget.active_window]
 type = "dln/status:active-window"
+
+[widget.audio-vis]
+type       = "audio_visualizer"
+width      = 64
+bands      = 20
+centered   = true
+show_when_idle = false
+color_1 = "primary"
+color_2 = "secondary"
 
 [widget.clock]
 format = "{:%Y-%m-%d %H:%M}"
@@ -144,6 +161,13 @@ hide_inactive = true
 icon_spacing = 4
 active_color = "#a3be8c"
 
+
+[widget.media]
+artist_first = true
+art_size     = 24
+hide_when_no_media = true
+hide_when_idle = true
+
 [lockscreen]
 enabled = true
 lock_before_suspend = true
@@ -151,7 +175,7 @@ fingerprint = false
 allow_empty_password = false
 transition            = ["fade", "wipe", "disc", "stripes", "zoom", "honeycomb"]
 transition_duration   = 750     # lock/unlock animation length in milliseconds
-blurred_desktop = true
+blurred_desktop = false
 
 
 [lockscreen_widgets]
@@ -260,6 +284,46 @@ format = "{:%H:%M}"
 center_text = true
 background = false
 shadow = true
+
+[lockscreen_widgets.widget."lockscreen-days-since@DP-1"]
+type = "dln/status:days-since"
+output = "DP-1"
+cx = 1720.0
+cy = 390.0
+box_width = 420.0
+box_height = 180.0
+placement_width = 3440.0
+placement_height = 1440.0
+
+[lockscreen_widgets.widget."lockscreen-days-since@DP-2"]
+type = "dln/status:days-since"
+output = "DP-2"
+cx = 1720.0
+cy = 390.0
+box_width = 420.0
+box_height = 180.0
+placement_width = 3440.0
+placement_height = 1440.0
+
+[lockscreen_widgets.widget."lockscreen-days-since@eDP-1"]
+type = "dln/status:days-since"
+output = "eDP-1"
+cx = 960.0
+cy = 390.0
+box_width = 420.0
+box_height = 180.0
+placement_width = 1920.0
+placement_height = 1200.0
+
+[lockscreen_widgets.widget."lockscreen-days-since@FALLBACK"]
+type = "dln/status:days-since"
+output = "FALLBACK"
+cx = 960.0
+cy = 390.0
+box_width = 420.0
+box_height = 180.0
+placement_width = 1920.0
+placement_height = 1080.0
 
 [hooks]
 session_locked = "bw lock >/dev/null 2>&1"
