@@ -37,8 +37,24 @@
       "format_on_save": "on",
       "formatter": "language_server",
     },
+    "Python": {
+      "language_servers": ["ty", "ruff"],
+      "formatter": { "language_server": { "name": "ruff" } },
+      "code_actions_on_format": {
+        "source.organizeImports.ruff": false,
+      },
+    },
   },
   "lsp": {
+    "ruff": {
+      "initialization_options": {
+        "settings": {
+          "lint": {
+            "ignore": ["I001"],
+          },
+        },
+      },
+    },
     "gopls": {
       "initialization_options": {
         "hints": {
@@ -149,7 +165,7 @@
     ],
   },
   "icon_theme": {
-    "mode": "dark",
+    "mode": "light",
     "light": "Zed (Default)",
     "dark": "Catppuccin Frappé",
   },
@@ -160,9 +176,10 @@
       "args": [],
       "env": {},
       "default_config_options": {
-        "collaboration_mode": "plan",
-        "reasoning_effort": "xhigh",
-        "model": "gpt-6-astra",
+        "mode": "workspace-write",
+        "collaboration_mode": "default",
+        "reasoning_effort": "high",
+        "model": "gpt-6.1-sol",
         "fast-mode": false
       },
       "favorite_config_option_values": {
@@ -173,7 +190,7 @@
     },
     "claude-acp": {
       "default_config_options": {
-        "effort": "high",
+        "effort": "xhigh",
         "mode": "auto",
         "model": "opus"
       },
@@ -235,7 +252,11 @@
     "ss08": true,
     "ss09": true,
   },
-  "theme": "Nordfox - opaque",
+  "theme": {
+    "mode": "dark",
+    "light": "One Light",
+    "dark": "Nordfox - blurred"
+  },
   "theme_overrides": {
     "Nord Dark": {
       "background.appearance": "blurred",
@@ -244,7 +265,7 @@
           "font_style": "italic",
         },
       },
-    },
+    }
   },
   "git": {
     "inline_blame": {
