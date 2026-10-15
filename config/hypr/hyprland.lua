@@ -60,6 +60,7 @@ local login_window_titles = {
     ["Sign in - Google Accounts — Zen Browser"] = true,
     ["Sign in - Google Accounts - Chromium"] = true,
     ["Sign in – Google accounts - Chromium"] = true,
+    ["Zed — Settings"] = true,
 }
 
 hl.on("window.open", function(w)
@@ -122,6 +123,10 @@ hl.on("window.open", function(w)
     local m = w.monitor
     if not m then return end
 
+    -- Dispatchers below warp the cursor to the PiP window; suppress warps while they run
+    local no_warps = hl.get_config("cursor:no_warps")
+    hl.config({ cursor = { no_warps = true } })
+
     -- float/pin dispatchers toggle; guard so the "pip" rule's state is not undone
     if not w.floating then
         hl.dispatch(hl.dsp.window.float({ action = "set", window = w }))
@@ -134,6 +139,8 @@ hl.on("window.open", function(w)
         y = m.y + math.max(pip_y_position, math.floor(m.height * 2 / 100)),
         window = w,
     }))
+
+    hl.config({ cursor = { no_warps = no_warps } })
 end)
 
 
