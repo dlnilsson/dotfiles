@@ -4,6 +4,9 @@
 [shell]
 setup_wizard_enabled = false
 
+[shell.panel]
+transparency_mode = "soft"
+
 # Privacy ignore list: cava and pw-cat microphone use, OBS screen sharing.
 [shell.privacy]
 mic_filter_regex = "cava|pw-cat|openwave|OpenWave|pw-loopback"
@@ -14,6 +17,13 @@ categories = false
 compact = true
 show_icons = true
 show_app_origin_indicator = false
+track_usage = true
+sort_by_usage = true
+
+[shell.shadow]
+direction = "down_right"  # center, up, down, left, right, up_left, up_right, down_left, down_right
+alpha     = 0.25    # multiplied by each component's background opacity
+
 
 [location]
 address = "Gothenburg, Sweden"
@@ -80,9 +90,9 @@ margin_edge = 0
 margin_ends = 0
 padding = 10
 widget_spacing = 5
-background_opacity = 1.0
-compositor_blur = false
-shadow = false
+background_opacity = 0.8
+compositor_blur = true
+shadow = true
 radius = 1
 radius_top_left = 1
 radius_top_right = 1
