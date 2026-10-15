@@ -6,7 +6,7 @@ setup_wizard_enabled = false
 
 # Privacy ignore list: cava and pw-cat microphone use, OBS screen sharing.
 [shell.privacy]
-mic_filter_regex = "cava|pw-cat"
+mic_filter_regex = "cava|pw-cat|openwave|OpenWave|pw-loopback"
 screen_filter_regex = "obs|OBS"
 
 [shell.launcher]
@@ -166,7 +166,7 @@ active_color = "#a3be8c"
 artist_first = true
 art_size     = 24
 hide_when_no_media = true
-hide_when_idle = true
+# hide_when_idle = true
 
 [lockscreen]
 enabled = true
