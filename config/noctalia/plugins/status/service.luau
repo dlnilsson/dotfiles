@@ -6,9 +6,17 @@ local sources = {
     { id = "glab", script = "glab-my-reviews", interval = 120 },
 }
 local pending = {}
-local nextPoll = {}
+local lastPoll = {}
+-- bin/power_saver writes this file. Power saver mode stretches every interval.
+local powerSaverState = (noctalia.getenv("XDG_RUNTIME_DIR") or "/tmp") .. "/power_saver_state"
+local powerSaverFactor = 6
 
 noctalia.setUpdateInterval(1000)
+
+local function powerSaving()
+    local mode = noctalia.readFile(powerSaverState)
+    return mode ~= nil and mode:match("^powersave") ~= nil
+end
 
 local function unavailable(source)
     noctalia.state.set(source.id, {
@@ -53,9 +61,11 @@ end
 
 function update()
     local now = os.time()
+    local factor = powerSaving() and powerSaverFactor or 1
     for _, source in ipairs(sources) do
-        if now >= (nextPoll[source.id] or 0) and not pending[source.id] then
-            nextPoll[source.id] = now + source.interval
+        local last = lastPoll[source.id]
+        if (last == nil or now >= last + source.interval * factor) and not pending[source.id] then
+            lastPoll[source.id] = now
             poll(source)
         end
     end

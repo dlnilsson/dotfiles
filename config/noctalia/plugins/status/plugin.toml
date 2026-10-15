@@ -38,14 +38,6 @@ id = "powermode-feed"
 entry = "powermode-service.luau"
 
 [[service]]
-id = "recording-feed"
-entry = "recording-service.luau"
-
-[[widget]]
-id = "recording"
-entry = "recording.luau"
-
-[[service]]
 id = "workspace-feed"
 entry = "workspace-service.luau"
 

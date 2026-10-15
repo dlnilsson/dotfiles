@@ -15,7 +15,24 @@ set_kitty_opacity() {
 set_noctalia_animations() {
     local dropin="$HOME/.config/noctalia/power_saver.toml"
     if [[ "$1" == "off" ]]; then
-        printf '[shell.animation]\nenabled = false\n\n[wallpaper]\ntransition_duration = 0\n' > "$dropin"
+        cat > "$dropin" <<'EOF'
+[shell]
+offline_mode = true
+popup_shadows = false
+
+[shell.animation]
+enabled = false
+
+[shell.panel]
+transparency_mode = "solid"
+shadow = false
+
+[backdrop]
+enabled = false
+
+[wallpaper]
+transition_duration = 0
+EOF
     else
         rm -f "$dropin"
     fi

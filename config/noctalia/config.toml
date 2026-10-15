@@ -3,9 +3,13 @@
 
 [shell]
 setup_wizard_enabled = false
+offline_mode          = false
+telemetry_enabled     = false
+popup_shadows         = true            # draw drop shadows behind popups and dropdowns
 
 [shell.panel]
-transparency_mode = "soft"
+transparency_mode = "glass" #  solid | soft | glass; controls floating panel opacity and card translucency
+shadow                = true   # cast the global [shell.shadow] from panel surfaces
 
 # Privacy ignore list: cava and pw-cat microphone use, OBS screen sharing.
 [shell.privacy]
@@ -17,8 +21,13 @@ categories = false
 compact = true
 show_icons = true
 show_app_origin_indicator = false
-track_usage = true
 sort_by_usage = true
+
+
+[shell.animation]
+enabled = true
+speed   = 1.0   # 1.0 = normal, 0.5 = 2× slower, 2.0 = 2× faster
+
 
 [shell.shadow]
 direction = "down_right"  # center, up, down, left, right, up_left, up_right, down_left, down_right
@@ -90,7 +99,7 @@ margin_edge = 0
 margin_ends = 0
 padding = 10
 widget_spacing = 5
-background_opacity = 0.8
+background_opacity = 0.65
 compositor_blur = true
 shadow = true
 radius = 1
@@ -109,7 +118,6 @@ end = [
     "spacer",
     "codex",
     "claude",
-    "recording",
     "privacy",
     "vpn",
     "spacer",
@@ -407,9 +415,6 @@ type = "dln/status:claude"
 
 [widget.vpn]
 type = "dln/status:vpn"
-
-[widget.recording]
-type = "dln/status:recording"
 
 [widget.glab]
 type = "dln/status:glab"

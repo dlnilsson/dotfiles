@@ -2,8 +2,7 @@
 local root = arg[0]:match("^(.*)/[^/]+$") or "."
 local plugin = root .. "/"
 local now, calls, streamCallback, streams = 0, {}, nil, 0
-local recordingCallback, recordingStreams = nil, 0
-local state, watchers = {}, {}
+local state, watchers, files = {}, {}, {}
 local decoded = {
     usage = { text = "18.8M", tooltip = "OpenAI: 18.8M" },
     waiting = { text = "Codex: 1", tooltip = "Action required", class = "action-required" },
@@ -16,19 +15,15 @@ local decoded = {
     noreviews = { text = "", tooltip = "No open MRs awaiting review", class = "none" },
 }
 local host = {
-    setUpdateInterval = function(ms) assert(ms == 1000 or ms == 500) end,
+    setUpdateInterval = function(ms) assert(ms == 1000) end,
     expandPath = function(path) return path end,
+    getenv = function(name) return name == "XDG_RUNTIME_DIR" and "/run/user/test" or nil end,
+    readFile = function(path) return files[path] end,
     runAsync = function(argv, callback)
         table.insert(calls, { argv = argv, callback = callback })
         return true
     end,
     runStream = function(command, callback)
-        if command:find("hypr-screencapture status -subscribe", 1, true) then
-            assert(command:find("^while :; do"), "the subscription must restart when it exits")
-            recordingStreams = recordingStreams + 1
-            recordingCallback = callback
-            return true
-        end
         assert(command == "~/.dotfiles/noctalia-workspaces-zig/zig-out/bin/noctalia-workspaces")
         streams = streams + 1
         streamCallback = callback
@@ -170,6 +165,25 @@ assert(usage.tree.children[2].props.text == "18.8M" and codex.visible)
 assert(not glab.visible, "GitLab must hide when there are no reviews")
 print("PASS: shared polls, intervals, agent styling, VPN states, GitLab reviews, invalid output, and recovery")
 
+files["/run/user/test/power_saver_state"] = "powersave\n"
+now = 130
+service.update()
+assert(#calls == 20, "power saver must stretch every poll interval")
+now = 180
+service.update()
+assert(#calls == 22 and calls[21].argv[1] == "~/.dotfiles/bin/codex-status"
+    and calls[22].argv[1] == "~/.dotfiles/bin/claude-status", "agent polls must run every 60 seconds in power saver")
+complete(21, "idle")
+complete(22, "idle")
+files["/run/user/test/power_saver_state"] = "performance\n"
+now = 181
+service.update()
+assert(#calls == 24 and calls[23].argv[1] == "~/.dotfiles/bin/waybar-ef-usage"
+    and calls[24].argv[1] == "~/.dotfiles/bin/vpn-status", "leaving power saver must restore the normal intervals")
+complete(23, "usage")
+complete(24, "tailscale")
+print("PASS: power saver stretches status polls and leaving it restores them")
+
 local feed = loadEntry("workspace-service.luau")
 local workspaces, laptop = widget("workspaces"), widget("workspaces", "eDP-1")
 local window, laptopWindow = widget("active-window"), widget("active-window", "eDP-1")
@@ -218,23 +232,3 @@ decoded.workspaces.titles = {}
 streamCallback("workspaces")
 assert(not window.visible and window.tooltip == "" and not laptopWindow.visible)
 print("PASS: monitor-local window titles, original tooltips, title changes, and empty workspaces")
-
-local recordingFeed = loadEntry("recording-service.luau")
-local recording, laptopRecording = widget("recording"), widget("recording", "eDP-1")
-assert(not recording.visible and not laptopRecording.visible)
-recordingFeed.update()
-recordingFeed.update()
-assert(recordingStreams == 1, "there must be one recording subscription for every monitor")
-recordingCallback("●")
-assert(recording.visible and laptopRecording.visible)
-assert(recording.tree.children[1].props.text == "●")
-assert(recording.tree.children[1].props.color == "#ff0000")
-recording.update()
-assert(recording.tree.children[1].props.color == "#00000000", "the dot must blink off")
-recording.update()
-assert(recording.tree.children[1].props.color == "#ff0000", "the dot must blink on")
-recording.tree.props.onClick()
-assert(calls[#calls].argv[1] == "~/.dotfiles/bin/screen-recorder")
-recordingCallback("")
-assert(not recording.visible and not laptopRecording.visible)
-print("PASS: shared recording subscription, blinking dot, click action, and hide when off")
