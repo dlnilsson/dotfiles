@@ -149,6 +149,7 @@ pipewire-alsa
 pipewire-docs
 pipewire-pulse
 pipewire-session-manager
+plezy
 polkit-kde-agent
 polybar
 python-openapi-spec-validator
@@ -165,7 +166,6 @@ rofi-calc
 rofi-emoji
 rsync
 ruby
-rustup
 screen
 sddm
 seahorse
@@ -191,6 +191,7 @@ ttf-jetbrains-mono-nerd
 typst
 unzip
 usbutils
+uv
 vhs
 vim
 vivaldi

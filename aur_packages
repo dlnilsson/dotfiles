@@ -8,6 +8,7 @@ caffeine-ng
 ccat
 coreimage
 datagrip
+datagrip-jre
 dprint-bin
 drm_info
 dygmate-bin
@@ -33,6 +34,7 @@ notify-send.sh
 numbat-bin
 opencode-bin
 openlogi-bin
+openwave
 opera
 ox-bin
 postman-bin
