@@ -258,7 +258,7 @@
     "dark": "Nordfox - blurred"
   },
   "theme_overrides": {
-    "Nord Dark": {
+    "Nordfox - blurred": {
       "background.appearance": "blurred",
       "syntax": {
         "comment": {

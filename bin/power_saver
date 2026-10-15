@@ -12,6 +12,12 @@ set_kitty_opacity() {
     sed -i "s/^background_opacity.*/background_opacity $opacity/" ~/.config/kitty/background.conf
 }
 
+set_zed_background() {
+    local settings="$HOME/.config/zed/settings.json"
+    [[ -f "$settings" ]] || return 0
+    sed -i "s/\"background.appearance\": \"[a-z]*\"/\"background.appearance\": \"$1\"/" "$settings"
+}
+
 set_noctalia_animations() {
     local dropin="$HOME/.config/noctalia/power_saver.toml"
     if [[ "$1" == "off" ]]; then
@@ -79,6 +85,7 @@ if [[ "$enabled" == "true" ]]; then
         })
     ' &>/dev/null || true
     set_kitty_opacity 1
+    set_zed_background opaque
     set_noctalia_animations off
     for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
         echo "powersave" > "$cpu/cpufreq/scaling_governor"
@@ -95,6 +102,7 @@ else
         })
     ' &>/dev/null || true
     set_kitty_opacity 0.75
+    set_zed_background blurred
     set_noctalia_animations on
     for cpu in /sys/devices/system/cpu/cpu[0-9]*; do
         echo "performance" > "$cpu/cpufreq/scaling_governor"
