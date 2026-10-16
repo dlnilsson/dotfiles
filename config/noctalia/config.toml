@@ -348,10 +348,20 @@ placement_width = 1920.0
 placement_height = 1080.0
 
 [hooks]
-session_locked = "bw lock >/dev/null 2>&1"
 battery_discharging = "~/.dotfiles/bin/power_saver true && notify-send --app-name=ac-notify --icon=battery-symbolic --expire-time=3000 --transient 'Power' 'Charger disconnected'"
 battery_charging = "~/.dotfiles/bin/power_saver false && notify-send --app-name=ac-notify --icon=battery-good-charging-symbolic --expire-time=3000 --transient 'Power' 'Charger connected'"
 battery_plugged = "~/.dotfiles/bin/power_saver false && notify-send --app-name=ac-notify --icon=battery-good-charging-symbolic --expire-time=3000 --transient 'Power' 'Charger connected'"
+session_locked = [
+    "bw lock >/dev/null 2>&1",
+    "playerctl pause",
+    "noctalia msg bar-hide",
+]
+session_unlocked = [
+  "noctalia msg bar-show",
+  "noctalia msg dpms-on",
+]
+
+
 
 [idle]
 behavior_order = ["lock", "screen-off", "suspend"]
