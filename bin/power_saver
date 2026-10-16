@@ -15,7 +15,11 @@ set_kitty_opacity() {
 set_zed_background() {
     local settings="$HOME/.config/zed/settings.json"
     [[ -f "$settings" ]] || return 0
-    sed -i "s/\"background.appearance\": \"[a-z]*\"/\"background.appearance\": \"$1\"/" "$settings"
+    # Write in place: sed -i swaps the inode and Zed stops watching the file
+    # (https://github.com/zed-industries/zed/issues/65270).
+    local updated
+    updated="$(sed "s/\"background.appearance\": \"[a-z]*\"/\"background.appearance\": \"$1\"/" "$settings")"
+    printf '%s\n' "$updated" > "$settings"
 }
 
 set_noctalia_animations() {
