@@ -112,5 +112,6 @@ else
 	[[ -n "$batch" ]] && hyprctl --batch "$batch" &>/dev/null || true
 fi
 
-batch="$(hyprctl clients -j 2>/dev/null | jq -r '.[].address | "dispatch setprop address:\(.) opaque toggle"' | paste -sd';' -)"
+opaque="$([[ "$enabled" == "true" ]] && echo 1 || echo 0)"
+batch="$(hyprctl clients -j 2>/dev/null | jq -r --arg opaque "$opaque" '.[].address | "dispatch setprop address:\(.) opaque \($opaque)"' | paste -sd';' -)"
 [[ -n "$batch" ]] && hyprctl --batch "$batch" &>/dev/null || true
