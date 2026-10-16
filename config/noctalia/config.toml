@@ -22,7 +22,11 @@ compact = true
 show_icons = true
 show_app_origin_indicator = false
 sort_by_usage = true
-
+show_session_button = false
+show_settings_button = false
+default_view = "recent"
+search_position = "top"
+layout = "simple"
 
 [shell.animation]
 enabled = true
@@ -403,6 +407,13 @@ hidden = ["/org/ayatana/NotificationItem"]
 [widget.ef-usage]
 type = "dln/status:ef-usage"
 color = "#81a1c1"
+
+[shell.launcher.dmenu.entry.commands]
+command = "printf 'Excursion funnel'"
+label = "Commands"
+glyph = "terminal"
+global = false
+exec = "kitty --class ef-usage -o background_opacity=1.0 -e sh -c \"ef usage today; ef usage today --heatmap; read\""
 
 [widget.ef-usage.actions]
 left = "exec kitty --class ef-usage -o background_opacity=1.0 -e sh -c 'ef usage today; ef usage today --heatmap; read'"
