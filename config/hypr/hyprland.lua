@@ -114,7 +114,6 @@ hl.on("window.open", function(w)
 end)
 
 -- Picture-in-Picture: move to top-right of its monitor. Float + pin come from
--- the "pip" window rule. Replaces hypr-screencapture handlePictureInPictureWindow.
 local pip_right_padding = 2
 local pip_y_position = 20
 
@@ -350,9 +349,11 @@ hl.workspace_rule({ workspace = "special:gromit", gaps_in = 0, gaps_out = 0, on_
 
 
 hl.window_rule({
-  name    = "plezy-no-blur",
+  name    = "plezy-video",
   match   = { class = "^(com\\.edde746\\.plezy)$" },
   no_blur = true,
+  -- Keep the video subsurface visible when Plezy fills the screen.
+  opacity = "0.999 override 0.999 override 0.999 override",
 })
 
 
@@ -666,6 +667,7 @@ hl.config({
         disable_splash_rendering = true,
         force_default_wallpaper  = 0,
         disable_hyprland_logo    = false,
+        vrr = 1
     },
 
     binds = {
