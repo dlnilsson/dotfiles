@@ -42,6 +42,9 @@ enabled = false
 
 [wallpaper]
 transition_duration = 0
+
+[lockscreen]
+transition = []
 EOF
     else
         rm -f "$dropin"
