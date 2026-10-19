@@ -17,10 +17,12 @@ disable_edp() {
 
 if has_external_monitor; then
   disable_edp
+  hyprctl eval 'hl.config({ layout = { single_window_aspect_ratio = {16, 9} } })'
   res=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | "\(.width)x\(.height) at \(.refreshRate | floor)hz"')
   notify-send --transient --app-name=clamshell --icon=video-display "Running external" "$res" --expire-time=3000
 else
   enable_edp
+  hyprctl eval 'hl.config({ layout = { single_window_aspect_ratio = {16, 10} } })'
   sleep 1
   res=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | "\(.width)x\(.height) at \(.refreshRate | floor)hz"')
   notify-send --transient --app-name=clamshell --icon=video-display "No external monitor detected" "running $res" --expire-time=3000
