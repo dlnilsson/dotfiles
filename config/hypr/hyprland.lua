@@ -351,7 +351,10 @@ hl.workspace_rule({ workspace = "special:gromit", gaps_in = 0, gaps_out = 0, on_
 hl.window_rule({
   name    = "plezy-video",
   match   = { class = "^(com\\.edde746\\.plezy)$" },
-  no_blur = true,
+  no_blur   = true,
+  no_dim    = true,
+  no_anim   = true,
+  no_shadow = true,
   -- Keep the video subsurface visible when Plezy fills the screen.
   opacity = "0.999 override 0.999 override 0.999 override",
 })
