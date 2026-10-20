@@ -27,6 +27,7 @@ show_settings_button = false
 default_view = "recent"
 search_position = "top"
 layout = "simple"
+track_usage = true
 
 [shell.animation]
 enabled = true
@@ -146,6 +147,13 @@ margin_ends = 467
 [bar.default.monitor.aoc]
 match = "AOC CU34E4CV"
 margin_ends = 467
+
+[widget.lock_keys]
+display          = "short"
+show_caps_lock   = true
+show_num_lock    = true
+show_scroll_lock = false
+hide_when_off    = false
 
 [widget.active_window]
 type = "dln/status:active-window"
