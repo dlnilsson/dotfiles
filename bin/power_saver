@@ -3,6 +3,7 @@ set -euo pipefail
 shopt -s nullglob
 
 STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/power_saver_state"
+NOTIFY_ID_FILE="${XDG_RUNTIME_DIR:-/tmp}/power_saver_notify_id"
 
 set_kitty_opacity() {
     local opacity="$1"
@@ -56,6 +57,12 @@ EOF
     noctalia msg config-reload &>/dev/null || true
 }
 
+notify() {
+    local id=""
+    [[ -f "$NOTIFY_ID_FILE" ]] && id="$(<"$NOTIFY_ID_FILE")"
+    notify-send --app-name=power_saver --transient --print-id --replace-id="${id:-0}" "$1" > "$NOTIFY_ID_FILE"
+}
+
 get_status() {
     if [[ -f "$STATE_FILE" ]]; then
         cat "$STATE_FILE"
@@ -77,10 +84,10 @@ case "${1:-}" in
     --toggle)
         if [[ "$(get_status)" == "powersave" ]]; then
             set -- false
-			noctalia msg notification-show "performance"
+			notify "performance"
         else
             set -- true
-			noctalia msg notification-show "powersave"
+			notify "powersave"
         fi
         ;;
 esac
