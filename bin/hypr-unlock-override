@@ -1,0 +1,16 @@
+#!/bin/bash
+
+hyprctl --instance 0 eval "hl.config({ misc = {allow_session_lock_restore = true}})"
+
+if ! pgrep -x noctalia >/dev/null; then
+    hyprctl --instance 0 eval "hl.dispatch(hl.dsp.exec_cmd('noctalia'))"
+    for _ in $(seq 50); do
+        noctalia msg bluetooth-status >/dev/null 2>&1 && break
+        sleep 0.2
+    done
+fi
+
+hyprctl --instance 0 eval "hl.dispatch(hl.dsp.exec_cmd('noctalia msg session lock'))"
+hyprctl --instance 0 dispatch 'hl.dsp.dpms({action="enable"})'
+
+echo "Done!"
