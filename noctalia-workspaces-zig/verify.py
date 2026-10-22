@@ -321,19 +321,15 @@ def class_check(server, directory, env):
     titles = once([str(BINARY), "--rules", str(rules)], env)["titles"]
     assert titles == {
         # Class captures and the rewritten title; first full class match wins.
-        "DP-1": {"text": "[ify] Song", "tooltip": "Song"},
-        "HDMI-A-1": {"text": "zen Tab (zen)", "tooltip": "Tab — Zen Browser"},
-        "eDP-1": {"text": "any", "tooltip": "Term"},
+        # Known classes also carry the class and the title before class rules.
+        "DP-1": {"text": "[ify] Song", "tooltip": "Song", "class": "Spotify", "title": "Song"},
+        "HDMI-A-1": {"text": "zen Tab (zen)", "tooltip": "Tab — Zen Browser", "class": "zen", "title": "zen Tab"},
+        "eDP-1": {"text": "any", "tooltip": "Term", "class": "Spotify2", "title": "Term"},
         # Unknown window addresses and empty workspaces skip class rules.
         "DP-2": {"text": "Lost", "tooltip": "Lost"},
         "DP-3": {"text": "", "tooltip": ""},
     }, titles
-    title_only = directory / "title-rewrites.toml"
-    title_only.write_text("[rewrite]\n")
-    server.requests.clear()
-    once([str(BINARY), "--rules", str(title_only)], env)
-    assert "j/clients" not in server.requests, server.requests
-    print("PASS: class rules, captures, $title, first match, unknown windows, no clients query without class rules")
+    print("PASS: class rules, captures, $title, first match, unknown windows")
 
 
 def mock_check():

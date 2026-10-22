@@ -1,7 +1,9 @@
 const std = @import("std");
-const c = @import("c");
 const Allocator = std.mem.Allocator;
 const heap = std.heap.page_allocator;
+
+const c = @import("c");
+
 const Rule = struct {
     code: *c.pcre2_code_8,
     match: *c.pcre2_match_data_8,
@@ -293,11 +295,9 @@ fn flatten(alloc: Allocator, title: []const u8) ![]const u8 {
     return bytes.items;
 }
 
-fn rewrite(alloc: Allocator, title: []const u8, class: ?[]const u8, rules: Rules) ![]const u8 {
+fn rewrite(alloc: Allocator, title: []const u8, rules: Rules) ![]const u8 {
     const text = try flatten(alloc, title);
-    const rewritten = try apply(alloc, text, rules.titles, null) orelse text;
-    const name = class orelse return rewritten;
-    return try apply(alloc, name, rules.classes, rewritten) orelse rewritten;
+    return try apply(alloc, text, rules.titles, null) orelse text;
 }
 
 // Returns the first full match's replacement, or null when no rule matches.
@@ -407,11 +407,9 @@ fn snapshot(alloc: Allocator, path: []const u8, rules: Rules) ![]const u8 {
     const monitors = try std.json.parseFromSlice([]Monitor, alloc, try query(alloc, path, "j/monitors"), .{ .ignore_unknown_fields = true });
     const workspaces = try std.json.parseFromSlice([]Workspace, alloc, try query(alloc, path, "j/workspaces"), .{ .ignore_unknown_fields = true });
     var classes: std.StringHashMap([]const u8) = .init(alloc);
-    // Only class rules need window classes; skip the clients query without them.
-    if (rules.classes.len > 0) {
-        const clients = try std.json.parseFromSlice([]Client, alloc, try query(alloc, path, "j/clients"), .{ .ignore_unknown_fields = true });
-        for (clients.value) |client| try classes.put(client.address, client.class);
-    }
+    // Class rules and the widget's app icon both need window classes.
+    const clients = try std.json.parseFromSlice([]Client, alloc, try query(alloc, path, "j/clients"), .{ .ignore_unknown_fields = true });
+    for (clients.value) |client| try classes.put(client.address, client.class);
     var active: std.json.ObjectMap = .{};
     var titles: std.json.ObjectMap = .{};
     var occupied: std.ArrayList(i64) = .empty;
@@ -428,8 +426,15 @@ fn snapshot(alloc: Allocator, path: []const u8, rules: Rules) ![]const u8 {
         const title = if (workspace) |w| (if (w.windows > 0) w.lastwindowtitle else "") else "";
         const class = if (workspace) |w| (if (w.windows > 0) classes.get(w.lastwindow) else null) else null;
         var entry: std.json.ObjectMap = .{};
-        try entry.put(alloc, "text", .{ .string = try rewrite(alloc, title, class, rules) });
+        const rewritten = try rewrite(alloc, title, rules);
+        const text = if (class) |name| try apply(alloc, name, rules.classes, rewritten) orelse rewritten else rewritten;
+        try entry.put(alloc, "text", .{ .string = text });
         try entry.put(alloc, "tooltip", .{ .string = title });
+        // The widget shows the app icon before "title" and falls back to "text".
+        if (class) |name| {
+            try entry.put(alloc, "class", .{ .string = name });
+            try entry.put(alloc, "title", .{ .string = rewritten });
+        }
         try titles.put(alloc, monitor.name, .{ .object = entry });
     }
     return std.json.Stringify.valueAlloc(alloc, .{ .active = std.json.Value{ .object = active }, .occupied = occupied.items, .titles = std.json.Value{ .object = titles } }, .{});
