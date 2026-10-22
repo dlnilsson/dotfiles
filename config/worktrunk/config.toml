@@ -1,5 +1,8 @@
 skip-commit-generation-prompt = true
 
+[aliases]
+recent = "git recent {{ args }}"
+
 [post-start]
 copy = "wt step copy-ignored"
 
