@@ -27,7 +27,8 @@ fi
 
 # ---------------------------------------------------------------------------------------
 
-branches_format="%(color:yellow)%(refname:short)%(color:reset)"
+# Branches checked out in a worktree get a dim ⇶ marker.
+branches_format="%(color:yellow)%(refname:short)%(color:reset)%(if)%(worktreepath)%(then)%(color:dim) ⇶%(color:reset)%(end)"
 commits_format="%C(red bold)%h %C(bold blue)%an %C(bold green)%ad %Creset%s"
 
 # The HEAD of the primary branch (eg main or master or w/e), for diffing.
@@ -36,7 +37,7 @@ diff_base=$(cat $(git rev-parse --show-cdup).git/refs/remotes/origin/HEAD | awk 
 
 uniqcommits_cmd="git log --date=human --color=always --format='$commits_format' --no-merges $diff_base..{1}"
 
-diffbranch_cmd="git diff --color=always $diff_base...{}"
+diffbranch_cmd="git diff --color=always $diff_base...{1}"
 # Progressive enhancement if you have delta or diff-so-fancy
 if command -v delta >/dev/null 2>&1; then
   diffbranch_cmd="$diffbranch_cmd | delta --width=\$FZF_PREVIEW_COLUMNS"
@@ -45,15 +46,15 @@ elif command -v diff-so-fancy >/dev/null 2>&1; then
 fi
 
 # Copy to clipboard, variants for mac/linux
-copy_cmd="echo 'Could not copy {} to clipboard.'"
+copy_cmd="echo 'Could not copy {1} to clipboard.'"
 if command -v pbcopy >/dev/null; then
-  copy_cmd="printf '%s' {} | pbcopy"
+  copy_cmd="printf '%s' {1} | pbcopy"
 elif command -v wl-copy >/dev/null; then
-  copy_cmd="printf '%s' {} | wl-copy"
+  copy_cmd="printf '%s' {1} | wl-copy"
 elif command -v xclip >/dev/null; then
-  copy_cmd="printf '%s' {} | xclip -selection clipboard"
+  copy_cmd="printf '%s' {1} | xclip -selection clipboard"
 elif command -v xsel >/dev/null; then
-  copy_cmd="printf '%s' {} | xsel --clipboard"
+  copy_cmd="printf '%s' {1} | xsel --clipboard"
 fi
 
 # if extra arg passed (eg `git recent remotename`), then list those remote branches, rather than local ones
@@ -84,8 +85,23 @@ chosen_branch="$(_browse_branches)"
 line_count=$(printf "%s" "$chosen_branch" | wc -l)
 
 if [[ -n "$chosen_branch" ]] && (( line_count == 0 )); then
-  echo git checkout "$chosen_branch"
-  git checkout "$chosen_branch"
+  chosen_branch=${chosen_branch%% *}
+  wt_path=$(git for-each-ref --format='%(worktreepath)' "refs/heads/$chosen_branch")
+
+  # Branch is checked out in another worktree: jump there instead of checking out.
+  # wt can only cd the parent shell when run via worktrunk shell integration (eg `wt recent`).
+  if [[ -n "$wt_path" && "$wt_path" != "$(git rev-parse --show-toplevel)" ]]; then
+    if command -v wt >/dev/null; then
+      echo wt switch "$chosen_branch"
+      wt switch "$chosen_branch"
+    else
+      echo "Branch '$chosen_branch' is open in worktree: $wt_path" >&2
+      echo "$wt_path"
+    fi
+  else
+    echo git checkout "$chosen_branch"
+    git checkout "$chosen_branch"
+  fi
 else
   echo "$chosen_branch"
 fi
