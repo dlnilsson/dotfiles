@@ -361,7 +361,7 @@ battery_charging = "~/.dotfiles/bin/power_saver false && notify-send --app-name=
 battery_plugged = "~/.dotfiles/bin/power_saver false && notify-send --app-name=ac-notify --icon=battery-good-charging-symbolic --expire-time=3000 --transient 'Power' 'Charger connected'"
 session_locked = [
     "bw lock >/dev/null 2>&1",
-    "playerctl pause",
+    "playerctl --all-players pause",
     "noctalia msg bar-hide",
 ]
 session_unlocked = [
