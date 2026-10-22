@@ -1,16 +1,5 @@
 const std = @import("std");
-const c = @cImport({
-    @cDefine("PCRE2_CODE_UNIT_WIDTH", "8");
-    @cInclude("pcre2.h");
-    @cInclude("sys/socket.h");
-    @cInclude("sys/un.h");
-    @cInclude("sys/inotify.h");
-    @cInclude("poll.h");
-    @cInclude("unistd.h");
-    @cInclude("fcntl.h");
-    @cInclude("errno.h");
-    @cInclude("time.h");
-});
+const c = @import("c");
 const Allocator = std.mem.Allocator;
 const heap = std.heap.page_allocator;
 const Rule = struct {
@@ -18,9 +7,13 @@ const Rule = struct {
     match: *c.pcre2_match_data_8,
     replacement: []const u8,
 };
+const Rules = struct {
+    titles: []const Rule,
+    classes: []const Rule,
+};
 const RuleSet = struct {
     arena: std.heap.ArenaAllocator,
-    items: []const Rule,
+    items: Rules,
 
     fn load(path: [:0]const u8) !RuleSet {
         var arena = std.heap.ArenaAllocator.init(heap);
@@ -30,20 +23,25 @@ const RuleSet = struct {
     }
 
     fn deinit(self: *RuleSet) void {
-        for (self.items) |rule| {
-            c.pcre2_match_data_free_8(rule.match);
-            c.pcre2_code_free_8(rule.code);
-        }
+        freeRules(self.items.titles);
+        freeRules(self.items.classes);
         self.arena.deinit();
     }
 };
+
+fn freeRules(rules: []const Rule) void {
+    for (rules) |rule| {
+        c.pcre2_match_data_free_8(rule.match);
+        c.pcre2_code_free_8(rule.code);
+    }
+}
 
 const RuleWatcher = struct {
     fd: c_int,
     filename: []const u8,
 
     fn init(alloc: Allocator, path: []const u8) !RuleWatcher {
-        const directory = try alloc.dupeZ(u8, std.fs.path.dirname(path) orelse ".");
+        const directory = try alloc.dupeSentinel(u8, std.fs.path.dirname(path) orelse ".", 0);
         const fd = c.inotify_init1(c.IN_NONBLOCK | c.IN_CLOEXEC);
         if (fd < 0) return error.RulesWatchFailed;
         errdefer _ = c.close(fd);
@@ -83,7 +81,12 @@ const Monitor = struct {
 const Workspace = struct {
     id: i64,
     windows: i64 = 0,
+    lastwindow: []const u8 = "",
     lastwindowtitle: []const u8 = "",
+};
+const Client = struct {
+    address: []const u8,
+    class: []const u8 = "",
 };
 const empty = "{\"active\":{},\"occupied\":[],\"titles\":{}}";
 const events = [_][]const u8{
@@ -190,8 +193,9 @@ fn readAll(alloc: Allocator, fd: c_int) ![]const u8 {
     return bytes.items;
 }
 
-// The existing configuration uses a [rewrite] table with single-line TOML
-// literal strings. Reject other syntax rather than silently interpreting it.
+// The existing configuration uses a [rewrite] table and an optional [class]
+// table with single-line TOML literal strings. Reject other syntax rather than
+// silently interpreting it.
 fn literal(input: *[]const u8) ![]const u8 {
     input.* = std.mem.trimStart(u8, input.*, " \t");
     if (input.*.len == 0 or input.*[0] != '\'') return error.ExpectedTomlLiteralString;
@@ -201,27 +205,35 @@ fn literal(input: *[]const u8) ![]const u8 {
     return result;
 }
 
-fn loadRules(alloc: Allocator, path: [:0]const u8) ![]const Rule {
+fn loadRules(alloc: Allocator, path: [:0]const u8) !Rules {
     const fd = c.open(path.ptr, c.O_RDONLY | c.O_CLOEXEC);
     if (fd < 0) return error.OpenRulesFailed;
     defer _ = c.close(fd);
     const source = try readAll(alloc, fd);
-    var rules: std.ArrayList(Rule) = .empty;
-    errdefer for (rules.items) |rule| {
-        c.pcre2_match_data_free_8(rule.match);
-        c.pcre2_code_free_8(rule.code);
-    };
-    var in_table = false;
+    var titles: std.ArrayList(Rule) = .empty;
+    errdefer freeRules(titles.items);
+    var classes: std.ArrayList(Rule) = .empty;
+    errdefer freeRules(classes.items);
+    var table: ?*std.ArrayList(Rule) = null;
+    var has_rewrite = false;
+    var has_class = false;
     var lines = std.mem.splitScalar(u8, source, '\n');
     while (lines.next()) |raw| {
         var line = std.mem.trim(u8, raw, " \t\r");
         if (line.len == 0 or line[0] == '#') continue;
         if (std.mem.eql(u8, line, "[rewrite]")) {
-            if (in_table) return error.DuplicateRewriteTable;
-            in_table = true;
+            if (has_rewrite) return error.DuplicateRewriteTable;
+            has_rewrite = true;
+            table = &titles;
             continue;
         }
-        if (!in_table) return error.ExpectedRewriteTable;
+        if (std.mem.eql(u8, line, "[class]")) {
+            if (has_class) return error.DuplicateClassTable;
+            has_class = true;
+            table = &classes;
+            continue;
+        }
+        const rules = table orelse return error.ExpectedRewriteTable;
         const pattern = try literal(&line);
         line = std.mem.trimStart(u8, line, " \t");
         if (line.len == 0 or line[0] != '=') return error.ExpectedEquals;
@@ -238,8 +250,8 @@ fn loadRules(alloc: Allocator, path: [:0]const u8) ![]const Rule {
         try validateReplacement(replacement, c.pcre2_get_ovector_count_8(match));
         try rules.append(alloc, .{ .code = code, .match = match, .replacement = replacement });
     }
-    if (!in_table) return error.ExpectedRewriteTable;
-    return rules.items;
+    if (!has_rewrite) return error.ExpectedRewriteTable;
+    return .{ .titles = titles.items, .classes = classes.items };
 }
 
 fn validateReplacement(replacement: []const u8, count: usize) !void {
@@ -281,8 +293,16 @@ fn flatten(alloc: Allocator, title: []const u8) ![]const u8 {
     return bytes.items;
 }
 
-fn rewrite(alloc: Allocator, title: []const u8, rules: []const Rule) ![]const u8 {
+fn rewrite(alloc: Allocator, title: []const u8, class: ?[]const u8, rules: Rules) ![]const u8 {
     const text = try flatten(alloc, title);
+    const rewritten = try apply(alloc, text, rules.titles, null) orelse text;
+    const name = class orelse return rewritten;
+    return try apply(alloc, name, rules.classes, rewritten) orelse rewritten;
+}
+
+// Returns the first full match's replacement, or null when no rule matches.
+// Class rules pass the rewritten title for $title.
+fn apply(alloc: Allocator, text: []const u8, rules: []const Rule, title: ?[]const u8) !?[]const u8 {
     for (rules) |rule| {
         const n = c.pcre2_match_8(rule.code, text.ptr, text.len, 0, 0, rule.match, null);
         if (n == c.PCRE2_ERROR_NOMATCH) continue;
@@ -300,6 +320,9 @@ fn rewrite(alloc: Allocator, title: []const u8, rules: []const Rule) ![]const u8
                 // PCRE2_UNSET is SIZE_MAX; Zig 0.16 cannot translate its C macro.
                 if (groups[group * 2] != std.math.maxInt(usize)) try result.appendSlice(alloc, text[groups[group * 2]..groups[group * 2 + 1]]);
                 index = end;
+            } else if (title != null and std.mem.startsWith(u8, rule.replacement[index..], "$title")) {
+                try result.appendSlice(alloc, title.?);
+                index += "$title".len;
             } else {
                 try result.append(alloc, rule.replacement[index]);
                 index += 1;
@@ -307,7 +330,7 @@ fn rewrite(alloc: Allocator, title: []const u8, rules: []const Rule) ![]const u8
         }
         return result.items;
     }
-    return text;
+    return null;
 }
 
 fn milliseconds() !i64 {
@@ -380,9 +403,15 @@ fn query(alloc: Allocator, path: []const u8, request: []const u8) ![]const u8 {
     }
 }
 
-fn snapshot(alloc: Allocator, path: []const u8, rules: []const Rule) ![]const u8 {
+fn snapshot(alloc: Allocator, path: []const u8, rules: Rules) ![]const u8 {
     const monitors = try std.json.parseFromSlice([]Monitor, alloc, try query(alloc, path, "j/monitors"), .{ .ignore_unknown_fields = true });
     const workspaces = try std.json.parseFromSlice([]Workspace, alloc, try query(alloc, path, "j/workspaces"), .{ .ignore_unknown_fields = true });
+    var classes: std.StringHashMap([]const u8) = .init(alloc);
+    // Only class rules need window classes; skip the clients query without them.
+    if (rules.classes.len > 0) {
+        const clients = try std.json.parseFromSlice([]Client, alloc, try query(alloc, path, "j/clients"), .{ .ignore_unknown_fields = true });
+        for (clients.value) |client| try classes.put(client.address, client.class);
+    }
     var active: std.json.ObjectMap = .{};
     var titles: std.json.ObjectMap = .{};
     var occupied: std.ArrayList(i64) = .empty;
@@ -397,15 +426,16 @@ fn snapshot(alloc: Allocator, path: []const u8, rules: []const Rule) ![]const u8
         const id = if (monitor.specialWorkspace.id != 0) monitor.specialWorkspace.id else monitor.activeWorkspace.id;
         const workspace = by_id.get(id);
         const title = if (workspace) |w| (if (w.windows > 0) w.lastwindowtitle else "") else "";
+        const class = if (workspace) |w| (if (w.windows > 0) classes.get(w.lastwindow) else null) else null;
         var entry: std.json.ObjectMap = .{};
-        try entry.put(alloc, "text", .{ .string = try rewrite(alloc, title, rules) });
+        try entry.put(alloc, "text", .{ .string = try rewrite(alloc, title, class, rules) });
         try entry.put(alloc, "tooltip", .{ .string = title });
         try titles.put(alloc, monitor.name, .{ .object = entry });
     }
     return std.json.Stringify.valueAlloc(alloc, .{ .active = std.json.Value{ .object = active }, .occupied = occupied.items, .titles = std.json.Value{ .object = titles } }, .{});
 }
 
-fn publish(path: []const u8, rules: []const Rule, last: *?[]const u8) !void {
+fn publish(path: []const u8, rules: Rules, last: *?[]const u8) !void {
     var arena = std.heap.ArenaAllocator.init(heap);
     defer arena.deinit();
     const value = try snapshot(arena.allocator(), path, rules);

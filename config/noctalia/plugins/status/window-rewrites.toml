@@ -4,7 +4,12 @@
 '(.*) — Code - OSS' = '$1'
 '(.*) - Visual Studio Code' = '$1'
 '(.*) - Slack.*' = ' $1'
-'(.*) - Discord' = '$1'
+'(.*) - Discord' = '   $1'
 '(.*) - Cursor' = '$1'
 '(.*) - Chromium' = '$1'
 '(.*) - Free Version' = '$1'
+
+[class]
+'Spotify' = ' $title'
+'dev.zed.Zed' = ' $title'
+'kitty' = '󰄛  $title'

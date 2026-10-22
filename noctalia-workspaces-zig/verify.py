@@ -32,8 +32,9 @@ class MockHyprland:
     def __init__(self, directory):
         self.directory = directory
         directory.mkdir(parents=True)
-        self.state = {"monitors": [], "workspaces": []}
+        self.state = {"monitors": [], "workspaces": [], "clients": []}
         self.clients = []
+        self.requests = []
         self.lock = threading.Lock()
         self.queries = 0
         self.malformed = False
@@ -64,8 +65,9 @@ class MockHyprland:
     def command(self, client):
         with client:
             request = client.recv(128).decode()
-            assert request in ("j/monitors", "j/workspaces"), request
+            assert request in ("j/monitors", "j/workspaces", "j/clients"), request
             with self.lock:
+                self.requests.append(request)
                 data = b"invalid JSON" if self.malformed else json.dumps(self.state[request[2:]]).encode()
                 delay = self.delay
                 self.queries += 1
@@ -201,6 +203,7 @@ def fixture(title="A tab — Zen Browser"):
             {"id": -99, "windows": 1, "lastwindowtitle": "special - Slack | Company"},
             {"id": 9, "windows": 3, "lastwindowtitle": "background window"},
         ],
+        "clients": [],
     }
 
 
@@ -268,6 +271,8 @@ def reload_check(server, directory, env):
         rejected(valid_rule + "unfinished", "ExpectedTomlLiteralString")
         rejected(valid_rule + "'[' = 'invalid'\n", "InvalidRegex")
         rejected(valid_rule + "'(.*)' = '$2'\n", "InvalidCaptureGroup")
+        rejected(valid_rule + "[class]\n'[' = 'invalid'\n", "InvalidRegex")
+        rejected(valid_rule + "[class]\n[class]\n", "DuplicateClassTable")
         rejected(None, "OpenRulesFailed")
         expected = save("recreated", atomic=True)
         assert stream.line() == expected
@@ -284,6 +289,51 @@ def reload_check(server, directory, env):
         final = memory(stream.process.pid)
         print("PASS: idle rule reloads, in-place and atomic saves, unchanged output, invalid TOML/regex/captures, deletion/recreation, reconnect, and 100 reloads")
         print(f"Zig RSS growth over 100 rule reloads: {final['Rss'] - initial['Rss']} KiB")
+
+
+def class_check(server, directory, env):
+    rules = directory / "class-rewrites.toml"
+    rules.write_text(
+        "[rewrite]\n'(.*) — Zen Browser' = 'zen $1'\n"
+        "[class]\n'Spot(ify)' = '[$1] $title'\n'zen' = '$title (zen)'\n'.*' = 'any'\n"
+    )
+    server.set({
+        "monitors": [
+            {"name": "DP-1", "activeWorkspace": {"id": 2}},
+            {"name": "HDMI-A-1", "activeWorkspace": {"id": 1}, "specialWorkspace": {"id": -99}},
+            {"name": "eDP-1", "activeWorkspace": {"id": 3}},
+            {"name": "DP-2", "activeWorkspace": {"id": 4}},
+            {"name": "DP-3", "activeWorkspace": {"id": 5}},
+        ],
+        "workspaces": [
+            {"id": 2, "windows": 1, "lastwindow": "0xa", "lastwindowtitle": "Song"},
+            {"id": -99, "windows": 1, "lastwindow": "0xb", "lastwindowtitle": "Tab — Zen Browser"},
+            {"id": 3, "windows": 1, "lastwindow": "0xc", "lastwindowtitle": "Term"},
+            {"id": 4, "windows": 1, "lastwindow": "0xd", "lastwindowtitle": "Lost"},
+            {"id": 5, "windows": 0, "lastwindow": "0xa", "lastwindowtitle": "stale"},
+        ],
+        "clients": [
+            {"address": "0xa", "class": "Spotify", "workspace": {"id": 2, "name": "2"}, "at": [0, 0]},
+            {"address": "0xb", "class": "zen", "initialClass": "zen"},
+            {"address": "0xc", "class": "Spotify2"},
+        ],
+    })
+    titles = once([str(BINARY), "--rules", str(rules)], env)["titles"]
+    assert titles == {
+        # Class captures and the rewritten title; first full class match wins.
+        "DP-1": {"text": "[ify] Song", "tooltip": "Song"},
+        "HDMI-A-1": {"text": "zen Tab (zen)", "tooltip": "Tab — Zen Browser"},
+        "eDP-1": {"text": "any", "tooltip": "Term"},
+        # Unknown window addresses and empty workspaces skip class rules.
+        "DP-2": {"text": "Lost", "tooltip": "Lost"},
+        "DP-3": {"text": "", "tooltip": ""},
+    }, titles
+    title_only = directory / "title-rewrites.toml"
+    title_only.write_text("[rewrite]\n")
+    server.requests.clear()
+    once([str(BINARY), "--rules", str(title_only)], env)
+    assert "j/clients" not in server.requests, server.requests
+    print("PASS: class rules, captures, $title, first match, unknown windows, no clients query without class rules")
 
 
 def mock_check():
@@ -305,7 +355,7 @@ while data := s.recv(65536):
             hyprctl.chmod(0o755)
             env = dict(os.environ, XDG_RUNTIME_DIR=temp, HYPRLAND_INSTANCE_SIGNATURE="test", PATH=f"{temp}:{os.environ['PATH']}")
             commands = [[sys.executable, str(SOURCE)], [str(BINARY), "--rules", str(RULES)]]
-            cases = [{"monitors": [], "workspaces": []}, fixture()]
+            cases = [{"monitors": [], "workspaces": [], "clients": []}, fixture()]
             for title in [
                 "File — Code - OSS", "File - Visual Studio Code", "File - Slack | Workspace",
                 "File - Discord", "File - Cursor", "File - Chromium", "File - Free Version",
@@ -325,6 +375,7 @@ while data := s.recv(65536):
             server.set(fixture("bcdefghij"))
             assert once([sys.executable, str(custom_source)], env) == once([str(BINARY), "--rules", str(custom_rules)], env)
             print(f"PASS: {len(cases) + 1} snapshot and rewrite comparisons")
+            class_check(server, directory, env)
             server.set(fixture())
             with streams(commands, env) as running:
                 expected = once(commands[0], env)
