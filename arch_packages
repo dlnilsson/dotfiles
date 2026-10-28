@@ -59,6 +59,7 @@ fuse2
 fwupd
 fx
 fzf
+gamescope
 gdb
 gedit
 ghostty
@@ -85,7 +86,6 @@ hyperfine
 hypridle
 hyprland
 hyprlauncher
-hyprlock
 hyprpaper
 hyprpicker
 hyprpolkitagent
@@ -128,7 +128,6 @@ neovim
 nix
 nmap
 noctalia
-nodejs-lts-iron
 noto-fonts
 noto-fonts-cjk
 noto-fonts-emoji
@@ -203,7 +202,6 @@ vulkan-nouveau
 vulkan-radeon
 vulkan-tools
 watchexec
-waybar
 wev
 wget
 whois
