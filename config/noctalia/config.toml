@@ -319,6 +319,70 @@ center_text = true
 background = false
 shadow = true
 
+[lockscreen_widgets.widget."lockscreen-date@DP-1"]
+type = "clock"
+output = "DP-1"
+cx = 1720.0
+cy = 250.0
+box_width = 640.0
+box_height = 50.0
+placement_width = 3440.0
+placement_height = 1440.0
+
+[lockscreen_widgets.widget."lockscreen-date@DP-1".settings]
+format = "{:%A %-d %B}"
+center_text = true
+background = false
+shadow = true
+
+[lockscreen_widgets.widget."lockscreen-date@DP-2"]
+type = "clock"
+output = "DP-2"
+cx = 1720.0
+cy = 250.0
+box_width = 640.0
+box_height = 50.0
+placement_width = 3440.0
+placement_height = 1440.0
+
+[lockscreen_widgets.widget."lockscreen-date@DP-2".settings]
+format = "{:%A %-d %B}"
+center_text = true
+background = false
+shadow = true
+
+[lockscreen_widgets.widget."lockscreen-date@eDP-1"]
+type = "clock"
+output = "eDP-1"
+cx = 960.0
+cy = 250.0
+box_width = 640.0
+box_height = 50.0
+placement_width = 1920.0
+placement_height = 1200.0
+
+[lockscreen_widgets.widget."lockscreen-date@eDP-1".settings]
+format = "{:%A %-d %B}"
+center_text = true
+background = false
+shadow = true
+
+[lockscreen_widgets.widget."lockscreen-date@FALLBACK"]
+type = "clock"
+output = "FALLBACK"
+cx = 960.0
+cy = 250.0
+box_width = 640.0
+box_height = 50.0
+placement_width = 1920.0
+placement_height = 1080.0
+
+[lockscreen_widgets.widget."lockscreen-date@FALLBACK".settings]
+format = "{:%A %-d %B}"
+center_text = true
+background = false
+shadow = true
+
 [lockscreen_widgets.widget."lockscreen-days-since@DP-1"]
 type = "dln/status:days-since"
 output = "DP-1"
