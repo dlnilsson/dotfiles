@@ -216,6 +216,7 @@ type = "login_box"
 output = "DP-1"
 
 [lockscreen_widgets.widget."lockscreen-login-box@DP-1".settings]
+background_color = "surface_container"
 show_session_buttons = false
 show_unlock_hint = false
 show_weather = false
@@ -226,6 +227,7 @@ type = "login_box"
 output = "DP-2"
 
 [lockscreen_widgets.widget."lockscreen-login-box@DP-2".settings]
+background_color = "surface_container"
 show_session_buttons = false
 show_unlock_hint = false
 show_weather = false
@@ -236,6 +238,7 @@ type = "login_box"
 output = "eDP-1"
 
 [lockscreen_widgets.widget."lockscreen-login-box@eDP-1".settings]
+background_color = "surface_container"
 show_session_buttons = false
 show_unlock_hint = false
 show_weather = false
@@ -246,6 +249,7 @@ type = "login_box"
 output = "FALLBACK"
 
 [lockscreen_widgets.widget."lockscreen-login-box@FALLBACK".settings]
+background_color = "surface_container"
 show_session_buttons = false
 show_unlock_hint = false
 show_weather = false
