@@ -297,6 +297,10 @@ hl.config({
         dim_inactive     = true,
         dim_strength     = 0.05,
 
+        wobble = {
+            enabled = true,
+        },
+
         shadow = {
             enabled      = true,
             range        = 4,

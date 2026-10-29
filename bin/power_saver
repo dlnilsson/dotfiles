@@ -97,7 +97,7 @@ enabled="${1:-true}"
 if [[ "$enabled" == "true" ]]; then
     hyprctl eval '
         hl.config({
-            decoration = { blur = { enabled = false }, rounding = 0, shadow = { enabled = false } },
+            decoration = { blur = { enabled = false }, rounding = 0, shadow = { enabled = false }, wobble = { enabled = false } },
             general    = { gaps_out = 0, gaps_in = 0, border_size = 0 },
             animations = { enabled = false },
         })
@@ -114,7 +114,7 @@ if [[ "$enabled" == "true" ]]; then
 else
     hyprctl eval '
         hl.config({
-            decoration = { blur = { enabled = true }, rounding = 10, shadow = { enabled = true } },
+            decoration = { blur = { enabled = true }, rounding = 10, shadow = { enabled = true }, wobble = { enabled = true } },
             general    = { gaps_out = 10, gaps_in = 5, border_size = 2 },
             animations = { enabled = true },
         })
