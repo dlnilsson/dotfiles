@@ -141,6 +141,43 @@ hl.on("window.open", function(w)
     hl.config({ cursor = { no_warps = no_warps } })
 end)
 
+-- Keep a monitor enabled: when the last external monitor is unplugged,
+-- enable the builtin display again. Port of hypr-monitord.
+local builtin_monitor = "eDP-1"
+
+local function enable_monitor(name)
+    hl.monitor({ output = name, mode = "highres", position = "auto", scale = 1.0, disabled = false })
+end
+
+local function ensure_monitor_enabled()
+    local monitors = hl.get_monitors({ all = true })
+    -- An empty list tells us nothing, so leave that state alone.
+    if #monitors == 0 then return end
+    for _, m in ipairs(monitors) do
+        if m.name ~= "FALLBACK" and m.enabled then return end
+    end
+    enable_monitor(builtin_monitor)
+end
+
+local monitor_removed_timer
+hl.on("monitor.removed", function()
+    -- Several monitors can be removed at once; check once they are all gone.
+    if monitor_removed_timer then monitor_removed_timer:set_enabled(false) end
+    monitor_removed_timer = hl.timer(ensure_monitor_enabled, { timeout = 7000, type = "oneshot" })
+end)
+
+hl.on("monitor.added", function(added)
+    for _, m in ipairs(hl.get_monitors({ all = true })) do
+        if added and m.name == added.name
+            and m.name ~= builtin_monitor and m.name ~= "FALLBACK"
+            and (not m.enabled or m.width == 0 or m.height == 0) then
+            enable_monitor(m.name)
+            return
+        end
+    end
+    ensure_monitor_enabled()
+end)
+
 
 
 
