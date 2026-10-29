@@ -142,7 +142,7 @@ hl.on("window.open", function(w)
 end)
 
 -- Keep a monitor enabled: when the last external monitor is unplugged,
--- enable the builtin display again. Port of hypr-monitord.
+-- enable the builtin display again.
 local builtin_monitor = "eDP-1"
 
 local function enable_monitor(name)
@@ -177,7 +177,6 @@ hl.on("monitor.added", function(added)
     end
     ensure_monitor_enabled()
 end)
-
 
 
 
