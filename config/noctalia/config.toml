@@ -504,6 +504,15 @@ glyph = "terminal"
 global = false
 exec = "kitty --class ef-usage -o background_opacity=1.0 -e sh -c \"ef usage today; ef usage today --heatmap; read\""
 
+# /hypr in the launcher: toggle Hyprland effects at runtime (reset on reload).
+[shell.launcher.dmenu.entry.hypr]
+command = "~/.dotfiles/bin/hypr-toggle"
+prefix = "hypr"
+label = "Hyprland toggles"
+glyph = "adjustments"
+global = true
+exec = "~/.dotfiles/bin/hypr-toggle \"{selection}\""
+
 [widget.ef-usage.actions]
 left = "exec kitty --class ef-usage -o background_opacity=1.0 -e sh -c 'ef usage today; ef usage today --heatmap; read'"
 

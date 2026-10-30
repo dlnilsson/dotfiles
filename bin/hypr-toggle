@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Toggle Hyprland boolean options and pick the blur variant at runtime.
+#   hypr-toggle            list options as "label<TAB>state" (Noctalia dmenu entry)
+#   hypr-toggle <label>    flip that option, or select that blur variant
+set -euo pipefail
+
+declare -A options=(
+    ["Animations"]="animations:enabled"
+    ["Blur"]="decoration:blur:enabled"
+    ["Blur popups"]="decoration:blur:popups"
+    ["Blur special workspace"]="decoration:blur:special"
+    ["Blur xray"]="decoration:blur:xray"
+    ["Motion blur"]="decoration:motion_blur:enabled"
+    ["Shadow"]="decoration:shadow:enabled"
+    ["Sharp shadow"]="decoration:shadow:sharp"
+    ["Glow"]="decoration:glow:enabled"
+    ["Dim inactive"]="decoration:dim_inactive"
+    ["Wobble"]="decoration:wobble:enabled"
+)
+
+# decoration:blur:variant values; glass variants use decoration:blur:glass:*.
+variant_prefix="Blur variant: "
+declare -A variants=(
+    [kawase]=0 [frost]=1 [ripple]=2 [drops]=3 [water]=4 [fluid_jar]=5
+    [prism]=6 [heat_shimmer]=7 [acrylic]=8 [aurora]=9 [haze]=10
+)
+
+current() {
+    hyprctl getoption "$1" | awk 'NR == 1 { print $2 }'
+}
+
+# set "decoration:blur:enabled" false -> hl.config({ decoration = { blur = { enabled = false } } })
+set_option() {
+    local parts table=$2 i
+    IFS=: read -ra parts <<< "$1"
+    for ((i = ${#parts[@]} - 1; i >= 0; i--)); do
+        table="${parts[i]} = $table"
+        [ "$i" -gt 0 ] && table="{ $table }"
+    done
+    hyprctl -q eval "hl.config({ $table })"
+}
+
+if [ $# -eq 0 ]; then
+    for label in "${!options[@]}"; do
+        if [ "$(current "${options[$label]}")" = "true" ]; then state=on; else state=off; fi
+        printf '%s\t%s\n' "$label" "$state"
+    done | sort
+
+    active=$(current decoration:blur:variant)
+    for name in "${!variants[@]}"; do
+        if [ "${variants[$name]}" = "$active" ]; then state=active; else state=""; fi
+        printf '%s%s\t%s\n' "$variant_prefix" "$name" "$state"
+    done | sort
+    exit 0
+fi
+
+# Noctalia passes the raw line; keep only the label before the tab.
+label=${1%%$'\t'*}
+
+if [[ $label == "$variant_prefix"* ]]; then
+    name=${label#"$variant_prefix"}
+    [ -n "${variants[$name]:-}" ] || { echo "unknown blur variant: $name" >&2; exit 1; }
+    set_option decoration:blur:variant "${variants[$name]}"
+    exit 0
+fi
+
+option=${options[$label]:-}
+[ -n "$option" ] || { echo "unknown option: $label" >&2; exit 1; }
+
+if [ "$(current "$option")" = "true" ]; then value=false; else value=true; fi
+set_option "$option" "$value"
