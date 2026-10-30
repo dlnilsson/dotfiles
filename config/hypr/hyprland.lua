@@ -384,7 +384,13 @@ hl.window_rule({
 })
 
 -- Gromit-mpx annotation special workspace
-hl.workspace_rule({ workspace = "special:gromit", gaps_in = 0, gaps_out = 0, on_created_empty = "gromit-mpx -a" })
+hl.workspace_rule({ workspace = "special:gromit", gaps_in = 0, gaps_out = 0 })
+
+hl.on("workspace.created", function(ws)
+    if ws.name == "special:gromit" and ws.is_empty then
+        hl.exec_cmd("gromit-mpx -a")
+    end
+end)
 
 
 hl.window_rule({
