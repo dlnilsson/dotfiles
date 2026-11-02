@@ -464,6 +464,7 @@ hl.window_rule({
     name  = "terminal",
     match = { class = "(Alacritty|kitty|com.mitchellh.ghostty)" },
     tag   = "terminal",
+    no_wobble = true,
 })
 
 hl.window_rule({
