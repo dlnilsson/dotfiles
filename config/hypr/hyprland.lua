@@ -712,10 +712,12 @@ hl.config({
 
 hl.config({
     misc = {
-        focus_on_activate      = true,
+        allow_session_lock_restore = true,
+        focus_on_activate        = true,
         disable_splash_rendering = true,
         force_default_wallpaper  = 0,
         disable_hyprland_logo    = false,
+        font_family              = "JetBrainsMono Nerd Font Mono",
         vrr = 1
     },
 
@@ -804,8 +806,8 @@ hl.bind(mainMod .. " + code:108",     hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/c
 hl.bind(mainMod .. " + code:34",      hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/clamshell"))
 
 -- Lid switch
-hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/clamshell"), { locked = true })
-hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/clamshell"), { locked = true })
+hl.bind("switch:off:Lid Switch", hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/clamshell off"), { locked = true })
+hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("/home/dln/.dotfiles/bin/clamshell on"), { locked = true })
 
 -- Move focus with arrow keys
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
