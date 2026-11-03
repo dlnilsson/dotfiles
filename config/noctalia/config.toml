@@ -6,6 +6,7 @@ setup_wizard_enabled = false
 offline_mode          = false
 telemetry_enabled     = false
 popup_shadows         = true            # draw drop shadows behind popups and dropdowns
+font_family           = "JetBrainsMono Nerd Font Mono"
 
 [shell.panel]
 transparency_mode = "glass" #  solid | soft | glass; controls floating panel opacity and card translucency
