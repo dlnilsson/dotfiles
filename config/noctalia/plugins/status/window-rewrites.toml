@@ -1,5 +1,8 @@
 # Regex rules. The first matching rule wins; $1 keeps capture group 1.
 [rewrite]
+# trim suffix -
+'(.*) - Slack.*' = '$1'
+'(.*) - Discord' = '$1'
 # Site rules: browser tab titles. They must stay before the browser suffix rules.
 '(.*) - YouTube — Zen Browser' = '󰗃  $1' # md-youtube
 'YouTube — Zen Browser' = '󰗃  YouTube' # md-youtube
