@@ -25,7 +25,6 @@ cloc
 cmake
 cmatrix
 codespell
-copyq
 cpio
 cronie
 cups
@@ -140,6 +139,7 @@ nwg-look
 obsidian
 openssh
 pacman-contrib
+pandoc-cli
 papirus-icon-theme
 parallel
 pavucontrol
