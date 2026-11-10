@@ -100,6 +100,7 @@ ironbar
 iwd
 jdk-openjdk
 jq
+just
 keychain
 keyd
 kgpg
@@ -185,6 +186,7 @@ tailscale
 television
 texlive-binextra
 the_silver_searcher
+tmux
 tree
 ttf-fira-code
 ttf-jetbrains-mono-nerd
