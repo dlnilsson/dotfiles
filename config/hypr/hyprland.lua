@@ -161,6 +161,9 @@ end
 
 local monitor_removed_timer
 hl.on("monitor.removed", function()
+    -- The kitty quick-access panel loses its layer surface with its monitor and
+    -- cannot recreate it; kill it so the next toggle starts a fresh one.
+    hl.exec_cmd("pkill -f 'app-id=kitty-quick-access'")
     -- Several monitors can be removed at once; check once they are all gone.
     if monitor_removed_timer then monitor_removed_timer:set_enabled(false) end
     monitor_removed_timer = hl.timer(ensure_monitor_enabled, { timeout = 7000, type = "oneshot" })
@@ -768,7 +771,8 @@ hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd(
     "kitten panel --toggle-visibility --single-instance --instance-group=quick-access " ..
     "--edge=top --layer=overlay --lines=25 --app-id=kitty-quick-access " ..
     "--focus-policy=exclusive --exclusive-zone=-1 --override-exclusive-zone " ..
-    "--override=background_opacity=1.0"
+    "--override=background_opacity=1.0 " ..
+    "tmux new-session -A -s quick-access"
 ))
 
 hl.bind(mainMod .. " + B",            hl.dsp.window.float({ action = "toggle" }))
