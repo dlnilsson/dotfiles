@@ -1,0 +1,14 @@
+#!/bin/bash
+# Exit 0 if user is at the keyboard, >0 if AFK.
+#   1 = session locked (noctalia)
+#   2 = all monitors DPMS off
+
+if [[ $(noctalia msg status 2>/dev/null | jq -r '.locked') == "true" ]]; then
+	exit 1
+fi
+
+if [[ $(hyprctl monitors -j 2>/dev/null | jq '[.[] | select(.dpmsStatus)] | length') == "0" ]]; then
+	exit 2
+fi
+
+exit 0
