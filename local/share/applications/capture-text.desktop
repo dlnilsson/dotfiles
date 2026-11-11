@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Capture Text
+Comment=Select a screen region and copy its text to the clipboard (OCR)
+Path=/home/dln/.dotfiles/bin/
+Exec=/home/dln/.dotfiles/bin/capture-text
+Terminal=false
+Categories=Utility;
+Keywords=ocr;text;capture;clipboard;wayland;
