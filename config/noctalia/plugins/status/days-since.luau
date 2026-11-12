@@ -18,7 +18,7 @@ local function refresh()
     pending = true
     local launched = noctalia.runAsync({
         "python3",
-        noctalia.expandPath("~/.dotfiles/bin/days_since"),
+        noctalia.expandPath("/home/dln/.local/bin/days_since"),
     }, function(result)
         pending = false
         if result.exitCode ~= 0 or result.timedOut then
