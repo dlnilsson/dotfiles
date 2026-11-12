@@ -25,8 +25,8 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
 # export FZF_CTRL_R_OPTS="--no-highlight-line"
 export FZF_CTRL_R_OPTS="--no-multi --no-highlight-line"
 export HUSKY=0
-export MICRO_TRUECOLOR=1
-# export TERMINAL=termite
+export SUPERPOWERS_DISABLE_TELEMETRY=true
+
 alias zed=zeditor
 alias hx=helix
 alias nano=hx
@@ -431,4 +431,14 @@ claude() {
 	/home/dln/.local/bin/claude "$@"
 	reset
 	kitty @ set-window-title ""
+}
+
+# Route `git recent` through worktrunk so jumping to a branch open in another worktree can cd the shell.
+git() {
+	if [[ "$1" == "recent" ]]; then
+		shift
+		wt recent -- "$@"
+	else
+		command git "$@"
+	fi
 }
