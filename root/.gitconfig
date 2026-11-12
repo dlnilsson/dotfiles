@@ -62,7 +62,7 @@
 	editor = helix
 	excludesfile = ~/.gitignore_global
 	autocrlf = input
-	pager = delta
+	pager = /usr/bin/delta
 [alias]
 	pd = pull-default
 	# git fixup, but fuzzy find commit
@@ -114,7 +114,7 @@
 [rerere]
 	enabled = true
 [interactive]
-    diffFilter = delta --color-only
+    diffFilter = /usr/bin/delta --color-only
 [delta]
 	features = side-by-side
 	plus-style = syntax "#012800"
