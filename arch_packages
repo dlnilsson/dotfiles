@@ -180,6 +180,7 @@ speech-dispatcher
 spotify-launcher
 spotify-player
 sqlfluff
+stow
 strace
 swaylock
 tailscale
