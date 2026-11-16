@@ -24,7 +24,7 @@ elif (( percent <= 20 )); then
   color="#D08770"
 fi
 
-echo "<span foreground='$color'>$glyph $percent% ($state)</span>"
+printf '%s\t%s\n' "$color" "$glyph $percent% ($state)"
 wlan=$(cat /sys/class/net/wlan0/operstate | tr -d '\n' | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | tr '[:lower:]' '[:upper:]')
 
 # Usage:
@@ -52,5 +52,5 @@ wifi_strength() {
   echo -e "$bars   ${pct}%"
 }
 
-echo "<span>WLAN0 $wlan  $(wifi_strength)</span>"
+printf '%s\t%s\n' "#D8DEE9" "WLAN0 $wlan  $(wifi_strength)"
 

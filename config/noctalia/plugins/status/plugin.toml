@@ -70,3 +70,7 @@ open_near_click = true
 [[desktop_widget]]
 id = "days-since"
 entry = "days-since.luau"
+
+[[desktop_widget]]
+id = "battery-lock"
+entry = "battery-lock.luau"
