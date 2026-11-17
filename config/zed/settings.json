@@ -165,8 +165,8 @@
     ],
   },
   "icon_theme": {
-    "mode": "light",
-    "light": "Zed (Default)",
+    "mode": "dark",
+    "light": "Catppuccin Macchiato",
     "dark": "Catppuccin Frappé",
   },
   "agent_servers": {
@@ -177,9 +177,9 @@
       "env": {},
       "default_config_options": {
         "mode": "workspace-write",
-        "collaboration_mode": "default",
+        "collaboration_mode": "plan",
         "reasoning_effort": "high",
-        "model": "gpt-6.1-sol",
+        "model": "gpt-6-astra",
         "fast-mode": false
       },
       "favorite_config_option_values": {
@@ -254,12 +254,12 @@
   },
   "theme": {
     "mode": "dark",
-    "light": "One Light",
+    "light": "Catppuccin Latte",
     "dark": "Nordfox - blurred"
   },
   "theme_overrides": {
     "Nordfox - blurred": {
-      "background.appearance": "blurred",
+      "background.appearance": "opaque",
       "syntax": {
         "comment": {
           "font_style": "italic",
