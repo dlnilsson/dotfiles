@@ -17,6 +17,17 @@ shadow                = true   # cast the global [shell.shadow] from panel surfa
 mic_filter_regex = "cava|pw-cat|openwave|OpenWave|pw-loopback"
 screen_filter_regex = "obs|OBS"
 
+[shell.window_switcher]
+colorize_icons = false # tint application icons with shell.app_icon_color
+style = "compact"              # carousel | compact | grid | icons
+mru = true                     # order windows by most recently used (Alt+Tab) instead of workspace layout
+show_caption = true             # show window titles and application names below previews
+show_count = false               # show the current and total window count above the previews
+show_app_icon = true            # show application icons over window previews
+show_all_outputs = true         # list windows from every monitor; false = only the monitor showing the switcher
+current_workspace_only = false  # list only the windows of the workspace shown on each monitor; false = windows from every workspace
+
+
 [shell.launcher]
 categories = false
 compact = true
