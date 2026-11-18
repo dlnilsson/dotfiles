@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#
+# Find local git repositories whose remote points at the given repo.
+# Accepts HTTPS or SSH (scp-style or ssh://) URLs; protocol, user and .git suffix are ignored.
+#
+# Usage: git-find-repo <remote-url> [search-root...]   (default root: $HOME)
+
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  printf 'Usage: git-find-repo <remote-url> [search-root...]\n' >&2
+  exit 2
+fi
+
+# Reduce a remote URL to "host/owner/repo".
+normalize() {
+  local url=$1
+  if [[ $url == *://* ]]; then
+    url=${url#*://}          # drop scheme
+    url=${url#*@}            # drop user
+    local host=${url%%/*} path=${url#*/}
+    url=${host%%:*}/$path    # drop port
+  else
+    url=${url#*@}            # scp-style: user@host:path
+    url=${url/://}
+  fi
+  url=${url%/}
+  url=${url%.git}
+  printf '%s\n' "${url,,}"
+}
+
+target=$(normalize "$1")
+shift
+roots=("${@:-$HOME}")
+
+fd --hidden --no-ignore --prune --exclude node_modules '^\.git$' "${roots[@]}" 2>/dev/null |
+  while IFS= read -r gitpath; do
+    dir=$(dirname "$gitpath")
+    git -C "$dir" remote -v 2>/dev/null | while read -r _ url _; do
+      if [[ $(normalize "$url") == "$target" ]]; then
+        printf '%s\n' "$dir"
+        break
+      fi
+    done || true   # skip unreadable/broken repos
+  done | sort -u
