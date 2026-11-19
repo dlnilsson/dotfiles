@@ -63,6 +63,35 @@
 	excludesfile = ~/.gitignore_global
 	autocrlf = input
 	pager = /usr/bin/delta
+
+[pager]
+    diff = /usr/bin/delta --tui
+    show = /usr/bin/delta --tui
+    log  = /usr/bin/delta --tui
+[sequence]
+    editor = delta --tui sequence-editor
+
+[pretty]
+    commit-format = tformat:%n%n▸ %h %C(blue)%an %C(blue)%ar%C(auto)%d%C(reset)%n%n    %C(green)%s%C(auto)
+    commit-format-full = tformat:%n%n▸ %h %C(blue)%an %C(blue)%ar%C(auto)%d%C(reset)%n%n%w(0,4,4)%C(green)%s%C(reset)%n%+b
+
+[delta-tui]
+    # Arguments of the git log and git show that the TUI runs itself
+    # (`l l`, `right` on a commit).
+    log-args = --stat
+    log-args = --date=relative
+    log-args = --pretty=commit-format
+    show-args = --pretty=commit-format-full
+    # Head each file with its `git diff --stat` row.
+    file-header = stat
+    # Open every patch with its files folded.
+    start-folded = true
+
+[delta-tui "general.views"]
+    # use H to bind features, views, and commands to hotkeys
+    ignore-whitespace = {command} -w
+
+
 [alias]
 	pd = pull-default
 	# git fixup, but fuzzy find commit
@@ -111,11 +140,18 @@
 	# show diff of merge commit
 	showmerge = "!f() { rev=${1:-HEAD}; git show -p \"$rev^1..$rev\"; }; f"
 	fixsame = !git commit --amend --no-edit --date=\"$(git log -1 --format=%aD)\"
+
 [rerere]
 	enabled = true
+
 [interactive]
     diffFilter = /usr/bin/delta --color-only
+
 [delta]
+   	# Must match the first line of the [pretty] formats above, so that each
+    # commit is one cursor stop.
+    commit-regex = ^(▸|commit )
+    commit-decoration-style = blue ol
 	features = side-by-side
 	plus-style = syntax "#012800"
 	minus-style = normal "#340001"
@@ -123,6 +159,7 @@
 	line-numbers-left-format = " "
 	line-numbers-right-format = "│ "
 	#inspect-raw-lines = false
+
 [delta "line-numbers"]
 	line-numbers = true
 [delta "unobtrusive-line-numbers"]
