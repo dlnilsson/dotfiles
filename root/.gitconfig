@@ -68,6 +68,8 @@
     diff = /usr/bin/delta --tui
     show = /usr/bin/delta --tui
     log  = /usr/bin/delta --tui
+    # Keep `git lg` on plain delta, not the TUI.
+    lg   = /usr/bin/delta
 [sequence]
     editor = delta --tui sequence-editor
 
@@ -84,8 +86,8 @@
     show-args = --pretty=commit-format-full
     # Head each file with its `git diff --stat` row.
     file-header = stat
-    # Open every patch with its files folded.
-    start-folded = true
+    # Open every patch with its files unfolded.
+    start-folded = false
 
 [delta-tui "general.views"]
     # use H to bind features, views, and commands to hotkeys
