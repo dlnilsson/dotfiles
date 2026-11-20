@@ -182,6 +182,33 @@ hl.on("window.open", function(w)
     end, { timeout = 500, type = "oneshot" })
 end)
 
+-- Do Not Disturb while screen sharing; restore the previous state when sharing ends.
+-- The share picker briefly captures every window for previews, so count active captures
+-- and act only once the state has been stable for a moment.
+-- One counter, not keyed by name: a shared window's title can change between start and stop.
+local screenshares = 0
+local dnd_before
+local dnd_timer
+
+local function update_dnd()
+    local sharing = screenshares > 0
+    if sharing and not dnd_before then
+        local p = io.popen("noctalia msg notification-dnd-status")
+        dnd_before = p and p:read("*l") == "on" and "on" or "off"
+        if p then p:close() end
+        hl.exec_cmd("noctalia msg notification-dnd-set on")
+    elseif not sharing and dnd_before then
+        hl.exec_cmd("noctalia msg notification-dnd-set " .. dnd_before)
+        dnd_before = nil
+    end
+end
+
+hl.on("screenshare.state", function(active)
+    screenshares = math.max(0, screenshares + (active and 1 or -1))
+    if dnd_timer then dnd_timer:set_enabled(false) end
+    dnd_timer = hl.timer(update_dnd, { timeout = 2000, type = "oneshot" })
+end)
+
 -- Keep a monitor enabled: when the last external monitor is unplugged,
 -- enable the builtin display again.
 local builtin_monitor = "eDP-1"
