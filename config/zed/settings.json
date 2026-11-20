@@ -259,7 +259,7 @@
   },
   "theme_overrides": {
     "Nordfox - blurred": {
-      "background.appearance": "opaque",
+      "background.appearance": "blurred",
       "syntax": {
         "comment": {
           "font_style": "italic",
