@@ -116,8 +116,16 @@ end)
 local pip_right_padding = 2
 local pip_y_position = 20
 
-hl.on("window.open", function(w)
-    if not w.title:match("^Picture[- ]in[- ]Picture$") then return end
+-- Browser screen-sharing indicator ("<site> is sharing a window.") gets the same treatment.
+-- It is a small popup (about 500x64); check size to avoid false positives.
+-- Not idle inhibit: the meet.google.com indicator does not inhibit idle.
+local function is_sharing_indicator(w)
+    return w.class == ""
+        and w.size.x <= 800 and w.size.y <= 150
+        and w.title:match(" is sharing .+%.$") ~= nil
+end
+
+local function move_top_right(w)
     local m = w.monitor
     if not m then return end
 
@@ -139,6 +147,39 @@ hl.on("window.open", function(w)
     }))
 
     hl.config({ cursor = { no_warps = no_warps } })
+end
+
+-- Google Meet picture-in-picture: "Meet – abc-defg-hij", without the " - Google Chrome" suffix of the tab window.
+local function is_meet_pip(w)
+    return (w.class == "google-chrome" or w.class == "chromium")
+        and w.title:match("^Meet – %l%l%l%-%l%l%l%l%-%l%l%l$") ~= nil
+end
+
+hl.on("window.open", function(w)
+    if w.title:match("^Picture[- ]in[- ]Picture$") then
+        move_top_right(w)
+        return
+    end
+
+    -- Final size is not set yet at open; move shortly after.
+    if is_meet_pip(w) then
+        hl.timer(function()
+            local cw = hl.get_window(w)
+            if cw then move_top_right(cw) end
+        end, { timeout = 500, type = "oneshot" })
+        return
+    end
+
+    -- Final size is not set yet at open; check again shortly after.
+    if w.class ~= "" or not w.title:match(" is sharing ") then return end
+    hl.timer(function()
+        local cw = hl.get_window(w)
+        if not (cw and is_sharing_indicator(cw)) then return end
+        for prop, value in pairs({ border_size = "0", rounding = "0", no_dim = "1", no_shadow = "1" }) do
+            hl.dispatch(hl.dsp.window.set_prop({ prop = prop, value = value, window = cw }))
+        end
+        move_top_right(cw)
+    end, { timeout = 500, type = "oneshot" })
 end)
 
 -- Keep a monitor enabled: when the last external monitor is unplugged,
@@ -420,6 +461,24 @@ hl.window_rule({
     no_shadow   = true,
     rounding    = 0,
     pin         = true,
+})
+
+-- suppress_event only applies at map, so it cannot be set from the delayed sharing-indicator check.
+hl.window_rule({
+    name  = "sharing-indicator",
+    match = { class = "^$", title = " is sharing .+\\.$" },
+    suppress_event = "fullscreen",
+})
+
+hl.window_rule({
+    name  = "meet-pip",
+    match = { class = "^(google-chrome|chromium)$", title = "^Meet – [a-z]{3}-[a-z]{4}-[a-z]{3}$" },
+    float          = true,
+    border_size    = 0,
+    no_dim         = true,
+    no_shadow      = true,
+    rounding       = 0,
+    suppress_event = "fullscreen",
 })
 
 hl.window_rule({
