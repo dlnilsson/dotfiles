@@ -6,46 +6,149 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 )
 
 // gitLab implements Forge with the glab CLI.
 type gitLab struct{}
 
-// GraphQL, since the REST list has no approvals.
-const gitLabMRQuery = `
-query($project: ID!, $endCursor: String) {
-  project(fullPath: $project) {
-    mergeRequests(state: opened, first: 100, after: $endCursor) {
+const gitLabMRFields = `
       nodes {
         title webUrl draft
         author { name username publicEmail }
         approvedBy { nodes { username } }
       }
-      pageInfo { hasNextPage endCursor }
+      pageInfo { hasNextPage endCursor }`
+
+// GraphQL, since the REST list has no approvals.
+const gitLabOpenMRQuery = `
+query($project: ID!, $endCursor: String) {
+  project(fullPath: $project) {
+    mergeRequests(state: opened, first: 100, after: $endCursor) {` + gitLabMRFields + `
     }
   }
 }`
 
-func (gitLab) OpenMergeRequests() ([]MergeRequest, error) {
-	// :fullpath only works in REST endpoints, so resolve the project path first.
+// %s is the optional label filter.
+const gitLabMergedMRQuery = `
+query($project: ID!, $count: Int, $after: String) {
+  project(fullPath: $project) {
+    mergeRequests(state: merged, sort: MERGED_AT_DESC, first: $count, after: $after%s) {` + gitLabMRFields + `
+    }
+  }
+}`
+
+// gitLabPageSize is GitLab's max for first:.
+const gitLabPageSize = 100
+
+type gitLabMRNode struct {
+	Title  string `json:"title"`
+	WebURL string `json:"webUrl"`
+	Draft  bool   `json:"draft"`
+	Author struct {
+		Name        string `json:"name"`
+		Username    string `json:"username"`
+		PublicEmail string `json:"publicEmail"`
+	} `json:"author"`
+	ApprovedBy struct {
+		Nodes []struct {
+			Username string `json:"username"`
+		} `json:"nodes"`
+	} `json:"approvedBy"`
+}
+
+type gitLabPage struct {
+	Data struct {
+		Project *struct {
+			MergeRequests struct {
+				Nodes    []gitLabMRNode `json:"nodes"`
+				PageInfo struct {
+					HasNextPage bool   `json:"hasNextPage"`
+					EndCursor   string `json:"endCursor"`
+				} `json:"pageInfo"`
+			} `json:"mergeRequests"`
+		} `json:"project"`
+	} `json:"data"`
+	Errors []struct {
+		Message string `json:"message"`
+	} `json:"errors"`
+}
+
+func (gitLab) Project() (string, error) {
+	// :fullpath only works in REST endpoints, so GraphQL queries need this.
 	out, err := runCommand("glab", "api", "projects/:fullpath")
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	var project struct {
 		PathWithNamespace string `json:"path_with_namespace"`
 	}
 	if err := json.Unmarshal(out, &project); err != nil {
-		return nil, fmt.Errorf("glab: parse project: %w", err)
+		return "", fmt.Errorf("glab: parse project: %w", err)
 	}
+	return project.PathWithNamespace, nil
+}
 
-	out, err = runCommand("glab", "api", "graphql", "--paginate",
-		"-f", "project="+project.PathWithNamespace,
-		"-f", "query="+gitLabMRQuery)
+func (g gitLab) OpenMergeRequests() ([]MergeRequest, error) {
+	project, err := g.Project()
+	if err != nil {
+		return nil, err
+	}
+	out, err := runCommand("glab", "api", "graphql", "--paginate",
+		"-f", "project="+project,
+		"-f", "query="+gitLabOpenMRQuery)
 	if err != nil {
 		return nil, err
 	}
 	return parseGitLabMRs(out)
+}
+
+func (g gitLab) MergedMergeRequests(count int, skipLabel string, progress func(scanned int)) ([]MergeRequest, error) {
+	project, err := g.Project()
+	if err != nil {
+		return nil, err
+	}
+	filter := ""
+	if skipLabel != "" {
+		filter = ", not: {labels: [" + strconv.Quote(skipLabel) + "]}"
+	}
+	query := fmt.Sprintf(gitLabMergedMRQuery, filter)
+
+	var (
+		result []MergeRequest
+		cursor string
+	)
+	for len(result) < count {
+		progress(len(result))
+		args := []string{"api", "graphql",
+			"-f", "query=" + query,
+			"-f", "project=" + project,
+			"-F", "count=" + strconv.Itoa(min(count-len(result), gitLabPageSize)),
+		}
+		if cursor != "" {
+			args = append(args, "-f", "after="+cursor)
+		}
+		out, err := runCommand("glab", args...)
+		if err != nil {
+			return nil, err
+		}
+		var page gitLabPage
+		if err := json.Unmarshal(out, &page); err != nil {
+			return nil, fmt.Errorf("glab: parse merge requests: %w", err)
+		}
+		if err := page.err(); err != nil {
+			return nil, err
+		}
+		mrs := page.Data.Project.MergeRequests
+		for _, n := range mrs.Nodes {
+			result = append(result, n.toMergeRequest())
+		}
+		if !mrs.PageInfo.HasNextPage {
+			break
+		}
+		cursor = mrs.PageInfo.EndCursor
+	}
+	return result, nil
 }
 
 func (gitLab) Description(url string) (string, error) {
@@ -64,64 +167,55 @@ func (gitLab) Description(url string) (string, error) {
 
 // parseGitLabMRs parses paginated GraphQL output: one JSON document per page.
 func parseGitLabMRs(data []byte) ([]MergeRequest, error) {
-	type page struct {
-		Data struct {
-			Project *struct {
-				MergeRequests struct {
-					Nodes []struct {
-						Title  string `json:"title"`
-						WebURL string `json:"webUrl"`
-						Draft  bool   `json:"draft"`
-						Author struct {
-							Name        string `json:"name"`
-							Username    string `json:"username"`
-							PublicEmail string `json:"publicEmail"`
-						} `json:"author"`
-						ApprovedBy struct {
-							Nodes []struct {
-								Username string `json:"username"`
-							} `json:"nodes"`
-						} `json:"approvedBy"`
-					} `json:"nodes"`
-				} `json:"mergeRequests"`
-			} `json:"project"`
-		} `json:"data"`
-	}
-
 	var result []MergeRequest
 	dec := json.NewDecoder(bytes.NewReader(data))
 	for {
-		var p page
+		var p gitLabPage
 		if err := dec.Decode(&p); errors.Is(err, io.EOF) {
 			break
 		} else if err != nil {
 			return nil, fmt.Errorf("glab: parse merge requests: %w", err)
 		}
-		if p.Data.Project == nil {
-			return nil, errors.New("glab: project not found")
+		if err := p.err(); err != nil {
+			return nil, err
 		}
 		for _, n := range p.Data.Project.MergeRequests.Nodes {
-			mr := MergeRequest{
-				Title: n.Title,
-				URL:   n.WebURL,
-				Draft: n.Draft,
-				Author: Person{
-					Name:     n.Author.Name,
-					Username: n.Author.Username,
-				},
-			}
-			if n.Author.PublicEmail != "" {
-				mr.Author.Emails = []string{n.Author.PublicEmail}
-			}
-			// Self-approval by the author does not count.
-			for _, a := range n.ApprovedBy.Nodes {
-				if a.Username != n.Author.Username {
-					mr.Approved = true
-					break
-				}
-			}
-			result = append(result, mr)
+			result = append(result, n.toMergeRequest())
 		}
 	}
 	return result, nil
+}
+
+// err returns the GraphQL error of the page, if any.
+func (p gitLabPage) err() error {
+	if len(p.Errors) > 0 {
+		return errors.New("glab: GitLab request failed: " + p.Errors[0].Message)
+	}
+	if p.Data.Project == nil {
+		return errors.New("glab: project not found")
+	}
+	return nil
+}
+
+func (n gitLabMRNode) toMergeRequest() MergeRequest {
+	mr := MergeRequest{
+		Title: n.Title,
+		URL:   n.WebURL,
+		Draft: n.Draft,
+		Author: Person{
+			Name:     n.Author.Name,
+			Username: n.Author.Username,
+		},
+	}
+	if n.Author.PublicEmail != "" {
+		mr.Author.Emails = []string{n.Author.PublicEmail}
+	}
+	for _, a := range n.ApprovedBy.Nodes {
+		mr.Approvers = append(mr.Approvers, a.Username)
+		// Self-approval by the author does not count.
+		if a.Username != n.Author.Username {
+			mr.Approved = true
+		}
+	}
+	return mr
 }

@@ -17,17 +17,24 @@ type Person struct {
 
 // MergeRequest is an open merge request (GitLab) or pull request (GitHub).
 type MergeRequest struct {
-	Title    string
-	URL      string
-	Draft    bool
-	Approved bool // approved by someone other than the author
-	Author   Person
+	Title     string
+	URL       string
+	Draft     bool
+	Approved  bool     // approved by someone other than the author
+	Approvers []string // usernames, the author included if they self-approved
+	Author    Person
 }
 
 // Forge is a code hosting service that serves merge requests for the
 // current repository.
 type Forge interface {
+	// Project returns the repository name on the forge, e.g. "group/repo".
+	Project() (string, error)
 	OpenMergeRequests() ([]MergeRequest, error)
+	// MergedMergeRequests returns up to count merge requests, most recently
+	// merged first, leaving out those labeled skipLabel (none when empty).
+	// progress is called with the number scanned so far before each request.
+	MergedMergeRequests(count int, skipLabel string, progress func(scanned int)) ([]MergeRequest, error)
 	// Description returns the markdown description of the merge request at url.
 	Description(url string) (string, error)
 }
