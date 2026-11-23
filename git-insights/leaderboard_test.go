@@ -16,14 +16,14 @@ func TestRankApprovers(t *testing.T) {
 		{},
 	}
 	got := rankApprovers(mrs, false)
-	want := []approverCount{{"bob", 2}, {"ann", 1}, {"cid", 1}}
+	want := []userCount{{"bob", 2}, {"ann", 1}, {"cid", 1}}
 	if !slices.Equal(got, want) {
 		t.Errorf("rankApprovers = %v, want %v", got, want)
 	}
 
 	mrs[0].Author.Username = "bob"
 	got = rankApprovers(mrs, true)
-	want = []approverCount{{"ann", 1}, {"bob", 1}, {"cid", 1}}
+	want = []userCount{{"ann", 1}, {"bob", 1}, {"cid", 1}}
 	if !slices.Equal(got, want) {
 		t.Errorf("rankApprovers skipping self = %v, want %v", got, want)
 	}

@@ -79,16 +79,9 @@ func runLeaderboard(args []string, reviews bool) error {
 		return err
 	}
 
-	progress := func(int) {}
-	if isTerminal(os.Stderr) {
-		progress = func(scanned int) {
-			fmt.Fprintf(os.Stderr, "\r\033[KFetching merged MRs in %s (%d/%d scanned)...", project, scanned, count)
-		}
-	}
-	mrs, err := forge.MergedMergeRequests(count, "Release", progress)
-	if isTerminal(os.Stderr) {
-		fmt.Fprint(os.Stderr, "\r\033[K")
-	}
+	mrs, _, err := collectMerged(forge, count, nil, func(_, scanned int) string {
+		return fmt.Sprintf("Fetching merged MRs in %s (%d/%d scanned)...", project, scanned, count)
+	})
 	if err != nil {
 		return err
 	}
@@ -111,9 +104,46 @@ func runLeaderboard(args []string, reviews bool) error {
 		return writeCSV(append([][]string{{"Rank", name, total}}, rows...))
 	}
 
-	t := table.New().
+	fmt.Println(renderTable([]string{"Rank", name, total}, rows))
+	fmt.Printf("Based on the last %d merged MRs in %s.\n", len(mrs), project)
+	return nil
+}
+
+// collectMerged returns the first count merged merge requests, skipping those
+// labeled Release, for which keep is true (all when nil), and how many it
+// scanned. On a terminal it shows status(found, scanned) on stderr meanwhile.
+func collectMerged(forge Forge, count int, keep func(MergeRequest) bool, status func(found, scanned int) string) ([]MergeRequest, int, error) {
+	show := func(string) {}
+	if isTerminal(os.Stderr) {
+		show = func(s string) { fmt.Fprint(os.Stderr, "\r\033[K"+s) }
+		defer show("")
+	}
+
+	var (
+		result  []MergeRequest
+		scanned int
+	)
+	show(status(0, 0))
+	for mr, err := range forge.MergedMergeRequests("Release") {
+		if err != nil {
+			return nil, scanned, err
+		}
+		scanned++
+		if keep == nil || keep(mr) {
+			result = append(result, mr)
+		}
+		show(status(len(result), scanned))
+		if len(result) == count {
+			break
+		}
+	}
+	return result, scanned, nil
+}
+
+func renderTable(headers []string, rows [][]string) string {
+	return table.New().
 		Border(lipgloss.RoundedBorder()).
-		Headers("Rank", name, total).
+		Headers(headers...).
 		Rows(rows...).
 		StyleFunc(func(row, _ int) lipgloss.Style {
 			style := lipgloss.NewStyle().Padding(0, 1)
@@ -121,10 +151,8 @@ func runLeaderboard(args []string, reviews bool) error {
 				return style.Bold(true)
 			}
 			return style
-		})
-	fmt.Println(t)
-	fmt.Printf("Based on the last %d merged MRs in %s.\n", len(mrs), project)
-	return nil
+		}).
+		String()
 }
 
 func writeCSV(records [][]string) error {
@@ -135,14 +163,14 @@ func writeCSV(records [][]string) error {
 	return w.Error()
 }
 
-type approverCount struct {
+type userCount struct {
 	Username string
 	Count    int
 }
 
 // rankApprovers counts approvals per username, most first, ties by name.
 // With skipSelf, an author approving their own merge request is not counted.
-func rankApprovers(mrs []MergeRequest, skipSelf bool) []approverCount {
+func rankApprovers(mrs []MergeRequest, skipSelf bool) []userCount {
 	counts := make(map[string]int)
 	for _, mr := range mrs {
 		for _, a := range mr.Approvers {
@@ -152,15 +180,17 @@ func rankApprovers(mrs []MergeRequest, skipSelf bool) []approverCount {
 			counts[a]++
 		}
 	}
-	result := make([]approverCount, 0, len(counts))
+	return rankCounts(counts)
+}
+
+// rankCounts sorts counts per username, most first, ties by name.
+func rankCounts(counts map[string]int) []userCount {
+	result := make([]userCount, 0, len(counts))
 	for name, n := range counts {
-		result = append(result, approverCount{Username: name, Count: n})
+		result = append(result, userCount{Username: name, Count: n})
 	}
-	slices.SortFunc(result, func(a, b approverCount) int {
-		if a.Count != b.Count {
-			return b.Count - a.Count
-		}
-		return strings.Compare(a.Username, b.Username)
+	slices.SortFunc(result, func(a, b userCount) int {
+		return cmp.Or(cmp.Compare(b.Count, a.Count), strings.Compare(a.Username, b.Username))
 	})
 	return result
 }

@@ -19,6 +19,8 @@ func main() {
 			run = runApprovals
 		case "reviews":
 			run = runReviews
+		case "unapproved":
+			run = runUnapproved
 		}
 		if run != nil {
 			if err := run(os.Args[2:]); err != nil {

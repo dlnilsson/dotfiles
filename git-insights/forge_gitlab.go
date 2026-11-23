@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"iter"
 	"strconv"
 	"time"
 )
@@ -106,52 +107,55 @@ func (g gitLab) OpenMergeRequests() ([]MergeRequest, error) {
 	return parseGitLabMRs(out)
 }
 
-func (g gitLab) MergedMergeRequests(count int, skipLabel string, progress func(scanned int)) ([]MergeRequest, error) {
-	project, err := g.Project()
-	if err != nil {
-		return nil, err
-	}
-	filter := ""
-	if skipLabel != "" {
-		filter = ", not: {labels: [" + strconv.Quote(skipLabel) + "]}"
-	}
-	query := fmt.Sprintf(gitLabMergedMRQuery, filter)
-
-	var (
-		result []MergeRequest
-		cursor string
-	)
-	for len(result) < count {
-		progress(len(result))
-		args := []string{"api", "graphql",
-			"-f", "query=" + query,
-			"-f", "project=" + project,
-			"-F", "count=" + strconv.Itoa(min(count-len(result), gitLabPageSize)),
-		}
-		if cursor != "" {
-			args = append(args, "-f", "after="+cursor)
-		}
-		out, err := runCommand("glab", args...)
+func (g gitLab) MergedMergeRequests(skipLabel string) iter.Seq2[MergeRequest, error] {
+	return func(yield func(MergeRequest, error) bool) {
+		project, err := g.Project()
 		if err != nil {
-			return nil, err
+			yield(MergeRequest{}, err)
+			return
 		}
-		var page gitLabPage
-		if err := json.Unmarshal(out, &page); err != nil {
-			return nil, fmt.Errorf("glab: parse merge requests: %w", err)
+		filter := ""
+		if skipLabel != "" {
+			filter = ", not: {labels: [" + strconv.Quote(skipLabel) + "]}"
 		}
-		if err := page.err(); err != nil {
-			return nil, err
+		query := fmt.Sprintf(gitLabMergedMRQuery, filter)
+
+		var cursor string
+		for {
+			args := []string{"api", "graphql",
+				"-f", "query=" + query,
+				"-f", "project=" + project,
+				"-F", "count=" + strconv.Itoa(gitLabPageSize),
+			}
+			if cursor != "" {
+				args = append(args, "-f", "after="+cursor)
+			}
+			out, err := runCommand("glab", args...)
+			if err != nil {
+				yield(MergeRequest{}, err)
+				return
+			}
+			var page gitLabPage
+			if err := json.Unmarshal(out, &page); err != nil {
+				yield(MergeRequest{}, fmt.Errorf("glab: parse merge requests: %w", err))
+				return
+			}
+			if err := page.err(); err != nil {
+				yield(MergeRequest{}, err)
+				return
+			}
+			mrs := page.Data.Project.MergeRequests
+			for _, n := range mrs.Nodes {
+				if !yield(n.toMergeRequest(), nil) {
+					return
+				}
+			}
+			if !mrs.PageInfo.HasNextPage {
+				return
+			}
+			cursor = mrs.PageInfo.EndCursor
 		}
-		mrs := page.Data.Project.MergeRequests
-		for _, n := range mrs.Nodes {
-			result = append(result, n.toMergeRequest())
-		}
-		if !mrs.PageInfo.HasNextPage {
-			break
-		}
-		cursor = mrs.PageInfo.EndCursor
 	}
-	return result, nil
 }
 
 func (gitLab) Description(url string) (string, error) {
@@ -204,6 +208,7 @@ func (n gitLabMRNode) toMergeRequest() MergeRequest {
 	number, _ := strconv.Atoi(n.IID)
 	mr := MergeRequest{
 		Number:   number,
+		Ref:      "!" + n.IID,
 		MergedAt: n.MergedAt,
 		Title:    n.Title,
 		URL:      n.WebURL,

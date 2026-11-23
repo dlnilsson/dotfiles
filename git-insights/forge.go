@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"iter"
 	"net/url"
 	"os/exec"
 	"strings"
@@ -19,6 +20,7 @@ type Person struct {
 // MergeRequest is an open merge request (GitLab) or pull request (GitHub).
 type MergeRequest struct {
 	Number    int       // GitLab iid or GitHub number
+	Ref       string    // display reference: "!123" on GitLab, "#123" on GitHub
 	MergedAt  time.Time // zero unless merged
 	Title     string
 	URL       string
@@ -34,10 +36,10 @@ type Forge interface {
 	// Project returns the repository name on the forge, e.g. "group/repo".
 	Project() (string, error)
 	OpenMergeRequests() ([]MergeRequest, error)
-	// MergedMergeRequests returns up to count merge requests, most recently
-	// merged first, leaving out those labeled skipLabel (none when empty).
-	// progress is called with the number scanned so far before each request.
-	MergedMergeRequests(count int, skipLabel string, progress func(scanned int)) ([]MergeRequest, error)
+	// MergedMergeRequests yields merge requests, most recently merged first,
+	// leaving out those labeled skipLabel (none when empty). It fetches more
+	// pages until the caller stops or none are left; on failure it yields an error.
+	MergedMergeRequests(skipLabel string) iter.Seq2[MergeRequest, error]
 	// Description returns the markdown description of the merge request at url.
 	Description(url string) (string, error)
 }
