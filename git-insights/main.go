@@ -10,6 +10,14 @@ import (
 )
 
 func main() {
+	if len(os.Args) > 1 && os.Args[1] == "mrs" {
+		if err := runMRs(os.Args[2:]); err != nil {
+			fmt.Fprintf(os.Stderr, "git-insights: %v\n", err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	if !isGitRepo() {
 		fmt.Fprintln(os.Stderr, "git-insights: not a git repository")
 		os.Exit(1)
