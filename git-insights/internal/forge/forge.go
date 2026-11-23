@@ -1,4 +1,6 @@
-package main
+// Package forge abstracts code hosting services (GitLab, later GitHub) that
+// serve merge requests for the repository in the current directory.
+package forge
 
 import (
 	"errors"
@@ -44,13 +46,17 @@ type Forge interface {
 	Description(url string) (string, error)
 }
 
-// detectForge picks the forge from the host of the origin remote.
-func detectForge() (Forge, error) {
-	output, err := runGit("remote", "get-url", "origin")
+// Detect picks the forge from the host of the origin remote of the
+// repository in the current directory.
+func Detect() (Forge, error) {
+	if _, err := runCommand("git", "rev-parse", "--git-dir"); err != nil {
+		return nil, errors.New("not a git repository")
+	}
+	output, err := runCommand("git", "remote", "get-url", "origin")
 	if err != nil {
 		return nil, err
 	}
-	if remoteHost(strings.TrimSpace(output)) == "github.com" {
+	if remoteHost(strings.TrimSpace(string(output))) == "github.com" {
 		return nil, errors.New("GitHub is not supported yet")
 	}
 	// Any other host is treated as GitLab, so self-hosted instances work.

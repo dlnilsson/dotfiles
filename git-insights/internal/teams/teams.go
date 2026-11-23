@@ -1,26 +1,31 @@
-package main
+// Package teams loads the team configuration used to filter merge requests
+// by author.
+package teams
 
 import (
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
+
+	"github.com/dlnilsson/dotfiles/git-insights/internal/forge"
 )
 
-// TeamMember identifies a person by name, username or any of their emails.
-type TeamMember struct {
+// Member identifies a person by name, username or any of their emails.
+type Member struct {
 	Name     string   `json:"name"`
 	Username string   `json:"username"`
 	Email    []string `json:"email"`
 }
 
 // Teams maps team name to its members.
-type Teams map[string][]TeamMember
+type Teams map[string][]Member
 
-// teamsFile returns $GIT_INSIGHTS_TEAMS_FILE, else
+// File returns $GIT_INSIGHTS_TEAMS_FILE, else
 // $XDG_CONFIG_HOME/git-insights/teams.json (XDG_CONFIG_HOME defaults to ~/.config).
-func teamsFile() (string, error) {
+func File() (string, error) {
 	if path := os.Getenv("GIT_INSIGHTS_TEAMS_FILE"); path != "" {
 		return path, nil
 	}
@@ -31,15 +36,17 @@ func teamsFile() (string, error) {
 	return filepath.Join(dir, "git-insights", "teams.json"), nil
 }
 
-func loadTeams(path string) (Teams, error) {
+// Load reads and validates the team configuration at path.
+func Load(path string) (Teams, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("team configuration is not readable: %w", err)
 	}
-	return parseTeams(data, path)
+	return Parse(data, path)
 }
 
-func parseTeams(data []byte, path string) (Teams, error) {
+// Parse validates team configuration data; path is used in errors.
+func Parse(data []byte, path string) (Teams, error) {
 	var teams Teams
 	if err := json.Unmarshal(data, &teams); err != nil {
 		return nil, fmt.Errorf("invalid team configuration %s: %w", path, err)
@@ -63,8 +70,8 @@ func hasNonEmpty(values []string) bool {
 	return false
 }
 
-// matches reports whether the member is p, comparing case-insensitively.
-func (m TeamMember) matches(p Person) bool {
+// Matches reports whether the member is p, comparing case-insensitively.
+func (m Member) Matches(p forge.Person) bool {
 	eq := func(a, b string) bool { return b != "" && strings.EqualFold(a, b) }
 	if eq(p.Name, m.Name) || eq(p.Username, m.Username) {
 		return true
@@ -77,4 +84,14 @@ func (m TeamMember) matches(p Person) bool {
 		}
 	}
 	return false
+}
+
+// Names returns the team names, sorted.
+func (t Teams) Names() []string {
+	names := make([]string, 0, len(t))
+	for name := range t {
+		names = append(names, name)
+	}
+	slices.Sort(names)
+	return names
 }
