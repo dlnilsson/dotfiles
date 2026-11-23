@@ -278,6 +278,14 @@ hl.config({
         no_donation_nag = true,
         enforce_permissions = true,
     },
+    -- Don't switch monitors to HDR/wide gamut when a fullscreen app requests it.
+    -- Displays run 8-bit, so Hyprland warns "wide color gamut is enabled but the
+    -- display is not in 10-bit mode".
+    -- For real HDR instead: add bitdepth = 10 and cm = "hdr" to the LG monitor
+    -- line. Only helps if the monitor and cable support 10-bit at 3440x1440@100.
+    render = {
+        cm_auto_hdr = 0,
+    },
 })
 
 hl.permission("/usr/(bin|local/bin)/grim", "screencopy", "allow")
