@@ -2,6 +2,7 @@ skip-commit-generation-prompt = true
 
 [aliases]
 recent = "git recent {{ args }}"
+swtich = "wt switch {{ args }}"
 
 [post-start]
 copy = "wt step copy-ignored"
