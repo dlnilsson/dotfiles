@@ -1,6 +1,6 @@
 module github.com/dlnilsson/dotfiles/git-insights
 
-go 1.26.1
+go 1.27.4
 
 require (
 	github.com/charmbracelet/bubbles v1.0.0
