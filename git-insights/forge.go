@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 // Person is the author of a merge request.
@@ -17,6 +18,8 @@ type Person struct {
 
 // MergeRequest is an open merge request (GitLab) or pull request (GitHub).
 type MergeRequest struct {
+	Number    int       // GitLab iid or GitHub number
+	MergedAt  time.Time // zero unless merged
 	Title     string
 	URL       string
 	Draft     bool

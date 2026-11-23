@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
 // gitLab implements Forge with the glab CLI.
@@ -14,7 +15,7 @@ type gitLab struct{}
 
 const gitLabMRFields = `
       nodes {
-        title webUrl draft
+        iid title webUrl draft mergedAt
         author { name username publicEmail }
         approvedBy { nodes { username } }
       }
@@ -42,10 +43,12 @@ query($project: ID!, $count: Int, $after: String) {
 const gitLabPageSize = 100
 
 type gitLabMRNode struct {
-	Title  string `json:"title"`
-	WebURL string `json:"webUrl"`
-	Draft  bool   `json:"draft"`
-	Author struct {
+	IID      string    `json:"iid"`
+	MergedAt time.Time `json:"mergedAt"`
+	Title    string    `json:"title"`
+	WebURL   string    `json:"webUrl"`
+	Draft    bool      `json:"draft"`
+	Author   struct {
 		Name        string `json:"name"`
 		Username    string `json:"username"`
 		PublicEmail string `json:"publicEmail"`
@@ -198,10 +201,13 @@ func (p gitLabPage) err() error {
 }
 
 func (n gitLabMRNode) toMergeRequest() MergeRequest {
+	number, _ := strconv.Atoi(n.IID)
 	mr := MergeRequest{
-		Title: n.Title,
-		URL:   n.WebURL,
-		Draft: n.Draft,
+		Number:   number,
+		MergedAt: n.MergedAt,
+		Title:    n.Title,
+		URL:      n.WebURL,
+		Draft:    n.Draft,
 		Author: Person{
 			Name:     n.Author.Name,
 			Username: n.Author.Username,
