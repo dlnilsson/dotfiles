@@ -70,8 +70,6 @@
     log  = /usr/bin/delta --tui
     # Keep `git lg` on plain delta, not the TUI.
     lg   = /usr/bin/delta
-[sequence]
-    editor = delta --tui sequence-editor
 
 [pretty]
     commit-format = tformat:%n%n▸ %h %C(blue)%an %C(blue)%ar%C(auto)%d%C(reset)%n%n    %C(green)%s%C(auto)
