@@ -77,23 +77,6 @@
     commit-format = tformat:%n%n▸ %h %C(blue)%an %C(blue)%ar%C(auto)%d%C(reset)%n%n    %C(green)%s%C(auto)
     commit-format-full = tformat:%n%n▸ %h %C(blue)%an %C(blue)%ar%C(auto)%d%C(reset)%n%n%w(0,4,4)%C(green)%s%C(reset)%n%+b
 
-[delta-tui]
-    # Arguments of the git log and git show that the TUI runs itself
-    # (`l l`, `right` on a commit).
-    log-args = --stat
-    log-args = --date=relative
-    log-args = --pretty=commit-format
-    show-args = --pretty=commit-format-full
-    # Head each file with its `git diff --stat` row.
-    file-header = stat
-    # Open every patch with its files unfolded.
-    start-folded = false
-
-[delta-tui "general.views"]
-    # use H to bind features, views, and commands to hotkeys
-    ignore-whitespace = {command} -w
-
-
 [alias]
 	pd = pull-default
 	# git fixup, but fuzzy find commit
@@ -161,6 +144,18 @@
 	line-numbers-left-format = " "
 	line-numbers-right-format = "│ "
 	#inspect-raw-lines = false
+    # Arguments of the git log and git show that the TUI runs itself
+    # (`l l`, `right` on a commit).
+    log-args = --stat
+    log-args = --date=relative
+    log-args = --pretty=commit-format
+    show-args = --pretty=commit-format-full
+    # Head each file with its `git diff --stat` row.
+    file-header = stat
+    # Open every patch with its files unfolded.
+    start-folded = false
+    # use H to bind features, views, and commands to hotkeys
+    view = ignore-whitespace {command} -w
 
 [delta "line-numbers"]
 	line-numbers = true
