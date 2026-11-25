@@ -69,6 +69,7 @@ tint_intensity = 0.3    # 0.0 = no tint, 1.0 = fully opaque tint
 enabled = true
 directory = "/home/dln/Wallpapers"
 fill_mode = "crop"
+transition_on_startup = false
 
 [wallpaper.automation]
 enabled = true
