@@ -1,6 +1,7 @@
 package insights
 
 import (
+	"os/exec"
 	"regexp"
 	"strings"
 
@@ -53,8 +54,7 @@ type model struct {
 	searching bool
 	filter    string
 
-	cursor      int
-	selectedSHA string // set on enter in firefighting tab, triggers quit
+	cursor int
 }
 
 func newModel() model {
@@ -158,8 +158,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			if m.activeTab == int(analysisFirefighting) {
 				if sha := m.selectedFirefightSHA(); sha != "" {
-					m.selectedSHA = sha
-					return m, tea.Quit
+					return m, tea.ExecProcess(exec.Command("git", "show", "-p", sha), nil)
 				}
 			}
 		case "/":
