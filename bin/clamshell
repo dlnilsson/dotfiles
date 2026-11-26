@@ -15,6 +15,22 @@ disable_edp() {
   hyprctl eval 'hl.monitor({ output = "eDP-1", disabled = true })'
 }
 
+edp_enabled() {
+  hyprctl monitors -j | jq -e '
+    any(.[]; .disabled != true and .name == "eDP-1")
+  ' >/dev/null
+}
+
+if [[ "${1:-}" == toggle ]]; then
+  if edp_enabled; then
+    # Never disable the only display.
+    has_external_monitor && disable_edp
+  else
+    enable_edp
+  fi
+  exit 0
+fi
+
 if has_external_monitor; then
   disable_edp
   hyprctl eval 'hl.config({ layout = { single_window_aspect_ratio = {16, 9} } })'
